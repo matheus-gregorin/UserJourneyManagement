@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Services\UsersServices;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -13,7 +14,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        //
+        //Definir aqui as services
+        $this->app->bind(UsersServices::class);
     }
 
     /**
