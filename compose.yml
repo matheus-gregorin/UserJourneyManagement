@@ -1,0 +1,13 @@
+services:
+  manager:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/var/www/html
+      - app_data:/var/www/html/public/uploads
+    container_name: user_manager
+volumes:
+  app_data:

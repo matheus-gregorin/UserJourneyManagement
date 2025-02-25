@@ -30,6 +30,6 @@ class UsersServices
             ];
        }
 
-       dd($list);
+       dd('Service', $list);
     }
 }
