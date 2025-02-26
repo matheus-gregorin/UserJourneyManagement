@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\CreateUserRequest;
 use App\Services\UsersServices;
 use Illuminate\Http\Request;
 
@@ -14,8 +15,13 @@ class UsersControllers extends Controller
         $this->usersServices = $usersServices;
     }
 
-    public function get()
+    public function createUser(CreateUserRequest $request)
     {
-        $this->usersServices->get();
+        return $this->usersServices->createUser($request->all());
+    }
+
+    public function getAllUsers()
+    {
+        $this->usersServices->getAllUsers();
     }
 }

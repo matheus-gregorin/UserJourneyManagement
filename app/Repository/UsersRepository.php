@@ -3,6 +3,8 @@
 namespace App\Repository;
 
 use App\Models\UsersModel;
+use Exception;
+use Illuminate\Support\Facades\Log;
 
 class UsersRepository
 {
@@ -13,8 +15,31 @@ class UsersRepository
      $this->usersModel = $usersModel;   
     }
 
-    public function get()
+    public function createUser(array $data)
     {
-        return $this->usersModel::all();
+        try {
+
+            dd($this->usersModel::created($data));
+
+        } catch (Exception $e) {
+
+            Log::critical("Error in created user: ", ['message' => $e->getTraceAsString()]);
+            return [];
+
+        }
+    }
+
+    public function getAllUsers()
+    {
+        try {
+
+            return $this->usersModel::all();
+
+        } catch (Exception $e) {
+
+            Log::critical("Error in get all users: ", ['message' => $e->getTraceAsString()]);
+            return [];
+
+        }
     }
 }

@@ -15,4 +15,5 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/users', [UsersControllers::class, 'get']);
+Route::post('/create-user', [UsersControllers::class, 'createUser']);
+Route::get('/all-users', [UsersControllers::class, 'getAllUsers']);
