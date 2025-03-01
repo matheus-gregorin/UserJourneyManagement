@@ -2,7 +2,9 @@
 
 namespace App\Services;
 
+use App\Entitys\UserEntity;
 use App\Repository\UsersRepository;
+use DateTime;
 
 class UsersServices
 {
@@ -15,8 +17,17 @@ class UsersServices
 
     public function createUser(array $data)
     {
-        dd($data); // Criar entity e passar para bcrypt o password
-        $this->usersRepository->createUser($data);
+        $password = password_hash($data['password'], PASSWORD_BCRYPT);
+        $user = new UserEntity(
+            $data['name'],
+            $data['email'],
+            $password,
+            $data['is_admin'],
+            $data['roles'],
+            new DateTime()
+        );
+        dd($user->getUuid());
+        //$this->usersRepository->createUser($data);
     }
 
     public function getAllUsers()

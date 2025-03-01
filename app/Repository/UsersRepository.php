@@ -19,7 +19,7 @@ class UsersRepository
     {
         try {
 
-            dd($this->usersModel::created($data));
+            return $this->usersModel::created($data);
 
         } catch (Exception $e) {
 
