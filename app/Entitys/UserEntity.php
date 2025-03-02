@@ -18,7 +18,7 @@ class UserEntity
 
     private bool $isAdmin;
 
-    private array $roles;
+    private string $role;
 
     private DateTime $createdAt;
 
@@ -27,7 +27,7 @@ class UserEntity
         string $email,
         string $password,
         bool $isAdmin,
-        array $roles,
+        string $role,
         DateTime $createdAt
     )
     {
@@ -36,7 +36,7 @@ class UserEntity
         $this->email = $email;
         $this->password = $password;
         $this->isAdmin = $isAdmin;
-        $this->roles = $roles;
+        $this->role = $role;
         $this->createdAt = $createdAt;
     }
 

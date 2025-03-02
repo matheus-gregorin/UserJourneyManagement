@@ -16,7 +16,7 @@ class UsersModel extends Model
      *
      * @var string
      */
-    protected $table = 'users';
+    protected $table = 'usuarios';
 
     protected $fillable = [
         'id',
@@ -24,7 +24,6 @@ class UsersModel extends Model
         'email',
         'password',
         'is_admin',
-        'roles',
-        'created_at'
+        'role'
     ];
 }

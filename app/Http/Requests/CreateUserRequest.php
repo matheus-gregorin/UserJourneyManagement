@@ -30,7 +30,7 @@ class CreateUserRequest extends FormRequest
             'email' => 'required|max:50',
             'password' => 'required|size:8',
             'is_admin' => 'required|boolean',
-            'roles' => 'required|array'
+            'role' => 'required'
         ];
     }
 

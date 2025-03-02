@@ -23,11 +23,10 @@ class UsersServices
             $data['email'],
             $password,
             $data['is_admin'],
-            $data['roles'],
+            $data['role'],
             new DateTime()
         );
-        dd($user->getUuid());
-        //$this->usersRepository->createUser($data);
+        $this->usersRepository->createUser();
     }
 
     public function getAllUsers()

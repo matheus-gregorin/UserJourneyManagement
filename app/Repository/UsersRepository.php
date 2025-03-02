@@ -15,15 +15,24 @@ class UsersRepository
      $this->usersModel = $usersModel;   
     }
 
-    public function createUser(array $data)
+    public function createUser()
     {
         try {
 
-            return $this->usersModel::created($data);
+            $dados = [
+                "id" => 12,
+                "name" => "Math2",
+                "email" => "math2@gmail.com",
+                "password" => bcrypt("12345678"), // sempre criptografe a senha
+                "is_admin" => false,
+                "role" => json_encode(["low"]) // ou implode(',', ["low"])
+            ];
+            $user = UsersModel::create($dados);
+            dd('Usuário criado com sucesso!', $user);
 
         } catch (Exception $e) {
 
-            Log::critical("Error in created user: ", ['message' => $e->getTraceAsString()]);
+            dd("Error in created user: ", ['message' => $e->getMessage()]);
             return [];
 
         }
