@@ -27,7 +27,7 @@ class CreateUserRequest extends FormRequest
     {
         return [
             'name' => 'required|max:50',
-            'email' => 'required|max:50',
+            'email' => 'required|max:50|email|unique:usuarios,email',
             'password' => 'required|size:8',
             'is_admin' => 'required|boolean',
             'role' => 'required'
@@ -38,7 +38,7 @@ class CreateUserRequest extends FormRequest
     {
         throw new HttpResponseException(response()->json([
             'status' => false,
-            'message' => 'Erro de validação',
+            'message' => 'Validation error',
             'errors' => $validator->errors()
         ], 422));
     }

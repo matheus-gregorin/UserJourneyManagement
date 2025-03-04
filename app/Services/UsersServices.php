@@ -5,6 +5,8 @@ namespace App\Services;
 use App\Entitys\UserEntity;
 use App\Repository\UsersRepository;
 use DateTime;
+use Exception;
+use Ramsey\Uuid\Uuid;
 
 class UsersServices
 {
@@ -19,14 +21,19 @@ class UsersServices
     {
         $password = password_hash($data['password'], PASSWORD_BCRYPT);
         $user = new UserEntity(
+            Uuid::uuid4()->toString(),
             $data['name'],
             $data['email'],
             $password,
             $data['is_admin'],
             $data['role'],
+            new DateTime(),
             new DateTime()
         );
-        $this->usersRepository->createUser();
+        $user = $this->usersRepository->createUser($user->toArray());
+        unset($user['password']);
+
+        return $user;
     }
 
     public function getAllUsers()
@@ -34,19 +41,18 @@ class UsersServices
        $data = $this->usersRepository->getAllUsers();
        if ($data) {
             $list = [];
-
             foreach ($data as $user){
-                $list[$user->id] = [
-                    "name" => $user->name,
-                    "email" => $user->email,
-                    "password" => $user->password,
-                    "is_admin" => $user->is_admin,
-                    "roles" => $user->roles,
-                    "created_at" => $user->CREATED_AT
-                ];
+                $user = $this->usersRepository->modelToEntity($user);
+                $user = $user->toArray();
+
+                unset($user['password']);
+
+                $list[] = $user;
             }
-    
-            dd('Service', $list);
+            return $list;
        }
+
+       throw new Exception("Not content users", 204);
+
     }
 }
