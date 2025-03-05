@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\CreateUserRequest;
+use App\Http\Requests\LoginRequest;
 use App\Services\UsersServices;
 use Exception;
 use Illuminate\Http\Request;
@@ -16,10 +17,29 @@ class UsersControllers extends Controller
         $this->usersServices = $usersServices;
     }
 
+    public function login(LoginRequest $request)
+    {
+        try {
+            $token = $this->usersServices->login($request->all());
+
+            return response()->json([
+                'success' => true,
+                'message' => "authenticated user",
+                'token' => $token
+            ], 200);
+
+        } catch (Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+                'token' => null
+            ], $e->getCode());
+        }
+    }
+
     public function createUser(CreateUserRequest $request)
     {
         try {
-
             $user = $this->usersServices->createUser($request->all());
 
             return response()->json([
@@ -40,7 +60,6 @@ class UsersControllers extends Controller
     public function getAllUsers()
     {
         try {
-
             $users = $this->usersServices->getAllUsers();
 
             return response()->json([

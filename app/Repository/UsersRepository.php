@@ -20,7 +20,7 @@ class UsersRepository
     public function createUser(array $data): UsersModel|null|Exception
     {
         try {
-            return UsersModel::create($data);
+            return $this->usersModel::create($data);
 
         } catch (Exception $e) {
             Log::critical("Error in created user: ", ['message' => $e->getMessage()]);
@@ -37,6 +37,18 @@ class UsersRepository
         } catch (Exception $e) {
             Log::critical("Error in get all users: ", ['message' => $e->getTraceAsString()]);
             throw new Exception("Error get all users", 400);
+
+        }
+    }
+
+    public function getUser(string $email): UsersModel|null|Exception
+    {
+        try {
+            return $this->usersModel::where('email', '=', $email)->first();
+
+        } catch (Exception $e) {
+            Log::critical("Error in get user: ", ['message' => $e->getTraceAsString()]);
+            throw new Exception("Error get user", 400);
 
         }
     }

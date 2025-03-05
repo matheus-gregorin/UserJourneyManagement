@@ -17,6 +17,16 @@ class UsersServices
         $this->usersRepository = $usersRepository;
     }
 
+    public function login(array $data)
+    {
+
+        $user = $this->getUser($data['email']);
+       if(password_verify($data['password'], $user->getPassword())){
+            dd("Passou");
+       }
+       dd("Falhou");
+    }
+
     public function createUser(array $data)
     {
         $password = password_hash($data['password'], PASSWORD_BCRYPT);
@@ -53,6 +63,17 @@ class UsersServices
        }
 
        throw new Exception("Not content users", 204);
+
+    }
+
+    public function getUser(string $email)
+    {
+       $user = $this->usersRepository->getUser($email);
+       if ($user) {
+            return $this->usersRepository->modelToEntity($user);
+       }
+
+       throw new Exception("User not found", 400);
 
     }
 }
