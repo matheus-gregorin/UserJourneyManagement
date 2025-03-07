@@ -6,6 +6,8 @@ use App\Entitys\UserEntity;
 use App\Repository\UsersRepository;
 use DateTime;
 use Exception;
+use Firebase\JWT\JWT;
+use Illuminate\Support\Facades\Hash;
 use Ramsey\Uuid\Uuid;
 
 class UsersServices
@@ -21,10 +23,26 @@ class UsersServices
     {
 
         $user = $this->getUser($data['email']);
-       if(password_verify($data['password'], $user->getPassword())){
-            dd("Passou");
-       }
-       dd("Falhou");
+        if(Hash::check($data['password'], $user->getPassword())){
+            $exp = time() + 3600;
+            $token = JWT::encode(
+                [
+                    'iss' => "user-manager",           // Emissor do token
+                    'aud' => "user-manager",          // Destinatário
+                    'iat' => time(),                 // Emitido em
+                    'exp' => $exp,                  // Expira em 1 hora
+                    'user_id' => $user->getUuid(), // Dados do usuário
+                ],
+                env('JWTKEY'),
+                'HS256'
+            );
+            return [
+                'token' => $token,
+                'exp' => $exp
+            ];
+        }
+
+        throw new Exception("Credentials invalid", 400);
     }
 
     public function createUser(array $data)
@@ -41,6 +59,9 @@ class UsersServices
             new DateTime()
         );
         $user = $this->usersRepository->createUser($user->toArray());
+        if($user){
+
+        }
         unset($user['password']);
 
         return $user;

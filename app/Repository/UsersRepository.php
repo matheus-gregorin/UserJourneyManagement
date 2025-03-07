@@ -3,24 +3,24 @@
 namespace App\Repository;
 
 use App\Entitys\UserEntity;
-use App\Models\UsersModel;
+use App\Models\UserModel;
 use Exception;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Log;
 
 class UsersRepository
 {
-    private UsersModel $usersModel;
+    private UserModel $UserModel;
 
-    public function __construct(UsersModel $usersModel)
+    public function __construct(UserModel $UserModel)
     {
-     $this->usersModel = $usersModel;   
+     $this->UserModel = $UserModel;   
     }
 
-    public function createUser(array $data): UsersModel|null|Exception
+    public function createUser(array $data): UserModel|null|Exception
     {
         try {
-            return $this->usersModel::create($data);
+            return $this->UserModel::create($data);
 
         } catch (Exception $e) {
             Log::critical("Error in created user: ", ['message' => $e->getMessage()]);
@@ -32,7 +32,7 @@ class UsersRepository
     public function getAllUsers(): Collection|null|Exception
     {
         try {
-            return $this->usersModel::all();
+            return $this->UserModel::all();
 
         } catch (Exception $e) {
             Log::critical("Error in get all users: ", ['message' => $e->getTraceAsString()]);
@@ -41,10 +41,10 @@ class UsersRepository
         }
     }
 
-    public function getUser(string $email): UsersModel|null|Exception
+    public function getUser(string $email): UserModel|null|Exception
     {
         try {
-            return $this->usersModel::where('email', '=', $email)->first();
+            return $this->UserModel::where('email', '=', $email)->first();
 
         } catch (Exception $e) {
             Log::critical("Error in get user: ", ['message' => $e->getTraceAsString()]);
@@ -53,7 +53,7 @@ class UsersRepository
         }
     }
 
-    public function modelToEntity(UsersModel $userModel)
+    public function modelToEntity(UserModel $userModel)
     {
         return new UserEntity(
             $userModel->uuid,

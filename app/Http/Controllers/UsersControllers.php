@@ -20,19 +20,19 @@ class UsersControllers extends Controller
     public function login(LoginRequest $request)
     {
         try {
-            $token = $this->usersServices->login($request->all());
+            $data = $this->usersServices->login($request->all());
 
             return response()->json([
                 'success' => true,
-                'message' => "authenticated user",
-                'token' => $token
+                'message' => "User authenticated",
+                'token' => $data['token'],
+                'expire_id' => $data['exp']
             ], 200);
 
         } catch (Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => $e->getMessage(),
-                'token' => null
+                'message' => $e->getMessage()
             ], $e->getCode());
         }
     }
@@ -51,8 +51,7 @@ class UsersControllers extends Controller
         } catch (Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => $e->getMessage(),
-                'data' => []
+                'message' => $e->getMessage()
             ], $e->getCode());
         }
     }
@@ -71,8 +70,7 @@ class UsersControllers extends Controller
         } catch (Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => $e->getMessage(),
-                'data' => []
+                'message' => $e->getMessage()
             ], $e->getCode());
         }
     }
