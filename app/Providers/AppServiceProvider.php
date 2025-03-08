@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Models\UserMysqlModel;
+use App\Repository\UserMongoDbRepository;
 use App\Repository\UserRepositoryInterface;
 use App\Repository\UsersMysqlRepository;
 use App\Services\UsersServices;

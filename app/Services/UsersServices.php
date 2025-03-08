@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Entitys\UserEntity;
+use App\Repository\UserRepositoryInterface;
 use App\Repository\UsersMysqlRepository;
 use DateTime;
 use Exception;
@@ -13,10 +14,10 @@ use Ramsey\Uuid\Uuid;
 class UsersServices
 {
 
-    private UsersMysqlRepository $UsersMysqlRepository;
+    private UserRepositoryInterface $UserRepositoryInterface;
 
-    public function __construct(UsersMysqlRepository $UsersMysqlRepository) {
-        $this->UsersMysqlRepository = $UsersMysqlRepository;
+    public function __construct(UserRepositoryInterface $UserRepositoryInterface) {
+        $this->UserRepositoryInterface = $UserRepositoryInterface;
     }
 
     public function login(array $data)
@@ -58,7 +59,7 @@ class UsersServices
             new DateTime(),
             new DateTime()
         );
-        $user = $this->UsersMysqlRepository->createUser($user->toArray());
+        $user = $this->UserRepositoryInterface->createUser($user->toArray());
         if($user){
             unset($user['password']);
             unset($user['id']);
@@ -70,11 +71,11 @@ class UsersServices
 
     public function getAllUsers()
     {
-       $data = $this->UsersMysqlRepository->getAllUsers();
+       $data = $this->UserRepositoryInterface->getAllUsers();
        if ($data) {
             $list = [];
             foreach ($data as $user){
-                $user = $this->UsersMysqlRepository->modelToEntity($user);
+                $user = $this->UserRepositoryInterface->modelToEntity($user);
                 $user = $user->toArray();
 
                 unset($user['password']);
@@ -90,9 +91,9 @@ class UsersServices
 
     public function getUser(string $email)
     {
-       $user = $this->UsersMysqlRepository->getUser($email);
+       $user = $this->UserRepositoryInterface->getUser($email);
        if ($user) {
-            return $this->UsersMysqlRepository->modelToEntity($user);
+            return $this->UserRepositoryInterface->modelToEntity($user);
        }
 
        throw new Exception("User not found", 400);

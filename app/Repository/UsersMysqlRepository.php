@@ -53,7 +53,7 @@ class UsersMysqlRepository implements UserRepositoryInterface
         }
     }
 
-    public function modelToEntity(UserMysqlModel $UserMysqlModel)
+    public function modelToEntity($UserMysqlModel)
     {
         return new UserEntity(
             $UserMysqlModel->uuid,

@@ -24,6 +24,9 @@ RUN apt-get update && apt-get install -y \
 # Instalando a extensão sockets do php
 RUN docker-php-ext-install sockets
 
+# Instale a extensão do MongoDB com suporte a SSL
+RUN pecl install mongodb && docker-php-ext-enable mongodb
+
 # Instalar a extensão phpredis
 RUN pecl install redis \
     && docker-php-ext-enable redis
