@@ -3,24 +3,24 @@
 namespace App\Repository;
 
 use App\Entitys\UserEntity;
-use App\Models\UserModel;
+use App\Models\UserMysqlModel;
 use Exception;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Log;
 
-class UsersRepository implements UserRepositoryInterface
+class UsersMysqlRepository implements UserRepositoryInterface
 {
-    private UserModel $UserModel;
+    private UserMysqlModel $UserMysqlModel;
 
-    public function __construct(UserModel $UserModel)
+    public function __construct(UserMysqlModel $UserMysqlModel)
     {
-     $this->UserModel = $UserModel;   
+     $this->UserMysqlModel = $UserMysqlModel;   
     }
 
-    public function createUser(array $data): UserModel|null|Exception
+    public function createUser(array $data): UserMysqlModel|null|Exception
     {
         try {
-            return $this->UserModel::create($data);
+            return $this->UserMysqlModel::create($data);
 
         } catch (Exception $e) {
             Log::critical("Error in created user: ", ['message' => $e->getMessage()]);
@@ -32,7 +32,7 @@ class UsersRepository implements UserRepositoryInterface
     public function getAllUsers(): Collection|null|Exception
     {
         try {
-            return $this->UserModel::all();
+            return $this->UserMysqlModel::all();
 
         } catch (Exception $e) {
             Log::critical("Error in get all users: ", ['message' => $e->getTraceAsString()]);
@@ -41,10 +41,10 @@ class UsersRepository implements UserRepositoryInterface
         }
     }
 
-    public function getUser(string $email): UserModel|null|Exception
+    public function getUser(string $email): UserMysqlModel|null|Exception
     {
         try {
-            return $this->UserModel::where('email', '=', $email)->first();
+            return $this->UserMysqlModel::where('email', '=', $email)->first();
 
         } catch (Exception $e) {
             Log::critical("Error in get user: ", ['message' => $e->getTraceAsString()]);
@@ -53,17 +53,17 @@ class UsersRepository implements UserRepositoryInterface
         }
     }
 
-    public function modelToEntity(UserModel $userModel)
+    public function modelToEntity(UserMysqlModel $UserMysqlModel)
     {
         return new UserEntity(
-            $userModel->uuid,
-            $userModel->name,
-            $userModel->email,
-            $userModel->password,
-            $userModel->is_admin,
-            $userModel->role,
-            $userModel->updated_at,
-            $userModel->created_at
+            $UserMysqlModel->uuid,
+            $UserMysqlModel->name,
+            $UserMysqlModel->email,
+            $UserMysqlModel->password,
+            $UserMysqlModel->is_admin,
+            $UserMysqlModel->role,
+            $UserMysqlModel->updated_at,
+            $UserMysqlModel->created_at
         );
     }
 }

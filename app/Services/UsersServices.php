@@ -3,7 +3,7 @@
 namespace App\Services;
 
 use App\Entitys\UserEntity;
-use App\Repository\UsersRepository;
+use App\Repository\UsersMysqlRepository;
 use DateTime;
 use Exception;
 use Firebase\JWT\JWT;
@@ -13,10 +13,10 @@ use Ramsey\Uuid\Uuid;
 class UsersServices
 {
 
-    private UsersRepository $usersRepository;
+    private UsersMysqlRepository $UsersMysqlRepository;
 
-    public function __construct(UsersRepository $usersRepository) {
-        $this->usersRepository = $usersRepository;
+    public function __construct(UsersMysqlRepository $UsersMysqlRepository) {
+        $this->UsersMysqlRepository = $UsersMysqlRepository;
     }
 
     public function login(array $data)
@@ -58,22 +58,23 @@ class UsersServices
             new DateTime(),
             new DateTime()
         );
-        $user = $this->usersRepository->createUser($user->toArray());
+        $user = $this->UsersMysqlRepository->createUser($user->toArray());
         if($user){
-
+            unset($user['password']);
+            unset($user['id']);
+            return $user;
         }
-        unset($user['password']);
 
-        return $user;
+        throw new Exception("User not created", 503);
     }
 
     public function getAllUsers()
     {
-       $data = $this->usersRepository->getAllUsers();
+       $data = $this->UsersMysqlRepository->getAllUsers();
        if ($data) {
             $list = [];
             foreach ($data as $user){
-                $user = $this->usersRepository->modelToEntity($user);
+                $user = $this->UsersMysqlRepository->modelToEntity($user);
                 $user = $user->toArray();
 
                 unset($user['password']);
@@ -89,9 +90,9 @@ class UsersServices
 
     public function getUser(string $email)
     {
-       $user = $this->usersRepository->getUser($email);
+       $user = $this->UsersMysqlRepository->getUser($email);
        if ($user) {
-            return $this->usersRepository->modelToEntity($user);
+            return $this->UsersMysqlRepository->modelToEntity($user);
        }
 
        throw new Exception("User not found", 400);
