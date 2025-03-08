@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Repository\UserRepositoryInterface;
+use App\Repository\UsersRepository;
 use App\Services\UsersServices;
 use Illuminate\Support\ServiceProvider;
 
@@ -16,6 +18,9 @@ class AppServiceProvider extends ServiceProvider
     {
         //Definir aqui as services
         $this->app->bind(UsersServices::class);
+
+        //Definir aqui interfaces
+        $this->app->bind(UserRepositoryInterface::class, UsersRepository::class);
     }
 
     /**
