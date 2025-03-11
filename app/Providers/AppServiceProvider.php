@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Models\UserMongoDbModel;
 use App\Models\UserMysqlModel;
 use App\Repository\UserMongoDbRepository;
 use App\Repository\UserRepositoryInterface;
@@ -18,11 +19,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        //Definir aqui as services
+        //Services
         $this->app->bind(UsersServices::class);
 
-        //Definir aqui interfaces
-        $this->app->bind(UserRepositoryInterface::class, UsersMysqlRepository::class);
+        //Interfaces
+        //$this->app->bind(UserRepositoryInterface::class, UsersMysqlRepository::class);
+        $this->app->bind(UserRepositoryInterface::class, UserMongoDbRepository::class);
     }
 
     /**

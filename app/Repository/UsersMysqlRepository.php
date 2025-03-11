@@ -17,10 +17,10 @@ class UsersMysqlRepository implements UserRepositoryInterface
      $this->UserMysqlModel = $UserMysqlModel;   
     }
 
-    public function createUser(array $data): UserMysqlModel|null|Exception
+    public function createUser(array $data): UserEntity|null|Exception
     {
         try {
-            return $this->UserMysqlModel::create($data);
+            return $this->modelToEntity($this->UserMysqlModel::create($data), true);
 
         } catch (Exception $e) {
             Log::critical("Error in created user: ", ['message' => $e->getMessage()]);
@@ -41,25 +41,32 @@ class UsersMysqlRepository implements UserRepositoryInterface
         }
     }
 
-    public function getUser(string $email): UserMysqlModel|null|Exception
+    public function getUser(string $email): UserEntity|null|Exception
     {
         try {
-            return $this->UserMysqlModel::where('email', '=', $email)->first();
+            return $this->modelToEntity($this->UserMysqlModel::where('email', '=', $email)->first());
 
         } catch (Exception $e) {
             Log::critical("Error in get user: ", ['message' => $e->getTraceAsString()]);
-            throw new Exception("Error get user", 400);
+            throw new Exception("Error in get user: " . $e->getMessage(), 400);
 
         }
     }
 
-    public function modelToEntity($UserMysqlModel)
+    public function modelToEntity($UserMysqlModel, bool $removePass = false): UserEntity|Exception
     {
+
+        if(is_null($UserMysqlModel)){
+            throw new Exception("User not found", 400);
+        }
+
+        $password = $removePass ? "" : $UserMysqlModel->password;
+
         return new UserEntity(
             $UserMysqlModel->uuid,
             $UserMysqlModel->name,
             $UserMysqlModel->email,
-            $UserMysqlModel->password,
+            $password,
             $UserMysqlModel->is_admin,
             $UserMysqlModel->role,
             $UserMysqlModel->updated_at,

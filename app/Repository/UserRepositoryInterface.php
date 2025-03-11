@@ -2,13 +2,17 @@
 
 namespace App\Repository;
 
-use App\Models\UserMongoDbModel;
-use App\Models\UserMysqlModel;
+use App\Entitys\UserEntity;
+use Exception;
+use Illuminate\Database\Eloquent\Collection;
 
 interface UserRepositoryInterface
 {
-    public function createUser(array $data);
-    public function getAllUsers();
-    public function getUser(string $email);
-    public function modelToEntity($userModel);
+    public function createUser(array $data): UserEntity|null|Exception;
+
+    public function getAllUsers(): Collection|null|Exception;
+
+    public function getUser(string $email): UserEntity|null|Exception;
+
+    public function modelToEntity($userModel): UserEntity|Exception;
 }

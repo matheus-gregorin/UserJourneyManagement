@@ -4,7 +4,6 @@ namespace App\Services;
 
 use App\Entitys\UserEntity;
 use App\Repository\UserRepositoryInterface;
-use App\Repository\UsersMysqlRepository;
 use DateTime;
 use Exception;
 use Firebase\JWT\JWT;
@@ -24,12 +23,11 @@ class UsersServices
     {
 
         $user = $this->getUser($data['email']);
-        if(Hash::check($data['password'], $user->getPassword())){
+        if(!empty($user) && Hash::check($data['password'], $user->getPassword())){
             $exp = time() + 3600;
             $token = JWT::encode(
                 [
                     'iss' => "user-manager",           // Emissor do token
-                    'aud' => "user-manager",          // Destinatário
                     'iat' => time(),                 // Emitido em
                     'exp' => $exp,                  // Expira em 1 hora
                     'user_id' => $user->getUuid(), // Dados do usuário
@@ -61,6 +59,7 @@ class UsersServices
         );
         $user = $this->UserRepositoryInterface->createUser($user->toArray());
         if($user){
+            $user = $user->toArray();
             unset($user['password']);
             unset($user['id']);
             return $user;
@@ -93,7 +92,7 @@ class UsersServices
     {
        $user = $this->UserRepositoryInterface->getUser($email);
        if ($user) {
-            return $this->UserRepositoryInterface->modelToEntity($user);
+            return $user;
        }
 
        throw new Exception("User not found", 400);
