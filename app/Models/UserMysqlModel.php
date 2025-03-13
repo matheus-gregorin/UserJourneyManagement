@@ -18,6 +18,14 @@ class UserMysqlModel extends Model
      */
     protected $table = 'usuarios';
 
+    protected $primaryKey = 'uuid';
+
+    // Usa UUIDs string
+    protected $keyType = 'string';
+    
+    // Não está utiliza auto-incremento
+    public $incrementing = false;
+
     protected $fillable = [
         'uuid',
         'name',

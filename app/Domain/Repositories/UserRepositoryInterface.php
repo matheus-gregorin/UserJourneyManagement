@@ -16,5 +16,7 @@ interface UserRepositoryInterface
 
     public function getUserWithUuid(string $uuid): UserEntity|null|Exception;
 
+    public function updateRole(UserEntity $user): UserEntity|null|Exception;
+
     public function modelToEntity($userModel): UserEntity|Exception;
 }

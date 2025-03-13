@@ -116,11 +116,15 @@ class UsersServices
         if($user){
             // New role
             $user->changeRole($data['role']);
-            //$user = $this->userRepository->updateUser($user);
-            dd($user);
+            $this->userRepository->updateRole($user);
+            $user =$user->toArray();
+
+            unset($user['password']);
+            return $user;
+
 
         }
 
-        dd(123);
+        throw new Exception("User not found", 400);
     }
 }

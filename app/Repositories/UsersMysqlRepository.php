@@ -66,6 +66,22 @@ class UsersMysqlRepository implements UserRepositoryInterface
         }
     }
 
+    public function updateRole(UserEntity $user): UserEntity|null|Exception
+    {
+        try {
+            $userModel = $this->UserMysqlModel::where('uuid', $user->getUuid())->first();
+            $userModel->role = $user->getRole();
+            $userModel->save();
+
+            return $user;
+
+        } catch (Exception $e) {
+            Log::critical("Error in update user: ", ['message' => $e->getTraceAsString()]);
+            throw new Exception("Error in update user: " . $e->getMessage(), 400);
+
+        }
+    }
+
     public function modelToEntity($UserMysqlModel, bool $removePass = false): UserEntity|Exception
     {
 
