@@ -133,7 +133,7 @@ class UserEntity
         return $this;
     }
 
-    // Valida as permissões
+    // Valida a permissão
     public function enterPermission(string $role): string
     {
         switch ($role) {
@@ -152,7 +152,7 @@ class UserEntity
         }
     }
 
-    // Muda as permissões
+    // Muda a permissão
     public function changeRole(string $newRole)
     {
         switch ($newRole) {
