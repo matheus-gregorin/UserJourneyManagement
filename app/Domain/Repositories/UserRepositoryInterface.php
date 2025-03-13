@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Repository;
+namespace App\Domain\Repositories;
 
-use App\Entitys\UserEntity;
+use App\Domain\Entities\UserEntity;
 use Exception;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -12,7 +12,9 @@ interface UserRepositoryInterface
 
     public function getAllUsers(): Collection|null|Exception;
 
-    public function getUser(string $email): UserEntity|null|Exception;
+    public function getUserWithEmail(string $email): UserEntity|null|Exception;
+
+    public function getUserWithUuid(string $uuid): UserEntity|null|Exception;
 
     public function modelToEntity($userModel): UserEntity|Exception;
 }

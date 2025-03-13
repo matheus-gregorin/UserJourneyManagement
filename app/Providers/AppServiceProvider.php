@@ -2,12 +2,12 @@
 
 namespace App\Providers;
 
-use App\Models\UserMongoDbModel;
-use App\Models\UserMysqlModel;
-use App\Repository\UserMongoDbRepository;
-use App\Repository\UserRepositoryInterface;
-use App\Repository\UsersMysqlRepository;
+use App\Domain\Repositories\UserRepositoryInterface;
+use App\Repositories\UserMongoDbRepository;
+use App\Repositories\UsersMysqlRepository;
 use App\Services\UsersServices;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -23,8 +23,17 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(UsersServices::class);
 
         //Interfaces
-        //$this->app->bind(UserRepositoryInterface::class, UsersMysqlRepository::class);
-        $this->app->bind(UserRepositoryInterface::class, UserMongoDbRepository::class);
+        switch (Config::get('database.default')) {
+            case 'mysql':
+                    $this->app->bind(UserRepositoryInterface::class, UsersMysqlRepository::class);
+                break;
+            case 'mongodb':
+                    $this->app->bind(UserRepositoryInterface::class, UserMongoDbRepository::class);
+                break;
+            default:
+                    Log::critical("DB undefined", Config::get('database.default'));
+                break;
+        }
     }
 
     /**

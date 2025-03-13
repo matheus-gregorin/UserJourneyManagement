@@ -18,3 +18,4 @@ Route::post('/login', [UsersControllers::class, 'login']);
 
 Route::post('/create-user', [UsersControllers::class, 'createUser']);
 Route::get('/all-users', [UsersControllers::class, 'getAllUsers']);
+Route::put('/change-role-user/{uuid}', [UsersControllers::class, 'changeRoleUser']);

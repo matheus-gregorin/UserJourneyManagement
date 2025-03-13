@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\changeRoleUserRequest;
 use App\Http\Requests\CreateUserRequest;
 use App\Http\Requests\LoginRequest;
 use App\Services\UsersServices;
@@ -65,6 +66,25 @@ class UsersControllers extends Controller
                 'success' => true,
                 'message' => "Users collected",
                 'data' => $users
+            ], 200);
+
+        } catch (Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], $e->getCode());
+        }
+    }
+
+    public function changeRoleUser(string $uuid, changeRoleUserRequest $request)
+    {
+        try {
+            $user = $this->usersServices->changeRoleUser($uuid, $request->all());
+
+            return response()->json([
+                'success' => true,
+                'message' => "User role updated",
+                'data' => $user
             ], 200);
 
         } catch (Exception $e) {

@@ -2,27 +2,27 @@
 
 namespace App\Services;
 
-use App\Entitys\UserEntity;
-use App\Repository\UserRepositoryInterface;
-use DateTime;
-use Exception;
+use App\Domain\Entities\UserEntity;
+use App\Domain\Repositories\UserRepositoryInterface;;
 use Firebase\JWT\JWT;
 use Illuminate\Support\Facades\Hash;
 use Ramsey\Uuid\Uuid;
+use DateTime;
+use Exception;
 
 class UsersServices
 {
 
-    private UserRepositoryInterface $UserRepositoryInterface;
+    private UserRepositoryInterface $userRepository;
 
-    public function __construct(UserRepositoryInterface $UserRepositoryInterface) {
-        $this->UserRepositoryInterface = $UserRepositoryInterface;
+    public function __construct(UserRepositoryInterface $userRepository) {
+        $this->userRepository = $userRepository;
     }
 
     public function login(array $data)
     {
 
-        $user = $this->getUser($data['email']);
+        $user = $this->getUserWithEmail($data['email']);
         if(!empty($user) && Hash::check($data['password'], $user->getPassword())){
             $exp = time() + 3600;
             $token = JWT::encode(
@@ -57,7 +57,7 @@ class UsersServices
             new DateTime(),
             new DateTime()
         );
-        $user = $this->UserRepositoryInterface->createUser($user->toArray());
+        $user = $this->userRepository->createUser($user->toArray());
         if($user){
             $user = $user->toArray();
             unset($user['password']);
@@ -70,11 +70,11 @@ class UsersServices
 
     public function getAllUsers()
     {
-       $data = $this->UserRepositoryInterface->getAllUsers();
+       $data = $this->userRepository->getAllUsers();
        if ($data) {
             $list = [];
             foreach ($data as $user){
-                $user = $this->UserRepositoryInterface->modelToEntity($user);
+                $user = $this->userRepository->modelToEntity($user);
                 $user = $user->toArray();
 
                 unset($user['password']);
@@ -88,14 +88,39 @@ class UsersServices
 
     }
 
-    public function getUser(string $email)
+    public function getUserWithEmail(string $email)
     {
-       $user = $this->UserRepositoryInterface->getUser($email);
+       $user = $this->userRepository->getUserWithEmail($email);
        if ($user) {
             return $user;
        }
 
        throw new Exception("User not found", 400);
 
+    }
+
+    public function getUserWithUuid(string $uuid)
+    {
+       $user = $this->userRepository->getUserWithUuid($uuid);
+       if ($user) {
+            return $user;
+       }
+
+       throw new Exception("User not found", 400);
+
+    }
+
+    public function changeRoleUser(string $uuid, array $data)
+    {
+        $user = $this->getUserWithUuid($uuid);
+        if($user){
+            // New role
+            $user->changeRole($data['role']);
+            //$user = $this->userRepository->updateUser($user);
+            dd($user);
+
+        }
+
+        dd(123);
     }
 }

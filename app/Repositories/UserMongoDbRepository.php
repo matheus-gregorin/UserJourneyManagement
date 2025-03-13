@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Repository;
+namespace App\Repositories;
 
-use App\Entitys\UserEntity;
+use App\Domain\Entities\UserEntity;
+use App\Domain\Repositories\UserRepositoryInterface;
 use App\Models\UserMongoDbModel;
 use Exception;
 use Illuminate\Database\Eloquent\Collection;
@@ -41,10 +42,22 @@ class UserMongoDbRepository implements UserRepositoryInterface
         }
     }
 
-    public function getUser(string $email): UserEntity|null|Exception
+    public function getUserWithEmail(string $email): UserEntity|null|Exception
     {
         try {
             return $this->modelToEntity($this->UserMongoDbModel::where('email', '=', $email)->first());
+
+        } catch (Exception $e) {
+            Log::critical("Error in get user: ", ['message' => $e->getTraceAsString()]);
+            throw new Exception("Error in get user: " . $e->getMessage(), 400);
+
+        }
+    }
+
+    public function getUserWithUuid(string $uuid): UserEntity|null|Exception
+    {
+        try {
+            return $this->modelToEntity($this->UserMongoDbModel::where('uuid', '=', $uuid)->first());
 
         } catch (Exception $e) {
             Log::critical("Error in get user: ", ['message' => $e->getTraceAsString()]);

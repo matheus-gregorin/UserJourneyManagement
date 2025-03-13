@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Entitys;
+namespace App\Domain\Entities;
 
+use App\Domain\Enums\RolesEnum;
 use DateTime;
-use Ramsey\Uuid\Uuid;
 
 class UserEntity
 {
@@ -40,7 +40,7 @@ class UserEntity
         $this->email = $email;
         $this->password = $password;
         $this->isAdmin = $isAdmin;
-        $this->role = $role;
+        $this->role = $this->enterPermission($role);
         $this->updatedAt = $updatedAt;
         $this->createdAt = $createdAt;
     }
@@ -105,7 +105,7 @@ class UserEntity
         return $this->role;
     }
 
-    public function setrole(string $role)
+    private function setrole(string $role)
     {
         $this->role = $role;
         return $this;
@@ -131,6 +131,50 @@ class UserEntity
     {
         $this->createdAt = $createdAt;
         return $this;
+    }
+
+    // Valida as permissões
+    public function enterPermission(string $role): string
+    {
+        switch ($role) {
+            case RolesEnum::LOW:
+                    return RolesEnum::LOW;
+                break;
+            case RolesEnum::MEDIUM:
+                    return RolesEnum::MEDIUM;
+                break;
+            case RolesEnum::HIGH:
+                    return RolesEnum::HIGH;
+                break;
+            default:
+                    return RolesEnum::LOW;
+                break;
+        }
+    }
+
+    // Muda as permissões
+    public function changeRole(string $newRole)
+    {
+        switch ($newRole) {
+            case RolesEnum::LOW:
+                    if(in_array($this->getRole(), [RolesEnum::MEDIUM, RolesEnum::HIGH])){
+                        $this->setrole(RolesEnum::LOW);
+                    }
+                break;
+            case RolesEnum::MEDIUM:
+                    if(in_array($this->getRole(), [RolesEnum::LOW, RolesEnum::HIGH])){
+                        $this->setrole(RolesEnum::MEDIUM);
+                    }
+                break;
+            case RolesEnum::HIGH:
+                    if(in_array($this->getRole(), [RolesEnum::LOW, RolesEnum::MEDIUM])){
+                        $this->setrole(RolesEnum::HIGH);
+                    }
+                    break;
+            default:
+                    $this->setrole(RolesEnum::LOW);
+                break;
+        }
     }
 
     public function toArray()
