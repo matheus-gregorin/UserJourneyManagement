@@ -97,6 +97,7 @@ class UserMongoDbRepository implements UserRepositoryInterface
             $UserMongoDbModel->name,
             $UserMongoDbModel->email,
             $password,
+            $UserMongoDbModel->phone,
             $UserMongoDbModel->is_admin,
             $UserMongoDbModel->role,
             $UserMongoDbModel->updated_at->toDateTime(),

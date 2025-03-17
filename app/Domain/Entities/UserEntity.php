@@ -16,6 +16,8 @@ class UserEntity
 
     private string $password;
 
+    private string $phone;
+
     private bool $isAdmin;
 
     private string $role;
@@ -29,6 +31,7 @@ class UserEntity
         string $name,
         string $email,
         string $password,
+        string $phone,
         bool $isAdmin,
         string $role,
         DateTime $updatedAt,
@@ -39,6 +42,7 @@ class UserEntity
         $this->name = $name;
         $this->email = $email;
         $this->password = $password;
+        $this->phone = $phone;
         $this->isAdmin = $isAdmin;
         $this->role = $this->enterPermission($role);
         $this->updatedAt = $updatedAt;
@@ -86,6 +90,17 @@ class UserEntity
     public function setPassword(string $password)
     {
         $this->password = $password;
+        return $this;
+    }
+
+    public function getPhone()
+    {
+        return $this->phone;
+    }
+
+    public function setPhone(string $phone)
+    {
+        $this->phone = $phone;
         return $this;
     }
 
@@ -184,6 +199,7 @@ class UserEntity
             "name" => $this->getName(),
             "email" => $this->getEmail(),
             "password" => $this->getPassword(),
+            "phone" => $this->getPhone(),
             "is_admin" => $this->getIsAdmin(),
             "role" => $this->getRole(),
             "updated_at" => $this->getUpdatedAt()->format('Y-m-d H:i:s'),

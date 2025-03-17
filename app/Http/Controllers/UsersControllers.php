@@ -94,4 +94,23 @@ class UsersControllers extends Controller
             ], $e->getCode());
         }
     }
+
+    public function webhookMessage(Request $request)
+    {
+        {
+            try {
+                $this->usersServices->webhookMessage($request->all());
+    
+                return response()->json([
+                    'success' => true
+                ], 200);
+    
+            } catch (Exception $e) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $e->getMessage()
+                ], 503);
+            }
+        }
+    }
 }

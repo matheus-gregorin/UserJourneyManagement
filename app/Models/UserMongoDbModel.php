@@ -23,6 +23,7 @@ class UserMongoDbModel extends Model
         'name',
         'email',
         'password',
+        'phone',
         'is_admin',
         'role'
     ];

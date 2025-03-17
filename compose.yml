@@ -9,5 +9,20 @@ services:
       - .:/var/www/html
       - app_data:/var/www/html/public/uploads
     container_name: user_manager
+
+  waha:
+    image: devlikeapro/waha
+    container_name: waha-monitoring
+    ports:
+      - "3000:3000"
+    stdin_open: true  # Habilita interação com o terminal (equivalente a -it)
+    tty: true  # Habilita o terminal para o contêiner
+    environment:
+      - WAHA_DASHBOARD_ENABLED=true
+      - WAHA_DASHBOARD_USERNAME=seu_usuario
+      - WAHA_DASHBOARD_PASSWORD=sua_senha
+    # volumes:
+    #   - ./sessions:/app/.sessions
+
 volumes:
   app_data:

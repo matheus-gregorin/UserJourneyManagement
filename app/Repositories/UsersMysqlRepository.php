@@ -96,6 +96,7 @@ class UsersMysqlRepository implements UserRepositoryInterface
             $UserMysqlModel->name,
             $UserMysqlModel->email,
             $password,
+            $UserMysqlModel->phone,
             $UserMysqlModel->is_admin,
             $UserMysqlModel->role,
             $UserMysqlModel->updated_at,

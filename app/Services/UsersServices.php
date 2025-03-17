@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Hash;
 use Ramsey\Uuid\Uuid;
 use DateTime;
 use Exception;
+use Gemini;
+use Illuminate\Support\Facades\Log;
 
 class UsersServices
 {
@@ -52,6 +54,7 @@ class UsersServices
             $data['name'],
             $data['email'],
             $password,
+            $data['phone'],
             $data['is_admin'],
             $data['role'],
             new DateTime(),
@@ -126,5 +129,26 @@ class UsersServices
         }
 
         throw new Exception("User not found", 400);
+    }
+
+    public function webhookMessage(array $payload)
+    {
+        $event = $payload['event'];
+        Log::info("EVENT", ['event' => $event]);
+
+        if(!empty($payload['payload']['body'])){
+
+            $user = $payload['payload']['_data']['notifyName'];
+            $message = $payload['payload']['body'];
+            Log::info("API WHATS", ['user' => $user, 'message' => $message, 'payload' => $payload]);
+
+            $gemini = Gemini::client(env('GEMINIKEY'));
+            $message = "Verifique se essa mensagem contém coisas suspeitas, tanto no conteudo como no fromato, e retorne uma string json sem quebras de linhas com o campo its_okay com true se não tiver maliciosidade ou false se tiver maliciosidade além disso envie um campo message com o seu relaório resumido do conteúdo da mensagem: " . $message;
+            $messageValidation = $gemini->geminiFlash()->generateContent($message);
+            $return = json_decode($messageValidation->text(), true);
+            Log::info("GEMINI RESPONSE", ['message' => $messageValidation->text()]);
+
+        }
+        return true;
     }
 }

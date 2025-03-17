@@ -29,6 +29,7 @@ class CreateUserRequest extends FormRequest
             'name' => 'required|max:50',
             'email' => 'required|max:50|email|unique:usuarios,email',
             'password' => 'required|size:8',
+            'phone' => 'required|size:13',
             'is_admin' => 'required|boolean',
             'role' => 'required'
         ];
