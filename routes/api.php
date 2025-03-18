@@ -22,4 +22,4 @@ Route::post('/create-user', [UsersControllers::class, 'createUser']);
 Route::get('/all-users', [UsersControllers::class, 'getAllUsers']);
 Route::put('/change-role-user/{uuid}', [UsersControllers::class, 'changeRoleUser']);
 
-Route::post('/message', [UsersControllers::class, 'webhookMessage']);
+Route::post('/whatsapp-receive', [UsersControllers::class, 'webhookReceiveMessage']);
