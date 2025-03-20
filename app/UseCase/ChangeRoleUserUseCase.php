@@ -3,6 +3,7 @@
 namespace App\UseCase;
 
 use App\Domain\Repositories\UserRepositoryInterface;
+use App\Exceptions\UserNotFoundException;
 use Exception;
 
 class ChangeRoleUserUseCase
@@ -28,6 +29,6 @@ class ChangeRoleUserUseCase
 
         }
 
-        throw new Exception("User not found", 400);
+        throw new UserNotFoundException("User not found", 400);
     }
 }

@@ -2,8 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Domain\Enums\ErrorsEnum;
+use App\Domain\Enums\CodesEnum;
+use App\Exceptions\CollectUserByUuidException;
 use App\Exceptions\CredentialsInvalidException;
+use App\Exceptions\NotContentUsersException;
+use App\Exceptions\UpdateRoleException;
+use App\Exceptions\UserNotCreatedException;
 use App\Exceptions\UserNotFoundException;
 use App\Http\Requests\changeRoleUserRequest;
 use App\Http\Requests\CreateUserRequest;
@@ -50,35 +54,35 @@ class UsersControllers extends Controller
                     'token' => $data['token'],
                     'expire_id' => $data['exp']
                 ],
-                ErrorsEnum::messageUserAuthenticated,
-                ErrorsEnum::codeSuccess
+                CodesEnum::messageUserAuthenticated,
+                CodesEnum::codeSuccess
             );
 
         } catch (CredentialsInvalidException $e) {
             return ApiResponse::error(
                 [    
-                    ErrorsEnum::messageCredentialsInvalid
+                    CodesEnum::messageCredentialsInvalid
                 ],
-                ErrorsEnum::messageUserNotAuthenticated,
-                ErrorsEnum::codeErrorUnauthorized
+                CodesEnum::messageUserNotAuthenticated,
+                CodesEnum::codeErrorUnauthorized
             );
 
         } catch (UserNotFoundException $e) {
             return ApiResponse::error(
                 [    
-                    ErrorsEnum::messageCredentialsInvalid
+                    CodesEnum::messageCredentialsInvalid
                 ],
-                ErrorsEnum::messageUserNotAuthenticated,
-                ErrorsEnum::codeErrorUnauthorized
+                CodesEnum::messageUserNotAuthenticated,
+                CodesEnum::codeErrorUnauthorized
             );
 
         } catch (Exception $e) {
             return ApiResponse::error(
                 [    
-                    'error' => ErrorsEnum::messageInternalServerError
+                    CodesEnum::messageInternalServerError
                 ],
-                ErrorsEnum::messageUserNotAuthenticated,
-                ErrorsEnum::codeErrorBadRequest
+                CodesEnum::messageUserNotAuthenticated,
+                CodesEnum::codeErrorInternalServerError
             );
 
         }
@@ -89,17 +93,41 @@ class UsersControllers extends Controller
         try {
             $user = $this->createUserUseCase->createUser($request->all());
 
-            return response()->json([
-                'success' => true,
-                'message' => "User created",
-                'data' => $user
-            ], 200);
+            return ApiResponse::success(
+                [
+                   'user' => $user
+                ],
+                CodesEnum::messageUserCreated,
+                CodesEnum::codeSuccess
+            );
+
+        } catch (UserNotCreatedException $e) {
+            return ApiResponse::error(
+                [    
+                    CodesEnum::messageDataInvalid
+                ],
+                CodesEnum::messageUserNotCreated,
+                CodesEnum::codeErrorBadRequest
+            );
+
+        } catch (UserNotFoundException $e) {
+            return ApiResponse::error(
+                [    
+                    CodesEnum::messageInternalServerError
+                ],
+                CodesEnum::messageUserNotCreated,
+                CodesEnum::codeErrorInternalServerError
+            );
 
         } catch (Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage()
-            ], $e->getCode());
+            return ApiResponse::error(
+                [    
+                    CodesEnum::messageInternalServerError
+                ],
+                CodesEnum::messageUserNotCreated,
+                CodesEnum::codeErrorInternalServerError
+            );
+
         }
     }
 
@@ -108,17 +136,32 @@ class UsersControllers extends Controller
         try {
             $users = $this->getAllUsersUseCase->getAllUsers();
 
-            return response()->json([
-                'success' => true,
-                'message' => "Users collected",
-                'data' => $users
-            ], 200);
+            return ApiResponse::success(
+                [
+                   'users' => $users
+                ],
+                CodesEnum::messageUsersCollected,
+                CodesEnum::codeSuccess
+            );
+
+        } catch (NotContentUsersException $e) {
+            return ApiResponse::error(
+                [    
+                    CodesEnum::messageUsersNotContent
+                ],
+                CodesEnum::messageUsersNotContent,
+                CodesEnum::codeNotContent
+            );
 
         } catch (Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage()
-            ], $e->getCode());
+            return ApiResponse::error(
+                [    
+                    CodesEnum::messageInternalServerError
+                ],
+                CodesEnum::messageUserNotCreated,
+                CodesEnum::codeErrorInternalServerError
+            );
+
         }
     }
 
@@ -127,17 +170,49 @@ class UsersControllers extends Controller
         try {
             $user = $this->changeRoleUserUseCase->changeRoleUser($uuid, $request->all());
 
-            return response()->json([
-                'success' => true,
-                'message' => "User role updated",
-                'data' => $user
-            ], 200);
+            return ApiResponse::success(
+                [
+                   'user' => $user
+                ],
+                CodesEnum::messageRoleUpdated,
+                CodesEnum::codeSuccess
+            );
+
+        } catch (UserNotFoundException $e) {
+            return ApiResponse::error(
+                [    
+                    CodesEnum::messageUserInvalid
+                ],
+                CodesEnum::messageNotUpdatedRole,
+                CodesEnum::codeErrorBadRequest
+            );
+
+        }  catch (CollectUserByUuidException $e) {
+            return ApiResponse::error(
+                [    
+                    CodesEnum::messageUserInvalid
+                ],
+                CodesEnum::messageNotUpdatedRole,
+                CodesEnum::codeErrorBadRequest
+            );
+
+        } catch (UpdateRoleException $e) {
+            return ApiResponse::error(
+                [    
+                    CodesEnum::messageNotUpdatedRole
+                ],
+                CodesEnum::messageNotUpdatedRole,
+                CodesEnum::codeErrorInternalServerError
+            );
 
         } catch (Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage()
-            ], $e->getCode());
+            return ApiResponse::error(
+                [    
+                    CodesEnum::messageInternalServerError
+                ],
+                CodesEnum::messageNotUpdatedRole,
+                CodesEnum::codeErrorInternalServerError
+            );
         }
     }
 

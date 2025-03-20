@@ -4,8 +4,10 @@ namespace App\UseCase;
 
 use App\Domain\Entities\UserEntity;
 use App\Domain\Repositories\UserRepositoryInterface;
+use App\Exceptions\UserNotCreatedException;
 use DateTime;
 use Exception;
+use Illuminate\Support\Facades\Log;
 use Ramsey\Uuid\Uuid;
 
 class CreateUserUseCase
@@ -39,7 +41,8 @@ class CreateUserUseCase
             return $user;
         }
 
-        throw new Exception("User not created", 503);
+        Log::critical("CreateUserUseCase invalid", ['data' => json_encode($data)]);
+        throw new UserNotCreatedException("User not created", 503);
     }
 
 }

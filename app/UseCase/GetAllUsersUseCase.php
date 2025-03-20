@@ -3,7 +3,9 @@
 namespace App\UseCase;
 
 use App\Domain\Repositories\UserRepositoryInterface;
+use App\Exceptions\NotContentUsersException;
 use Exception;
+use Illuminate\Support\Facades\Log;
 
 class GetAllUsersUseCase
 {
@@ -15,21 +17,23 @@ class GetAllUsersUseCase
 
     public function getAllUsers()
     {
-       $data = $this->userRepository->getAllUsers();
-       if ($data) {
-            $list = [];
-            foreach ($data as $user){
-                $user = $this->userRepository->modelToEntity($user);
-                $user = $user->toArray();
+        $data = $this->userRepository->getAllUsers();
 
-                unset($user['password']);
+        $list = [];
+        foreach ($data as $user){
+            $user = $this->userRepository->modelToEntity($user);
+            $user = $user->toArray();
 
-                $list[] = $user;
-            }
-            return $list;
+            unset($user['password']);
+
+            $list[] = $user;
+        }
+
+        if(empty($list)){
+            Log::critical("GetAllUsersUseCase invalid", ['data' => json_encode($data)]);
+            throw new NotContentUsersException("Not content users", 204);
        }
 
-       throw new Exception("Not content users", 204);
-
+        return $list;
     }
 }

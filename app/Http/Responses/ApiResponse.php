@@ -2,7 +2,7 @@
 
 namespace App\Http\Responses;
 
-use App\Domain\Enums\ErrorsEnum;
+use App\Domain\Enums\CodesEnum;
 use Illuminate\Http\JsonResponse;
 
 class ApiResponse
@@ -10,7 +10,7 @@ class ApiResponse
     public static function success(array $data = [], string $message = 'Success', int $status = 200): JsonResponse
     {
         return response()->json([
-            'status' => ErrorsEnum::statusSuccess,
+            'status' => CodesEnum::statusSuccess,
             'message' => $message,
             'data' => $data
         ], $status);
@@ -19,7 +19,7 @@ class ApiResponse
     public static function error(array $errors = [], string $message, int $status = 400): JsonResponse
     {
         return response()->json([
-            'status' => ErrorsEnum::statusError,
+            'status' => CodesEnum::statusError,
             'message' => $message,
             'errors' => $errors
         ], $status);

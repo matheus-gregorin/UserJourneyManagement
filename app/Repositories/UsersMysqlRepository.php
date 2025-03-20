@@ -5,6 +5,10 @@ namespace App\Repositories;
 use App\Domain\Entities\UserEntity;
 use App\Domain\Repositories\UserRepositoryInterface;
 use App\Exceptions\CollectUserByEmailException;
+use App\Exceptions\CollectUserByUuidException;
+use App\Exceptions\NotContentUsersException;
+use App\Exceptions\UpdateRoleException;
+use App\Exceptions\UserNotCreatedException;
 use App\Exceptions\UserNotFoundException;
 use App\Models\UserMysqlModel;
 use Exception;
@@ -27,7 +31,7 @@ class UsersMysqlRepository implements UserRepositoryInterface
 
         } catch (Exception $e) {
             Log::critical("Error in created user: ", ['message' => $e->getMessage()]);
-            throw new Exception("Error in created user", 400);
+            throw new UserNotCreatedException("Error in created user", 400);
 
         }
     }
@@ -38,8 +42,8 @@ class UsersMysqlRepository implements UserRepositoryInterface
             return $this->UserMysqlModel::all();
 
         } catch (Exception $e) {
-            Log::critical("Error in get all users: ", ['message' => $e->getTraceAsString()]);
-            throw new Exception("Error get all users", 400);
+            Log::critical("Error in get all users: ", ['message' => $e->getMessage()]);
+            throw new NotContentUsersException("Error get all users", 400);
 
         }
     }
@@ -49,7 +53,7 @@ class UsersMysqlRepository implements UserRepositoryInterface
         try {
             return $this->modelToEntity($this->UserMysqlModel::where('email', '=', $email)->first());
 
-        } catch (CollectUserByEmailException $e) {
+        } catch (Exception $e) {
             Log::critical("Error in get user by email: ", ['message' => $e->getMessage()]);
             throw new CollectUserByEmailException($e->getMessage(), 400);
 
@@ -62,8 +66,8 @@ class UsersMysqlRepository implements UserRepositoryInterface
             return $this->modelToEntity($this->UserMysqlModel::where('uuid', '=', $uuid)->first());
 
         } catch (Exception $e) {
-            Log::critical("Error in get user: ", ['message' => $e->getTraceAsString()]);
-            throw new Exception("Error in get user: " . $e->getMessage(), 400);
+            Log::critical("Error in get user by uuid: ", ['message' => $e->getMessage()]);
+            throw new CollectUserByUuidException($e->getMessage(), 400);
 
         }
     }
@@ -78,8 +82,8 @@ class UsersMysqlRepository implements UserRepositoryInterface
             return $user;
 
         } catch (Exception $e) {
-            Log::critical("Error in update user: ", ['message' => $e->getTraceAsString()]);
-            throw new Exception("Error in update user: " . $e->getMessage(), 400);
+            Log::critical("Error in update user: ", ['message' => $e->getMessage()]);
+            throw new UpdateRoleException("Error in update user: " . $e->getMessage(), 400);
 
         }
     }
@@ -88,6 +92,7 @@ class UsersMysqlRepository implements UserRepositoryInterface
     {
 
         if(is_null($UserMysqlModel)){
+            Log::critical("User not found: ", ['user' => json_encode($UserMysqlModel)]);
             throw new UserNotFoundException("User not found", 400);
         }
 

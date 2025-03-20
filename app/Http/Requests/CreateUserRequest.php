@@ -1,6 +1,9 @@
 <?php
 
 namespace App\Http\Requests;
+
+use App\Domain\Enums\CodesEnum;
+use App\Http\Responses\ApiResponse;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
@@ -37,10 +40,14 @@ class CreateUserRequest extends FormRequest
 
     protected function failedValidation(Validator $validator)
     {
-        throw new HttpResponseException(response()->json([
-            'success' => false,
-            'message' => 'Validation error',
-            'data' => $validator->errors()
-        ], 422));
+        throw new HttpResponseException(
+            ApiResponse::error(
+                [    
+                    $validator->errors()
+                ],
+                CodesEnum::messageValidationError,
+                CodesEnum::codeErrorUnprocessableEntity
+            )
+        );
     }
 }
