@@ -47,8 +47,10 @@ class JwtMiddleware
             throw new Exception('headers invalid', 401);
 
         } catch (Exception $e) {
-            return response()->json(['message' => "Token error: " . $e->getMessage()]);
-
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ]);
         }
     }
 }
