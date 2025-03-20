@@ -2,7 +2,7 @@
 
 namespace App\Domain\Enums;
 
-class RolesEnum
+enum RolesEnum
 {
     public const LOW = 'low';
     public const MEDIUM = 'medium';

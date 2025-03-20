@@ -3,9 +3,11 @@
 namespace App\UseCase;
 
 use App\Domain\Repositories\UserRepositoryInterface;
+use App\Exceptions\CredentialsInvalidException;
 use Exception;
 use Firebase\JWT\JWT;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 
 class LoginUseCase
 {
@@ -37,6 +39,7 @@ class LoginUseCase
             ];
         }
 
-        throw new Exception("Credentials invalid", 400);
+        Log::critical("LoginUseCase invalid", ['data' => json_encode($data)]);
+        throw new CredentialsInvalidException("Credentials invalid", 400);
     }
 }

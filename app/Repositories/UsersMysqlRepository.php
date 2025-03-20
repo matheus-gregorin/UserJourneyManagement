@@ -4,6 +4,8 @@ namespace App\Repositories;
 
 use App\Domain\Entities\UserEntity;
 use App\Domain\Repositories\UserRepositoryInterface;
+use App\Exceptions\CollectUserByEmailException;
+use App\Exceptions\UserNotFoundException;
 use App\Models\UserMysqlModel;
 use Exception;
 use Illuminate\Database\Eloquent\Collection;
@@ -47,9 +49,9 @@ class UsersMysqlRepository implements UserRepositoryInterface
         try {
             return $this->modelToEntity($this->UserMysqlModel::where('email', '=', $email)->first());
 
-        } catch (Exception $e) {
-            Log::critical("Error in get user: ", ['message' => $e->getTraceAsString()]);
-            throw new Exception("Error in get user: " . $e->getMessage(), 400);
+        } catch (CollectUserByEmailException $e) {
+            Log::critical("Error in get user by email: ", ['message' => $e->getMessage()]);
+            throw new CollectUserByEmailException($e->getMessage(), 400);
 
         }
     }
@@ -86,7 +88,7 @@ class UsersMysqlRepository implements UserRepositoryInterface
     {
 
         if(is_null($UserMysqlModel)){
-            throw new Exception("User not found", 400);
+            throw new UserNotFoundException("User not found", 400);
         }
 
         $password = $removePass ? "" : $UserMysqlModel->password;

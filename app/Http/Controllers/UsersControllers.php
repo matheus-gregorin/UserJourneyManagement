@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Domain\Enums\ErrorsEnum;
+use App\Exceptions\CredentialsInvalidException;
+use App\Exceptions\UserNotFoundException;
 use App\Http\Requests\changeRoleUserRequest;
 use App\Http\Requests\CreateUserRequest;
 use App\Http\Requests\LoginRequest;
-use App\Services\UsersServices;
+use App\Http\Responses\ApiResponse;
 use App\UseCase\ChangeRoleUserUseCase;
 use App\UseCase\CreateUserUseCase;
 use App\UseCase\GetAllUsersUseCase;
@@ -16,8 +19,6 @@ use Illuminate\Http\Request;
 
 class UsersControllers extends Controller
 {
-
-    private UsersServices $usersServices;
     private LoginUseCase $loginUseCase;
     private CreateUserUseCase $createUserUseCase;
     private GetAllUsersUseCase $getAllUsersUseCase;
@@ -25,7 +26,6 @@ class UsersControllers extends Controller
     private WebhookReceiveMessageWahaUseCase $webhookReceiveMessageWahaUseCase;
 
     public function __construct(
-        UsersServices $usersServices,
         LoginUseCase $loginUseCase,
         CreateUserUseCase $createUserUseCase,
         GetAllUsersUseCase $getAllUsersUseCase,
@@ -33,7 +33,6 @@ class UsersControllers extends Controller
         WebhookReceiveMessageWahaUseCase $webhookReceiveMessageWahaUse
     )
     {
-        $this->usersServices = $usersServices;
         $this->loginUseCase = $loginUseCase;
         $this->createUserUseCase = $createUserUseCase;
         $this->getAllUsersUseCase = $getAllUsersUseCase;
@@ -46,18 +45,42 @@ class UsersControllers extends Controller
         try {
             $data = $this->loginUseCase->login($request->all());
 
-            return response()->json([
-                'success' => true,
-                'message' => "User authenticated",
-                'token' => $data['token'],
-                'expire_id' => $data['exp']
-            ], 200);
+            return ApiResponse::success(
+                [
+                    'token' => $data['token'],
+                    'expire_id' => $data['exp']
+                ],
+                ErrorsEnum::messageUserAuthenticated,
+                ErrorsEnum::codeSuccess
+            );
+
+        } catch (CredentialsInvalidException $e) {
+            return ApiResponse::error(
+                [    
+                    ErrorsEnum::messageCredentialsInvalid
+                ],
+                ErrorsEnum::messageUserNotAuthenticated,
+                ErrorsEnum::codeErrorUnauthorized
+            );
+
+        } catch (UserNotFoundException $e) {
+            return ApiResponse::error(
+                [    
+                    ErrorsEnum::messageCredentialsInvalid
+                ],
+                ErrorsEnum::messageUserNotAuthenticated,
+                ErrorsEnum::codeErrorUnauthorized
+            );
 
         } catch (Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage()
-            ], $e->getCode());
+            return ApiResponse::error(
+                [    
+                    'error' => ErrorsEnum::messageInternalServerError
+                ],
+                ErrorsEnum::messageUserNotAuthenticated,
+                ErrorsEnum::codeErrorBadRequest
+            );
+
         }
     }
 

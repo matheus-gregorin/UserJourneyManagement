@@ -2,7 +2,7 @@
 
 namespace App\Domain\Enums;
 
-class EventsWaha
+enum EventsWahaEnum
 {
     public const MESSAGE = 'message';
 }

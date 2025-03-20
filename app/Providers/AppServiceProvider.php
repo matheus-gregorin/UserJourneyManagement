@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Domain\Repositories\UserRepositoryInterface;
+use App\Http\Responses\ApiResponse;
 use App\Repositories\UserMongoDbRepository;
 use App\Repositories\UsersMysqlRepository;
 use App\Services\UsersServices;
@@ -24,17 +25,20 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        //Services
+        // Response
+        $this->app->bind(ApiResponse::class);
+
+        // Services
         $this->app->bind(UsersServices::class);
 
-        //UseCase
+        // UseCase
         $this->app->bind(LoginUseCase::class);
         $this->app->bind(CreateUserUseCase::class);
         $this->app->bind(GetAllUsersUseCase::class);
         $this->app->bind(ChangeRoleUserUseCase::class);
         $this->app->bind(WebhookReceiveMessageWahaUseCase::class);
 
-        //Interfaces
+        // Interfaces
 
         // Repository Adapters
         switch (Config::get('database.default')) {

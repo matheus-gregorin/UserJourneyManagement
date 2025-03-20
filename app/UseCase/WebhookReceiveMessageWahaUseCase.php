@@ -2,7 +2,7 @@
 
 namespace App\UseCase;
 
-use App\Domain\Enums\EventsWaha;
+use App\Domain\Enums\EventsWahaEnum;
 use Gemini;
 use Illuminate\Support\Facades\Log;
 
@@ -18,7 +18,7 @@ class WebhookReceiveMessageWahaUseCase
         $event = $payload['event'];
         Log::info("EVENT", ['event' => $event]);
 
-        if($event == EventsWaha::MESSAGE){
+        if($event == EventsWahaEnum::MESSAGE){
 
             $user = $payload['payload']['_data']['notifyName'];
             $message = $payload['payload']['body'];
