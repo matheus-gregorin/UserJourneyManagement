@@ -8,13 +8,14 @@ enum CodesEnum
     public const statusSuccess = 'success';
     public const statusError = 'error';
 
-    //Messages
+    // Messages success
     public const messageUserAuthenticated = 'user authenticated';
     public const messageUserCreated = 'user created';
     public const messageUserNotCreated = 'user not created';
     public const messageUsersCollected = 'users collected';
     public const messageRoleUpdated = 'role updated';
 
+    // Messages errors
     public const messageUserNotAuthenticated = 'user not authenticated';
     public const messageUserInvalid = 'user invalid';
     public const messageCredentialsInvalid = 'credentials invalid';
