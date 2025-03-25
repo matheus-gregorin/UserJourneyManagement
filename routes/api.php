@@ -16,12 +16,15 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+// Login
 Route::post('/login', [UsersControllers::class, 'login']);
 
+// Core
 Route::group(['middleware' => 'jwt'], function(){
     Route::post('/create-user', [UsersControllers::class, 'createUser']);
     Route::get('/all-users', [UsersControllers::class, 'getAllUsers']);
     Route::put('/change-role-user/{uuid}', [UsersControllers::class, 'changeRoleUser']);
 });
 
+// Webhook
 Route::post('/whatsapp-receive', [UsersControllers::class, 'webhookReceiveMessage']);
