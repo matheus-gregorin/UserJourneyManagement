@@ -5,6 +5,7 @@ namespace App\Repositories;
 use App\Domain\Entities\UserEntity;
 use App\Domain\Repositories\UserRepositoryInterface;
 use App\Exceptions\CollectUserByEmailException;
+use App\Exceptions\CollectUserByPhoneException;
 use App\Exceptions\CollectUserByUuidException;
 use App\Exceptions\NotContentUsersException;
 use App\Exceptions\UpdateRoleException;
@@ -68,6 +69,18 @@ class UsersMysqlRepository implements UserRepositoryInterface
         } catch (Exception $e) {
             Log::critical("Error in get user by uuid: ", ['message' => $e->getMessage()]);
             throw new CollectUserByUuidException($e->getMessage(), 400);
+
+        }
+    }
+
+    public function getUserWithPhoneNumber(string $number): UserEntity|null|Exception
+    {
+        try {
+            return $this->modelToEntity($this->UserMysqlModel::where('phone', '=', $number)->first());
+
+        } catch (Exception $e) {
+            Log::critical("Error in get user by phone number: ", ['message' => $e->getMessage()]);
+            throw new CollectUserByPhoneException($e->getMessage(), 400);
 
         }
     }

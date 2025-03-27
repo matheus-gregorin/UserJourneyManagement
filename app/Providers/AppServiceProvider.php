@@ -2,7 +2,9 @@
 
 namespace App\Providers;
 
+use App\Domain\HttpClients\ClientInterface;
 use App\Domain\Repositories\UserRepositoryInterface;
+use App\Http\HttpClients\WahaHttpClient;
 use App\Http\Responses\ApiResponse;
 use App\Repositories\UserMongoDbRepository;
 use App\Repositories\UsersMysqlRepository;
@@ -39,6 +41,9 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(WebhookReceiveMessageWahaUseCase::class);
 
         // Interfaces
+
+        // Http Client
+        $this->app->bind(ClientInterface::class, WahaHttpClient::class);
 
         // Repository Adapters
         switch (Config::get('database.default')) {

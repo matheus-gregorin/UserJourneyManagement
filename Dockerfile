@@ -21,6 +21,14 @@ RUN apt-get update && apt-get install -y \
     && docker-php-ext-configure zip \
     && docker-php-ext-install zip gd pdo pdo_mysql
 
+# Instalar dependências para o cURL
+RUN apt-get install -y \
+    libcurl4-openssl-dev \
+    && docker-php-ext-install curl
+
+# Habilitar o cURL
+RUN docker-php-ext-enable curl
+
 # Instalando a extensão sockets do php
 RUN docker-php-ext-install sockets
 

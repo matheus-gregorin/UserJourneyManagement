@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Domain\Enums\CodesEnum;
+use App\Exceptions\CollectUserByPhoneException;
 use App\Exceptions\CollectUserByUuidException;
 use App\Exceptions\CredentialsInvalidException;
 use App\Exceptions\NotContentUsersException;
@@ -20,6 +21,7 @@ use App\UseCase\LoginUseCase;
 use App\UseCase\WebhookReceiveMessageWahaUseCase;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class UsersControllers extends Controller
 {
@@ -226,11 +228,12 @@ class UsersControllers extends Controller
                     'success' => true
                 ], 200);
     
+            } catch (CollectUserByPhoneException $e) {
+                Log::critical("Error in get user by phone number: ", ['message' => $e->getMessage()]);
+
             } catch (Exception $e) {
-                return response()->json([
-                    'success' => false,
-                    'message' => $e->getMessage()
-                ], 503);
+                Log::critical("Error in webhook receive message: ", ['message' => $e->getMessage()]);
+
             }
         }
     }

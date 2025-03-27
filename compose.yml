@@ -9,6 +9,8 @@ services:
       - .:/var/www/html
       - app_data:/var/www/html/public/uploads
     container_name: user_manager
+    networks:
+      - mynetwork
 
   waha:
     image: devlikeapro/waha
@@ -19,9 +21,15 @@ services:
     tty: true  # Habilita o terminal para o contêiner
     environment:
       - WHATSAPP_API_PORT=3001
+      - WHATSAPP_DEFAULT_ENGINE=WEBJS
     volumes:
-      - waha_data:/data 
+      - waha_data:/data
+    networks:
+      - mynetwork
 
 volumes:
   app_data:
   waha_data:
+
+networks:
+  mynetwork:
