@@ -36,34 +36,36 @@ class WebhookReceiveMessageWahaUseCase
         $event = $payload['event'];
         if($event == EventsWahaEnum::MESSAGE){
 
-            Log::info('USER', ['user' => $payload['payload']['_data']['notifyName']]);
             $name = !empty($payload['payload']['_data']['notifyName']) ? $payload['payload']['_data']['notifyName'] : false;
             if($name != 'Gustavo Gregorin' && $name != 'math'){
                 Log::info('Name not allowed', ['name' => $name]);
                 return true;
             }
+            Log::info('USER', ['user' => $payload['payload']['_data']['notifyName']]);
 
-            Log::info('NUMBER', ['number' => $payload['payload']['from']]);
             $number = !empty($payload['payload']['from']) ? $payload['payload']['from'] : false;
             if(!$number){
                 return true;
             }
+            Log::info('NUMBER', ['number' => $payload['payload']['from']]);
 
             $numberSearch = explode('@', $number)[0];
 
+            // Add try ctach para tratamento
             $user = $this->userRepository->getUserWithPhoneNumber($numberSearch);
+            //
 
-            Log::info('DATA ID', ['messageId' => $payload['payload']['id']]);
             $messageId = !empty($payload['payload']['id']) ? $payload['payload']['id'] : false;
             if(!$messageId){
                 return true;
             }
+            Log::info('DATA ID', ['messageId' => $payload['payload']['id']]);
 
-            Log::info('MESSAGE', ['message' => $payload['payload']['body']]);
             $message = !empty($payload['payload']['body']) ? $payload['payload']['body'] : false;
             if(!$message){
                 return true;
             }
+            Log::info('MESSAGE', ['message' => $payload['payload']['body']]);
 
             $validation = $this->validation($message);
             if($validation){
