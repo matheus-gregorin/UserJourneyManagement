@@ -27,6 +27,17 @@ services:
     networks:
       - mynetwork
 
+  redis_monitor:
+    image: redis:latest
+    container_name: bott_redis
+    ports:
+      - "6379:6379"
+    environment:
+      REDIS_PASSWORD: "bottRedis123456"
+    command: redis-server --requirepass bottRedis123456
+    networks:
+      - mynetwork
+
 volumes:
   app_data:
   waha_data:
