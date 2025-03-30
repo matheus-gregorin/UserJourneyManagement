@@ -18,7 +18,7 @@ autostart=true
 autorestart=true
 numprocs=1
 user=root
-# redirect_stderr=true
+redirect_stderr=false
 stdout_logfile=/var/www/html/laravel-worker.stdout.log
 stderr_logfile=/var/www/html/laravel-worker.stderr.log
 EOF
@@ -27,3 +27,5 @@ EOF
 else
   echo "Arquivo de configuração ${CONF_FILE} já existe."
 fi
+
+chmod 777 "$CONF_PATH"

@@ -31,6 +31,6 @@ class ResponseMessageJob implements ShouldQueue
      */
     public function handle()
     {
-        Log::info('ResponseMessageJob', ['message' => 'Job executed successfully after 1 second delay']);
+        Log::info('ResponseMessageJob Info', ['message' => 'Job executed successfully after 1 second delay']);
     }
 }

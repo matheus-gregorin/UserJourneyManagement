@@ -12,7 +12,8 @@
         "laravel/framework": "^9.19",
         "laravel/sanctum": "^3.0",
         "laravel/tinker": "^2.7",
-        "mongodb/laravel-mongodb": "^3.9"
+        "mongodb/laravel-mongodb": "^3.9",
+        "rap2hpoutre/laravel-log-viewer": "^2.5"
     },
     "require-dev": {
         "fakerphp/faker": "^1.9.1",

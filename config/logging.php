@@ -53,7 +53,7 @@ return [
     'channels' => [
         'stack' => [
             'driver' => 'stack',
-            'channels' => ['single'],
+            'channels' => ['single', 'stderr', 'syslog'],
             'ignore_exceptions' => false,
         ],
 
@@ -92,10 +92,9 @@ return [
         'stderr' => [
             'driver' => 'monolog',
             'level' => env('LOG_LEVEL', 'debug'),
-            'handler' => StreamHandler::class,
-            'formatter' => env('LOG_STDERR_FORMATTER'),
+            'handler' => \Monolog\Handler\StreamHandler::class,
             'with' => [
-                'stream' => 'php://stderr',
+                'stream' => 'php://stderr', // Aqui é onde os logs vão para o terminal
             ],
         ],
 
