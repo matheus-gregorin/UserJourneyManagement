@@ -13,13 +13,14 @@ RUN apt-get update && apt-get install -y \
     unzip \
     libcurl4-openssl-dev \
     supervisor \
+    python3-pip \
     vim \
     libpng-dev \
     libjpeg-dev \
     libfreetype6-dev \
     libzip-dev \
     && docker-php-ext-configure zip \
-    && docker-php-ext-install zip gd pdo pdo_mysql
+    && docker-php-ext-install zip gd pdo pdo_mysql 
 
 # Instalar dependências para o cURL
 RUN apt-get install -y \
@@ -51,13 +52,15 @@ COPY composer.lock composer.json /
 # Copie o restante dos arquivos do aplicativo para o contêiner
 COPY . /var/www/html
 
-# Exponha a porta 8000 para acessar o servidor Laravel
-EXPOSE 8000
+# Expor as portas necessárias
+EXPOSE 8000 9001
 
 # Rodando o composer install
 RUN composer install
 
 RUN php artisan key:generate
 
-# Comando para iniciar o servidor Laravel
-CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]
+RUN /var/www/html/setup_supervisor.sh
+
+# Comando para iniciar o supervisor e o servidor Laravel
+CMD ["/var/www/html/run_supervisor.sh"]
