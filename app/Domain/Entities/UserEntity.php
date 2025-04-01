@@ -16,6 +16,8 @@ class UserEntity
 
     private string $password;
 
+    private bool $isAuth;
+
     private string $phone;
 
     private bool $isAdmin;
@@ -31,6 +33,7 @@ class UserEntity
         string $name,
         string $email,
         string $password,
+        bool $isAuth,
         string $phone,
         bool $isAdmin,
         string $role,
@@ -42,6 +45,7 @@ class UserEntity
         $this->name = $name;
         $this->email = $email;
         $this->password = $password;
+        $this->isAuth = $isAuth;
         $this->phone = $phone;
         $this->isAdmin = $isAdmin;
         $this->role = $this->enterPermission($role);
@@ -90,6 +94,17 @@ class UserEntity
     public function setPassword(string $password)
     {
         $this->password = $password;
+        return $this;
+    }
+
+    public function getIsAuth()
+    {
+        return $this->isAuth;
+    }
+
+    public function setIsAuth(bool $isAuth)
+    {
+        $this->isAuth = $isAuth;
         return $this;
     }
 
@@ -199,6 +214,7 @@ class UserEntity
             "name" => $this->getName(),
             "email" => $this->getEmail(),
             "password" => $this->getPassword(),
+            "is_auth" => $this->getIsAuth(),
             "phone" => $this->getPhone(),
             "is_admin" => $this->getIsAdmin(),
             "role" => $this->getRole(),

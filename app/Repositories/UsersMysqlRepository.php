@@ -54,6 +54,10 @@ class UsersMysqlRepository implements UserRepositoryInterface
         try {
             return $this->modelToEntity($this->UserMysqlModel::where('email', '=', $email)->first());
 
+        } catch (UserNotFoundException $e) {
+            Log::critical("Error in get user by email: ", ['message' => $e->getMessage()]);
+            throw new UserNotFoundException($e->getMessage(), 400);
+
         } catch (Exception $e) {
             Log::critical("Error in get user by email: ", ['message' => $e->getMessage()]);
             throw new CollectUserByEmailException($e->getMessage(), 400);
@@ -66,6 +70,10 @@ class UsersMysqlRepository implements UserRepositoryInterface
         try {
             return $this->modelToEntity($this->UserMysqlModel::where('uuid', '=', $uuid)->first());
 
+        } catch (UserNotFoundException $e) {
+            Log::critical("Error in get user by uuid: ", ['message' => $e->getMessage()]);
+            throw new UserNotFoundException($e->getMessage(), 400);
+
         } catch (Exception $e) {
             Log::critical("Error in get user by uuid: ", ['message' => $e->getMessage()]);
             throw new CollectUserByUuidException($e->getMessage(), 400);
@@ -77,6 +85,10 @@ class UsersMysqlRepository implements UserRepositoryInterface
     {
         try {
             return $this->modelToEntity($this->UserMysqlModel::where('phone', '=', $number)->first());
+
+        } catch (UserNotFoundException $e) {
+            Log::critical("Error in get user by phone number: ", ['message' => $e->getMessage()]);
+            throw new UserNotFoundException($e->getMessage(), 400);
 
         } catch (Exception $e) {
             Log::critical("Error in get user by phone number: ", ['message' => $e->getMessage()]);
@@ -116,6 +128,7 @@ class UsersMysqlRepository implements UserRepositoryInterface
             $UserMysqlModel->name,
             $UserMysqlModel->email,
             $password,
+            $UserMysqlModel->is_auth,
             $UserMysqlModel->phone,
             $UserMysqlModel->is_admin,
             $UserMysqlModel->role,

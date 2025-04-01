@@ -2,7 +2,7 @@
 
 namespace App\Domain\HttpClients;
 
-interface ClientInterface
+interface ClientHttpInterface
 {
     public function sendViewMessage(string $number, string $messageId);
 

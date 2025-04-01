@@ -4,12 +4,9 @@ namespace App\UseCase;
 
 use App\Domain\Repositories\UserRepositoryInterface;
 use App\Exceptions\CredentialsInvalidException;
-use App\Jobs\ResponseMessageJob;
-use Exception;
 use Firebase\JWT\JWT;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Redis;
 
 class LoginUseCase
 {
@@ -21,9 +18,6 @@ class LoginUseCase
 
     public function login(array $data)
     {
-
-        ResponseMessageJob::dispatch()
-            ->delay(now()->addSeconds(1));
 
         $user = $this->userRepository->getUserWithEmail($data['email']);
         if(!empty($user) && Hash::check($data['password'], $user->getPassword())){

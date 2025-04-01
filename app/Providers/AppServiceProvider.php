@@ -2,7 +2,7 @@
 
 namespace App\Providers;
 
-use App\Domain\HttpClients\ClientInterface;
+use App\Domain\HttpClients\ClientHttpInterface;
 use App\Domain\Repositories\UserRepositoryInterface;
 use App\Http\HttpClients\WahaHttpClient;
 use App\Http\Responses\ApiResponse;
@@ -43,7 +43,7 @@ class AppServiceProvider extends ServiceProvider
         // Interfaces
 
         // Http Client
-        $this->app->bind(ClientInterface::class, WahaHttpClient::class);
+        $this->app->bind(ClientHttpInterface::class, WahaHttpClient::class);
 
         // Repository Adapters
         switch (Config::get('database.default')) {

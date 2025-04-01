@@ -27,6 +27,7 @@ class CreateUserUseCase
             $data['name'],
             $data['email'],
             $password,
+            false,
             $data['phone'],
             $data['is_admin'],
             $data['role'],

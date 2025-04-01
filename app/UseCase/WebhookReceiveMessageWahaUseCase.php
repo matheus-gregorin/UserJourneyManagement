@@ -5,8 +5,9 @@ namespace App\UseCase;
 use App\Domain\Entities\UserEntity;
 use App\Domain\Enums\EventsWahaEnum;
 use App\Domain\Enums\ValidationIAEnum;
-use App\Domain\HttpClients\ClientInterface;
 use App\Domain\Repositories\UserRepositoryInterface;
+use App\Http\HttpClients\WahaHttpClient;
+use App\Jobs\ResponseMessageJob;
 use Gemini;
 use Gemini\Client;
 use Illuminate\Support\Facades\Log;
@@ -15,16 +16,16 @@ class WebhookReceiveMessageWahaUseCase
 {
 
     private Client $IA;
-    private ClientInterface $client;
     private UserRepositoryInterface $userRepository;
 
     public function __construct(
-        ClientInterface $client,
         UserRepositoryInterface $userRepository
     ) 
     {
         $this->IA = Gemini::client(env('GEMINIKEY'));
-        $this->client = $client;
+        $this->IA->geminiFlash()->generateContent(
+            ValidationIAEnum::SETUP
+        );
         $this->userRepository = $userRepository;
     }
     
@@ -67,26 +68,43 @@ class WebhookReceiveMessageWahaUseCase
             }
             Log::info('MESSAGE', ['message' => $payload['payload']['body']]);
 
-            $validation = $this->validation($message);
+            $validation = $this->generateValidation($message);
             if($validation){
                 $response = $this->generateResponse($user, $message);
                 if($response){
-                    // Envia para o client
-                    $this->client->sendViewMessage($number, $messageId);
-                    $this->client->startTyping($number);
-                    sleep(5);
-                    $this->client->stopTyping($number);
-                    $this->client->sendResponse($number, $response);
+                    // Envia a mensagem via Job
+                    ResponseMessageJob::dispatch(
+                        $number,
+                        $messageId,
+                        $response
+                    )->delay(now()->addSeconds(5));
+
+                    return true;
                 }
             }
         }
 
+        Log::info('Event whatsapp receive error', [
+            'event' => $event,
+            'payload' => $payload
+        ]);
+
         return true;
     }
 
-    public function validation(string $message)
+    public function generateValidation(string $message)
     {
-        $messageValidation = $this->IA->geminiFlash()->generateContent(ValidationIAEnum::VALIDCONTENT . $message);
+        $messageValidation = $this->talkIA(
+            ValidationIAEnum::VALIDATION,
+            $message
+        );
+        if(!$messageValidation){
+            Log::info('Validation message not found', [
+                'messageValidation' => $messageValidation,
+                'message' => $message
+            ]);
+            return false;
+        }
         $validation = json_decode($messageValidation->text(), true);
 
         Log::info('Validation', ['validation' => $validation]);
@@ -99,7 +117,19 @@ class WebhookReceiveMessageWahaUseCase
 
     public function generateResponse(UserEntity $user, string $message)
     {
-        $responseMessage = $this->IA->geminiFlash()->generateContent(ValidationIAEnum::RESPONSE . $message . ' - Nome do usuário: ' . $user->getName());
+        $responseMessage = $this->talkIA(
+            ValidationIAEnum::RESPONSE,
+            $message,
+            $user
+        );
+        if(!$responseMessage){
+            Log::info('Response message not found', [
+                'responseMessage' => $responseMessage,
+                'user' => $user,
+                'message' => $message
+            ]);
+            return false;
+        }
         $response = json_decode($responseMessage->text(), true);
 
         Log::info('Response', ['response' => $response]);
@@ -108,5 +138,28 @@ class WebhookReceiveMessageWahaUseCase
             return $response['response'];
         }
         return false;
+    }
+
+    public function talkIA(string $case, string $message, ?UserEntity $user = null)
+    {
+        
+        $Ia = $this->IA->geminiFlash();
+
+        switch ($case) {
+            case ValidationIAEnum::VALIDATION:
+                return $Ia->generateContent(
+                    ValidationIAEnum::VALIDCONTENT . $message
+                );
+                break;
+            case ValidationIAEnum::RESPONSE:
+                return $Ia->generateContent(
+                    ValidationIAEnum::GENERATERESPONSE . $message . ValidationIAEnum::THISUSERNAME . $user->getName() . " E me fale quem é você e qual o seu proposito de trabalho nesse app."
+                );
+                break;
+            default:
+                Log::info('Case not found', ['case' => $case]);
+                return false;
+                break;
+        }
     }
 }

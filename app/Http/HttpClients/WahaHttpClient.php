@@ -2,12 +2,12 @@
 
 namespace App\Http\HttpClients;
 
-use App\Domain\HttpClients\ClientInterface;
+use App\Domain\HttpClients\ClientHttpInterface;
 use Exception;
 use GuzzleHttp\Client;
 use Illuminate\Support\Facades\Log;
 
-class WahaHttpClient implements ClientInterface
+class WahaHttpClient implements ClientHttpInterface
 {
 
     private Client $client;
