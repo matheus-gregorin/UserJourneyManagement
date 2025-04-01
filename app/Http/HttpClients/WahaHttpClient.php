@@ -146,6 +146,7 @@ class WahaHttpClient implements ClientHttpInterface
         }
     }
 
+    // Indisponible
     public function sendButtons(string $number): bool
     {
 
@@ -176,5 +177,11 @@ class WahaHttpClient implements ClientHttpInterface
             ]);
             return false;
         }
+    }
+    //
+
+    public function sendError()
+    {
+        //
     }
 }
