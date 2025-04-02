@@ -213,7 +213,7 @@ class WebhookReceiveMessageWahaUseCase
                 break;
             case ValidationIAEnum::RESPONSE:
                 return $Ia->generateContent(
-                    ValidationIAEnum::GENERATERESPONSE . $message . ValidationIAEnum::THISUSERNAME . $user->getName() . " E me fale quem é você e qual o seu proposito de trabalho nesse app."
+                    ValidationIAEnum::GENERATERESPONSE . $message . ValidationIAEnum::THISUSERNAME . $user->getName()
                 );
                 break;
             default:
