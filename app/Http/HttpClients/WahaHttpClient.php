@@ -180,8 +180,16 @@ class WahaHttpClient implements ClientHttpInterface
     }
     //
 
-    public function sendError()
+    public function sendError(string $number, string $message): bool
     {
-        //
+        Log::info('Send Error', ['number' => $number, 'message' => $message]);
+
+        // $this->sendViewMessage($number, $messageId);
+        $this->startTyping($number);
+        sleep(5);
+        $this->stopTyping($number);
+        $this->sendResponse($number, $message);
+
+        return true;
     }
 }

@@ -45,26 +45,44 @@ class WebhookReceiveMessageWahaUseCase
         $event = $payload['event'];
         if($event == EventsWahaEnum::MESSAGE){
 
-            $number = !empty($payload['payload']['from']) ? $payload['payload']['from'] : false;
-            if(!$number){
-                return true;
-            }
-            Log::info('NUMBER', ['number' => $number]);
-
-            // Quebra a string a partir do @ e coleta o primeiro elemento, que é o número do tolefone
-            $numberSearch = explode('@', $number)[0];
-
             // Add try catch para tratamento
             try {
 
+                $number = !empty($payload['payload']['from']) ? $payload['payload']['from'] : false;
+                if(!$number){
+                    throw new Exception('Number not found');
+                }
+                Log::info('NUMBER', ['number' => $number]);
+
+                $messageId = !empty($payload['payload']['id']) ? $payload['payload']['id'] : false;
+                if(!$messageId){
+                    throw new Exception('Message ID not found');
+                }
+                Log::info('MESSAGE ID', ['messageId' => $messageId]);
+
+                $message = !empty($payload['payload']['body']) ? $payload['payload']['body'] : false;
+                if(!$message){
+                    throw new Exception('Message not found');
+                }
+                Log::info('MESSAGE RECEIVE', ['messageReceive' => $message]);
+
+                // Quebra a string a partir do @ e coleta o primeiro elemento, que é o número do tolefone
+                $numberSearch = explode('@', $number)[0];
                 $user = $this->userRepository->getUserWithPhoneNumber($numberSearch);
+
+                            
+                // Autenticação
+                if(str_contains($message, 'OTP') && !$user->getIsAuth()){
+                    // Valida e autentica o usuário, depois envia as demais opções //
+                    return true;
+                }
 
             } catch (UserNotFoundException $e){
                 Log::critical('User not found', [
                     'number' => $number,
                     'message' => $e->getMessage()
                 ]);
-                $this->clientHttp->sendError(ValidationIAEnum::USERNOTFOUND);
+                $this->clientHttp->sendError($number, ValidationIAEnum::USERNOTFOUND);
                 return true;
 
             } catch (CollectUserByPhoneException $e) {
@@ -72,43 +90,50 @@ class WebhookReceiveMessageWahaUseCase
                     'number' => $number,
                     'message' => $e->getMessage()
                 ]);
-                $this->clientHttp->sendError(ValidationIAEnum::MESSAGENOTUNDERSTOOD);
+                $this->clientHttp->sendError($number, ValidationIAEnum::MESSAGENOTUNDERSTOOD);
                 return true;
 
             } catch (Exception $e) {
-                Log::critical('Get user error', [
-                    'number' => $number,
+                Log::critical('Validations error', [
+                    'number' => $number ?? "Not number",
                     'message' => $e->getMessage()
                 ]);
-                $this->clientHttp->sendError(ValidationIAEnum::MESSAGENOTUNDERSTOOD);
+                $this->clientHttp->sendError($number, ValidationIAEnum::MESSAGENOTUNDERSTOOD);
                 return true;
 
             }
             //
 
-            $messageId = !empty($payload['payload']['id']) ? $payload['payload']['id'] : false;
-            if(!$messageId){
-                return true;
-            }
-            Log::info('MESSAGE ID', ['messageId' => $messageId]);
-
-            $message = !empty($payload['payload']['body']) ? $payload['payload']['body'] : false;
-            if(!$message){
-                return true;
-            }
-            Log::info('MESSAGE RECEIVE', ['messageReceive' => $message]);
-
             $validation = $this->generateValidation($message);
             if($validation){
-                $response = $this->generateResponse($user, $message);
-                if($response){
+
+                if($user->getIsAuth()){
+
+                    $response = $this->generateResponse($user, $message);
+                    if($response){
+
+                        // Envia a mensagem via Job
+                        ResponseMessageJob::dispatch(
+                            $number,
+                            $messageId,
+                            $response
+                        )->delay(now()->addSeconds(5));
+    
+                        return true;
+                    }
+
+                } else {
+
                     // Envia a mensagem via Job
                     ResponseMessageJob::dispatch(
                         $number,
                         $messageId,
-                        $response
+                        "Olá, " . $user->getName() . ", tudo bem? Você ainda não está autenticado. Para isso, enviei um codigo no seu email, por favor, verifique e me envie o código para que eu possa te ajudar. Caso não tenha recebido, entre em contato com seu supervisor ou acesse o nosso site para mais informações. (www.userManager.com.br)"
                     )->delay(now()->addSeconds(5));
 
+                    // Criar codigo de autenticação
+                    // $otp = rand(100000, 999999);
+    
                     return true;
                 }
             }

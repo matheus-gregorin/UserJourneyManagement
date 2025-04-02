@@ -18,6 +18,8 @@ class UserEntity
 
     private bool $isAuth;
 
+    private ?string $otpCode;
+
     private string $phone;
 
     private bool $isAdmin;
@@ -34,6 +36,7 @@ class UserEntity
         string $email,
         string $password,
         bool $isAuth,
+        ?string $otpCode,
         string $phone,
         bool $isAdmin,
         string $role,
@@ -46,6 +49,7 @@ class UserEntity
         $this->email = $email;
         $this->password = $password;
         $this->isAuth = $isAuth;
+        $this->otpCode = $otpCode;
         $this->phone = $phone;
         $this->isAdmin = $isAdmin;
         $this->role = $this->enterPermission($role);
@@ -105,6 +109,16 @@ class UserEntity
     public function setIsAuth(bool $isAuth)
     {
         $this->isAuth = $isAuth;
+        return $this;
+    }
+
+    public function getOtpCode()
+    {
+        return $this->otpCode;
+    }
+    public function setOtpCode(string $otpCode)
+    {
+        $this->otpCode = $otpCode;
         return $this;
     }
 
@@ -215,6 +229,7 @@ class UserEntity
             "email" => $this->getEmail(),
             "password" => $this->getPassword(),
             "is_auth" => $this->getIsAuth(),
+            "otp_code" => $this->getOtpCode(),
             "phone" => $this->getPhone(),
             "is_admin" => $this->getIsAdmin(),
             "role" => $this->getRole(),

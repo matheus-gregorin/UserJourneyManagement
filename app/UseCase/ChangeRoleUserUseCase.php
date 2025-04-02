@@ -24,6 +24,7 @@ class ChangeRoleUserUseCase
             $user =$user->toArray();
 
             unset($user['password']);
+            unset($user['otp_code']);
             return $user;
 
 

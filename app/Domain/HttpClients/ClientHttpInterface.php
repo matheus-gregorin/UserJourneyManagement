@@ -14,5 +14,5 @@ interface ClientHttpInterface
 
     public function sendButtons(string $number): bool;
 
-    public function sendError();
+    public function sendError(string $number, string $message): bool;
 }

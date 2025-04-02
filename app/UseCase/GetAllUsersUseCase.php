@@ -25,6 +25,7 @@ class GetAllUsersUseCase
             $user = $user->toArray();
 
             unset($user['password']);
+            unset($user['otp_code']);
 
             $list[] = $user;
         }

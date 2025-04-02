@@ -28,6 +28,7 @@ class CreateUserUseCase
             $data['email'],
             $password,
             false,
+            "",
             $data['phone'],
             $data['is_admin'],
             $data['role'],
@@ -38,6 +39,7 @@ class CreateUserUseCase
         if($user){
             $user = $user->toArray();
             unset($user['password']);
+            unset($user['otp_code']);
             unset($user['id']);
             return $user;
         }
