@@ -8,6 +8,7 @@ use App\Exceptions\CollectUserByEmailException;
 use App\Exceptions\CollectUserByPhoneException;
 use App\Exceptions\CollectUserByUuidException;
 use App\Exceptions\NotContentUsersException;
+use App\Exceptions\UpdateOtpException;
 use App\Exceptions\UpdateRoleException;
 use App\Exceptions\UserNotCreatedException;
 use App\Exceptions\UserNotFoundException;
@@ -113,6 +114,22 @@ class UsersMysqlRepository implements UserRepositoryInterface
         }
     }
 
+    public function updateOTP(UserEntity $user)
+    {
+        try {
+            $userModel = $this->UserMysqlModel::where('uuid', $user->getUuid())->first();
+            $userModel->otp = $user->getOtpCode();
+            $userModel->save();
+
+            return $user;
+
+        } catch (Exception $e) {
+            Log::critical("Error in update otp: ", ['message' => $e->getMessage()]);
+            throw new UpdateOtpException("Error in update otp: " . $e->getMessage(), 400);
+
+        }
+    }
+
     public function modelToEntity($UserMysqlModel, bool $removePass = false): UserEntity|Exception
     {
 
@@ -129,7 +146,7 @@ class UsersMysqlRepository implements UserRepositoryInterface
             $UserMysqlModel->email,
             $password,
             $UserMysqlModel->is_auth,
-            $UserMysqlModel->otp_code,
+            $UserMysqlModel->otp,
             $UserMysqlModel->phone,
             $UserMysqlModel->is_admin,
             $UserMysqlModel->role,

@@ -3,6 +3,7 @@
 namespace App\Domain\Repositories;
 
 use App\Domain\Entities\UserEntity;
+use App\Exceptions\UpdateOtpException;
 use Exception;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -19,6 +20,8 @@ interface UserRepositoryInterface
     public function getUserWithPhoneNumber(string $number): UserEntity|null|Exception;
 
     public function updateRole(UserEntity $user): UserEntity|null|Exception;
+
+    public function updateOTP(UserEntity $user);
 
     public function modelToEntity($userModel): UserEntity|Exception;
 }

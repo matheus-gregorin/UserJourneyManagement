@@ -70,11 +70,65 @@ class WebhookReceiveMessageWahaUseCase
                 $numberSearch = explode('@', $number)[0];
                 $user = $this->userRepository->getUserWithPhoneNumber($numberSearch);
 
-                            
                 // Autenticação
-                if(str_contains($message, 'OTP') && !$user->getIsAuth()){
+                if(str_contains($message, 'OTPU') && !$user->getIsAuth()){
                     // Valida e autentica o usuário, depois envia as demais opções //
+                    Log::info('User request auth', [
+                        'user' => $user->getIsAuth(),
+                        'valid' => $user->getOtpCode() == $message,
+                        'otp_db' => $user->getOtpCode(),
+                        'otp_message' => $message
+                    ]);
                     return true;
+                }
+
+                // Valida a mensagem
+                // $validation = $this->generateValidation($message);
+                $validation = true;
+                if($validation){
+
+                    // Verifica se o usuário já se autenticou
+                    if($user->getIsAuth()){
+
+                        $response = $this->generateResponse($user, $message);
+                        if($response){
+
+                            // Envia a mensagem via Job
+                            ResponseMessageJob::dispatch(
+                                $number,
+                                $messageId,
+                                $response
+                            )->delay(now()->addSeconds(5));
+        
+                            return true;
+                        }
+
+                    } else {
+
+                        //Envia a mensagem via Job
+                        ResponseMessageJob::dispatch(
+                            $number,
+                            $messageId,
+                            "Olá, " . $user->getName() . ", tudo bem? Você ainda não está autenticado. Para isso, enviei um codigo no seu email: ". $user->getEmail() ." por favor, verifique se chegou e me envie o código para que eu possa te ajudar. Caso não tenha recebido, entre em contato com seu supervisor ou acesse o nosso suporte em www.userManager.com.br"
+                        )->delay(now()->addSeconds(5));
+
+                        // Criar codigo de autenticação
+                        $otp = "OTPU" . rand(100000, 999999);
+                        $user->setOtpCode($otp);
+                        $this->userRepository->updateOTP($user);
+                        Log::info('User OTP update success', [
+                            'user' => json_encode($user->toArray()),
+                            'otp' => $otp
+                        ]);
+        
+                        // Envia o email aqui
+
+                        return true;
+                    }
+
+                } else {
+                    throw new Exception('Validation not ok, message: ' . $message);
+
                 }
 
             } catch (UserNotFoundException $e){
@@ -103,40 +157,6 @@ class WebhookReceiveMessageWahaUseCase
 
             }
             //
-
-            $validation = $this->generateValidation($message);
-            if($validation){
-
-                if($user->getIsAuth()){
-
-                    $response = $this->generateResponse($user, $message);
-                    if($response){
-
-                        // Envia a mensagem via Job
-                        ResponseMessageJob::dispatch(
-                            $number,
-                            $messageId,
-                            $response
-                        )->delay(now()->addSeconds(5));
-    
-                        return true;
-                    }
-
-                } else {
-
-                    // Envia a mensagem via Job
-                    ResponseMessageJob::dispatch(
-                        $number,
-                        $messageId,
-                        "Olá, " . $user->getName() . ", tudo bem? Você ainda não está autenticado. Para isso, enviei um codigo no seu email, por favor, verifique e me envie o código para que eu possa te ajudar. Caso não tenha recebido, entre em contato com seu supervisor ou acesse o nosso site para mais informações. (www.userManager.com.br)"
-                    )->delay(now()->addSeconds(5));
-
-                    // Criar codigo de autenticação
-                    // $otp = rand(100000, 999999);
-    
-                    return true;
-                }
-            }
         }
 
         Log::info('Event whatsapp receive error', [
@@ -144,7 +164,7 @@ class WebhookReceiveMessageWahaUseCase
             'payload' => $payload
         ]);
 
-        return true;
+        return false;
     }
 
     public function generateScreening()
