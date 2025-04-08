@@ -130,6 +130,22 @@ class UsersMysqlRepository implements UserRepositoryInterface
         }
     }
 
+    public function authUser(UserEntity $user)
+    {
+        try {
+            $userModel = $this->UserMysqlModel::where('uuid', $user->getUuid())->first();
+            $userModel->is_auth = $user->getIsAuth();
+            $userModel->save();
+
+            return $user;
+
+        } catch (Exception $e) {
+            Log::critical("Error in update otp: ", ['message' => $e->getMessage()]);
+            throw new UpdateOtpException("Error in update otp: " . $e->getMessage(), 400);
+
+        }
+    }
+
     public function modelToEntity($UserMysqlModel, bool $removePass = false): UserEntity|Exception
     {
 

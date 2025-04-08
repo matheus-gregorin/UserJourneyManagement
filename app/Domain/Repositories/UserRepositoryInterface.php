@@ -23,5 +23,7 @@ interface UserRepositoryInterface
 
     public function updateOTP(UserEntity $user);
 
+    public function authUser(UserEntity $user);
+
     public function modelToEntity($userModel): UserEntity|Exception;
 }

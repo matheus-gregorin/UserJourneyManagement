@@ -11,10 +11,13 @@ use App\Exceptions\CollectUserByPhoneException;
 use App\Exceptions\UserNotFoundException;
 use App\Http\HttpClients\WahaHttpClient;
 use App\Jobs\ResponseMessageJob;
+use App\Jobs\sendCodeEmailJob;
+use App\Mail\CodeMail;
 use Exception;
 use Gemini;
 use Gemini\Client;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class WebhookReceiveMessageWahaUseCase
 {
@@ -74,21 +77,44 @@ class WebhookReceiveMessageWahaUseCase
                 if(str_contains($message, 'OTPU') && !$user->getIsAuth()){
                     // Valida e autentica o usuário, depois envia as demais opções //
                     Log::info('User request auth', [
-                        'user' => $user->getIsAuth(),
+                        'username' => $user->getName(),
+                        'isAuth' => $user->getIsAuth(),
                         'valid' => $user->getOtpCode() == $message,
                         'otp_db' => $user->getOtpCode(),
                         'otp_message' => $message
                     ]);
+
+                    if($user->getOtpCode() == $message){
+                        $user->setIsAuth(true);
+                        $this->userRepository->authUser($user);
+                        Log::info('User auth success', [
+                            'user' => json_encode($user->toArray())
+                        ]);
+
+                        // Envia a mensagem via Job
+                        ResponseMessageJob::dispatch(
+                            $number,
+                            $messageId,
+                            $user->getName() . " aguarde um momento..."
+                        )->delay(now()->addSeconds(1));
+
+                        // Envia a mensagem via Job
+                        ResponseMessageJob::dispatch(
+                            $number,
+                            $messageId,
+                            "Certo! Agora me diz como posso te ajudar? Selecione uma das opções abaixo:\n1 - Verificar seus pontos batidos hoje\n2 - Bater o ponto de entrada\n3 - Bater o ponto de saída para almoço\n4 - Bater o ponto de volta do almoço\n5 - Bater o ponto de saída"
+                        )->delay(now()->addSeconds(5));
+                    }
+
                     return true;
                 }
 
-                // Valida a mensagem
-                // $validation = $this->generateValidation($message);
-                $validation = true;
-                if($validation){
+                // Verifica se o usuário já se autenticou
+                if($user->getIsAuth()){
 
-                    // Verifica se o usuário já se autenticou
-                    if($user->getIsAuth()){
+                    // Valida a mensagem //VERIFICAR SE A OPÇÂO ESCOLHIDA CONDIZ COM AS OPÇÔES ACIMA!!
+                    $validation = $this->generateValidation($message);
+                    if($validation){
 
                         $response = $this->generateResponse($user, $message);
                         if($response){
@@ -104,31 +130,39 @@ class WebhookReceiveMessageWahaUseCase
                         }
 
                     } else {
-
-                        //Envia a mensagem via Job
-                        ResponseMessageJob::dispatch(
-                            $number,
-                            $messageId,
-                            "Olá, " . $user->getName() . ", tudo bem? Você ainda não está autenticado. Para isso, enviei um codigo no seu email: ". $user->getEmail() ." por favor, verifique se chegou e me envie o código para que eu possa te ajudar. Caso não tenha recebido, entre em contato com seu supervisor ou acesse o nosso suporte em www.userManager.com.br"
-                        )->delay(now()->addSeconds(5));
-
-                        // Criar codigo de autenticação
-                        $otp = "OTPU" . rand(100000, 999999);
-                        $user->setOtpCode($otp);
-                        $this->userRepository->updateOTP($user);
-                        Log::info('User OTP update success', [
-                            'user' => json_encode($user->toArray()),
-                            'otp' => $otp
+                        throw new Exception('Message not understood');
+                        Log::info('Message not understood', [
+                            'message' => $message,
+                            'user' => json_encode($user->toArray())
                         ]);
-        
-                        // Envia o email aqui
-
-                        return true;
                     }
 
-                } else {
-                    throw new Exception('Validation not ok, message: ' . $message);
+                }  else {
 
+                    // Envia a mensagem via Job
+                    ResponseMessageJob::dispatch(
+                        $number,
+                        $messageId,
+                        "Olá, " . $user->getName() . ", tudo bem? Você ainda não está autenticado. Para isso, enviei um codigo no seu email: ". $user->getEmail() ." por favor, verifique se chegou e me envie o código para que eu possa te ajudar. Caso não tenha recebido, entre em contato com seu supervisor ou acesse o nosso suporte em www.userManager.com.br"
+                    )->delay(now()->addSeconds(5));
+
+                    // Criar codigo de autenticação
+                    $otp = "OTPU" . rand(100000, 999999);
+                    $user->setOtpCode($otp);
+                    $this->userRepository->updateOTP($user);
+                    Log::info('User OTP update success', [
+                        'user' => json_encode($user->toArray()),
+                        'otp' => $otp
+                    ]);
+    
+                    // Envia o email aqui
+                    sendCodeEmailJob::dispatch(
+                        $user->getEmail(),
+                        $user->getName(),
+                        $otp
+                    )->delay(now()->addSeconds(3));
+
+                    return true;
                 }
 
             } catch (UserNotFoundException $e){
@@ -156,7 +190,6 @@ class WebhookReceiveMessageWahaUseCase
                 return true;
 
             }
-            //
         }
 
         Log::info('Event whatsapp receive error', [

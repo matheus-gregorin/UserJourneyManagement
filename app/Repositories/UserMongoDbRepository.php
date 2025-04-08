@@ -4,6 +4,9 @@ namespace App\Repositories;
 
 use App\Domain\Entities\UserEntity;
 use App\Domain\Repositories\UserRepositoryInterface;
+use App\Exceptions\CollectUserByPhoneException;
+use App\Exceptions\UpdateOtpException;
+use App\Exceptions\UserNotFoundException;
 use App\Models\UserMongoDbModel;
 use Exception;
 use Illuminate\Database\Eloquent\Collection;
@@ -66,6 +69,22 @@ class UserMongoDbRepository implements UserRepositoryInterface
         }
     }
 
+    public function getUserWithPhoneNumber(string $number): UserEntity|null|Exception
+    {
+        try {
+            return $this->modelToEntity($this->UserMongoDbModel::where('phone', '=', $number)->first());
+
+        } catch (UserNotFoundException $e) {
+            Log::critical("Error in get user by phone number: ", ['message' => $e->getMessage()]);
+            throw new UserNotFoundException($e->getMessage(), 400);
+
+        } catch (Exception $e) {
+            Log::critical("Error in get user by phone number: ", ['message' => $e->getMessage()]);
+            throw new CollectUserByPhoneException($e->getMessage(), 400);
+
+        }
+    }
+
     public function updateRole(UserEntity $user): UserEntity|null|Exception
     {
         try {
@@ -82,6 +101,37 @@ class UserMongoDbRepository implements UserRepositoryInterface
         }
     }
 
+    public function updateOTP(UserEntity $user)
+    {
+        try {
+            $userModel = $this->UserMongoDbModel::where('uuid', $user->getUuid())->first();
+            $userModel->otp = $user->getOtpCode();
+            $userModel->save();
+
+            return $user;
+
+        } catch (Exception $e) {
+            Log::critical("Error in update otp: ", ['message' => $e->getMessage()]);
+            throw new UpdateOtpException("Error in update otp: " . $e->getMessage(), 400);
+
+        }
+    }
+
+    public function authUser(UserEntity $user)
+    {
+        try {
+            $userModel = $this->UserMongoDbModel::where('uuid', $user->getUuid())->first();
+            $userModel->is_auth = $user->getIsAuth();
+            $userModel->save();
+
+            return $user;
+
+        } catch (Exception $e) {
+            Log::critical("Error in update otp: ", ['message' => $e->getMessage()]);
+            throw new UpdateOtpException("Error in update otp: " . $e->getMessage(), 400);
+
+        }
+    }
 
     public function modelToEntity($UserMongoDbModel, bool $removePass = false): UserEntity|Exception
     {
@@ -97,6 +147,8 @@ class UserMongoDbRepository implements UserRepositoryInterface
             $UserMongoDbModel->name,
             $UserMongoDbModel->email,
             $password,
+            $UserMongoDbModel->is_auth,
+            $UserMongoDbModel->otp,
             $UserMongoDbModel->phone,
             $UserMongoDbModel->is_admin,
             $UserMongoDbModel->role,
