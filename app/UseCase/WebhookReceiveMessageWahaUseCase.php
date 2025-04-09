@@ -25,13 +25,18 @@ class WebhookReceiveMessageWahaUseCase
     private Client $IA;
     private UserRepositoryInterface $userRepository;
     private ClientHttpInterface $clientHttp;
-    private array $themes = [];
+    private array $themes = [
+        '1' => '',
+        '2' => '',
+        '3' => '',
+        '4' => '',
+        '5' => '',
+    ];
 
     public function __construct(
         UserRepositoryInterface $userRepository,
         ClientHttpInterface $clientHttp
-    ) 
-    {
+    ) {
         $this->IA = Gemini::client(env('GEMINIKEY'));
         $this->IA->geminiFlash()->generateContent(
             ValidationIAEnum::SETUP
@@ -39,32 +44,32 @@ class WebhookReceiveMessageWahaUseCase
         $this->userRepository = $userRepository;
         $this->clientHttp = $clientHttp;
     }
-    
+
     public function webhookReceiveMessage(array $payload)
     {
 
-        Log::info('Message receive', ['payload' => $payload]);
+        Log::info('MESSAGE RECEIVE', ['payload' => $payload]);
 
         $event = $payload['event'];
-        if($event == EventsWahaEnum::MESSAGE){
+        if ($event == EventsWahaEnum::MESSAGE) {
 
             // Add try catch para tratamento
             try {
 
                 $number = !empty($payload['payload']['from']) ? $payload['payload']['from'] : false;
-                if(!$number){
+                if (!$number) {
                     throw new Exception('Number not found');
                 }
                 Log::info('NUMBER', ['number' => $number]);
 
                 $messageId = !empty($payload['payload']['id']) ? $payload['payload']['id'] : false;
-                if(!$messageId){
+                if (!$messageId) {
                     throw new Exception('Message ID not found');
                 }
                 Log::info('MESSAGE ID', ['messageId' => $messageId]);
 
                 $message = !empty($payload['payload']['body']) ? $payload['payload']['body'] : false;
-                if(!$message){
+                if (!$message) {
                     throw new Exception('Message not found');
                 }
                 Log::info('MESSAGE RECEIVE', ['messageReceive' => $message]);
@@ -74,76 +79,40 @@ class WebhookReceiveMessageWahaUseCase
                 $user = $this->userRepository->getUserWithPhoneNumber($numberSearch);
 
                 // Autenticação
-                if(str_contains($message, 'OTPU') && !$user->getIsAuth()){
-                    // Valida e autentica o usuário, depois envia as demais opções //
-                    Log::info('User request auth', [
-                        'username' => $user->getName(),
-                        'isAuth' => $user->getIsAuth(),
-                        'valid' => $user->getOtpCode() == $message,
-                        'otp_db' => $user->getOtpCode(),
-                        'otp_message' => $message
-                    ]);
-
-                    if($user->getOtpCode() == $message){
-                        $user->setIsAuth(true);
-                        $this->userRepository->authUser($user);
-                        Log::info('User auth success', [
-                            'user' => json_encode($user->toArray())
-                        ]);
-
-                        // Envia a mensagem via Job
-                        ResponseMessageJob::dispatch(
-                            $number,
-                            $messageId,
-                            $user->getName() . " aguarde um momento..."
-                        )->delay(now()->addSeconds(1));
-
-                        // Envia a mensagem via Job
-                        ResponseMessageJob::dispatch(
-                            $number,
-                            $messageId,
-                            "Certo! Agora me diz como posso te ajudar? Selecione uma das opções abaixo:\n1 - Verificar seus pontos batidos hoje\n2 - Bater o ponto de entrada\n3 - Bater o ponto de saída para almoço\n4 - Bater o ponto de volta do almoço\n5 - Bater o ponto de saída"
-                        )->delay(now()->addSeconds(5));
-                    }
-
+                if (str_contains($message, 'OTPU') && !$user->getIsAuth()) {
+                    $this->AuthUserByCodeOtp($user, $message, $number, $messageId);
                     return true;
                 }
 
                 // Verifica se o usuário já se autenticou
-                if($user->getIsAuth()){
+                if ($user->getIsAuth()) {
 
                     // Valida a mensagem //VERIFICAR SE A OPÇÂO ESCOLHIDA CONDIZ COM AS OPÇÔES ACIMA!!
-                    $validation = $this->generateValidation($message);
-                    if($validation){
+                    $validation = $this->maliciousMessageValidation($message);
+                    if ($validation && in_array($message, $this->themes)) {
 
-                        $response = $this->generateResponse($user, $message);
-                        if($response){
+                        // // Envia a mensagem via Job
+                        // ResponseMessageJob::dispatch(
+                        //     $number,
+                        //     $messageId,
+                        //     $response
+                        // )->delay(now()->addSeconds(5));
 
-                            // Envia a mensagem via Job
-                            ResponseMessageJob::dispatch(
-                                $number,
-                                $messageId,
-                                $response
-                            )->delay(now()->addSeconds(5));
-        
-                            return true;
-                        }
-
+                        return true;
                     } else {
                         throw new Exception('Message not understood');
-                        Log::info('Message not understood', [
+                        Log::info('MESSAGE NOT UNDERSTOOD', [
                             'message' => $message,
                             'user' => json_encode($user->toArray())
                         ]);
                     }
-
-                }  else {
+                } else {
 
                     // Envia a mensagem via Job
                     ResponseMessageJob::dispatch(
                         $number,
                         $messageId,
-                        "Olá, " . $user->getName() . ", tudo bem? Você ainda não está autenticado. Para isso, enviei um codigo no seu email: ". $user->getEmail() ." por favor, verifique se chegou e me envie o código para que eu possa te ajudar. Caso não tenha recebido, entre em contato com seu supervisor ou acesse o nosso suporte em www.userManager.com.br"
+                        "Olá, " . $user->getName() . ", tudo bem? Você ainda não está autenticado. Para isso, enviei um codigo no seu email: " . $user->getEmail() . " por favor, verifique se chegou e me envie o código para que eu possa te ajudar. Caso não tenha recebido, entre em contato com seu supervisor ou acesse o nosso suporte em www.userManager.com.br"
                     )->delay(now()->addSeconds(5));
 
                     // Criar codigo de autenticação
@@ -154,7 +123,7 @@ class WebhookReceiveMessageWahaUseCase
                         'user' => json_encode($user->toArray()),
                         'otp' => $otp
                     ]);
-    
+
                     // Envia o email aqui
                     sendCodeEmailJob::dispatch(
                         $user->getEmail(),
@@ -164,31 +133,27 @@ class WebhookReceiveMessageWahaUseCase
 
                     return true;
                 }
-
-            } catch (UserNotFoundException $e){
-                Log::critical('User not found', [
+            } catch (UserNotFoundException $e) {
+                Log::critical('USER NOT FOUND EXCEPTION', [
                     'number' => $number,
                     'message' => $e->getMessage()
                 ]);
-                $this->clientHttp->sendError($number, ValidationIAEnum::USERNOTFOUND);
+                //$this->clientHttp->sendError($number, EventsWahaEnum::USERNOTFOUND);
                 return true;
-
             } catch (CollectUserByPhoneException $e) {
-                Log::critical('Collect user by Phone Exception', [
+                Log::critical('COLLECT USER BY PHONE EXCEPTION', [
                     'number' => $number,
                     'message' => $e->getMessage()
                 ]);
-                $this->clientHttp->sendError($number, ValidationIAEnum::MESSAGENOTUNDERSTOOD);
+                //$this->clientHttp->sendError($number, EventsWahaEnum::MESSAGENOTUNDERSTOOD);
                 return true;
-
             } catch (Exception $e) {
-                Log::critical('Validations error', [
+                Log::critical('PROCESS ERROR', [
                     'number' => $number ?? "Not number",
                     'message' => $e->getMessage()
                 ]);
-                $this->clientHttp->sendError($number, ValidationIAEnum::MESSAGENOTUNDERSTOOD);
+                //$this->clientHttp->sendError($number, EventsWahaEnum::MESSAGENOTUNDERSTOOD);
                 return true;
-
             }
         }
 
@@ -200,77 +165,94 @@ class WebhookReceiveMessageWahaUseCase
         return false;
     }
 
-    public function generateScreening()
+    public function maliciousMessageValidation(string $message)
     {
-        //
-    }
-
-    public function generateValidation(string $message)
-    {
-        $messageValidation = $this->talkIA(
+        $validation = $this->talkIA(
             ValidationIAEnum::VALIDATION,
             $message
         );
-        if(!$messageValidation){
-            Log::info('Validation message not found', [
-                'messageValidation' => $messageValidation,
+        if (!$validation) {
+            Log::info('VALIDATION MESSAGE FAILED', [
+                'message_validation' => $validation,
                 'message' => $message
             ]);
             return false;
         }
-        $validation = json_decode($messageValidation->text(), true);
+        $validation = json_decode($validation->text(), true);
 
-        Log::info('Validation', ['validation' => $validation]);
+        Log::info('VALIDATION SUCCESS', ['message' => $validation]);
 
-        if($validation['its_okay']){
+        if ($validation['its_okay']) {
             return true;
         }
         return false;
     }
 
-    public function generateResponse(UserEntity $user, string $message)
+    public function AuthUserByCodeOtp(UserEntity $user, string $message, string $number, string $messageId)
     {
-        $responseMessage = $this->talkIA(
-            ValidationIAEnum::RESPONSE,
-            $message,
-            $user
-        );
-        if(!$responseMessage){
-            Log::info('Response message not found', [
-                'responseMessage' => $responseMessage,
-                'user' => $user,
-                'message' => $message
+        try {
+
+            // Valida e autentica o usuário, depois envia as demais opções
+            Log::info('USER REQUEST AUTH', [
+                'username' => $user->getName(),
+                'is_auth' => $user->getIsAuth(),
+                'valid' => $user->getOtpCode() == $message,
+                'otp_db' => $user->getOtpCode(),
+                'otp_message' => $message
             ]);
+
+            if ($user->getOtpCode() == $message) {
+                $user->setIsAuth(true);
+                $this->userRepository->authUser($user);
+
+                // Envia a mensagem via Job
+                ResponseMessageJob::dispatch(
+                    $number,
+                    $messageId,
+                    $user->getName() . EventsWahaEnum::AWAIT
+                )->delay(now()->addSeconds(1));
+
+                // Envia a mensagem via Job
+                ResponseMessageJob::dispatch(
+                    $number,
+                    $messageId,
+                    EventsWahaEnum::SCOPE
+                )->delay(now()->addSeconds(1));
+
+                Log::info('USER REQUEST AUTH SUCCESS', [
+                    'username' => $user->getName(),
+                    'is_auth' => $user->getIsAuth()
+                ]);
+            }
+            return true;
+
+        } catch (Exception $e){
+            Log::critical('USER REQUEST AUTH FAILED', [
+                'username' => $user->getName(),
+                'number' => $number,
+                'message' => $e->getMessage()
+            ]);
+            $this->clientHttp->sendError($number, EventsWahaEnum::MESSAGENOTUNDERSTOOD);
             return false;
-        }
-        $response = json_decode($responseMessage->text(), true);
 
-        Log::info('Response', ['response' => $response]);
-
-        if(!is_null($response) && $response['its_okay']){
-            return $response['response'];
         }
-        return false;
     }
 
     public function talkIA(string $case, string $message, ?UserEntity $user = null)
     {
-        
+
         $Ia = $this->IA->geminiFlash();
 
         switch ($case) {
             case ValidationIAEnum::VALIDATION:
                 return $Ia->generateContent(
-                    ValidationIAEnum::VALIDCONTENT . $message
-                );
-                break;
-            case ValidationIAEnum::RESPONSE:
-                return $Ia->generateContent(
-                    ValidationIAEnum::GENERATERESPONSE . $message . ValidationIAEnum::THISUSERNAME . $user->getName()
+                    ValidationIAEnum::VALIDCONTENT .
+                    ValidationIAEnum::RETURNVALIDCONTENT . 
+                    $message
                 );
                 break;
             default:
-                Log::info('Case not found', ['case' => $case]);
+                Log::info('CASE NOT FOUND', ['case' => $case]);
                 return false;
                 break;
         }
