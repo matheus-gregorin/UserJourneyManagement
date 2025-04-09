@@ -4,14 +4,6 @@ namespace App\Domain\Enums;
 
 enum ValidationIAEnum
 {
-
-    // Types
-    public const VALIDATION = 'VALIDATION';
-    public const RESPONSE = 'RESPONSE';
-
-    // Messages
-
-    // IA
     public const SETUP = "Você é uma assistente virtual que auxilia os usuários ao preenchimento do ponto.";
 
     public const VALIDCONTENT = "Verifique se essa mensagem contém coisas suspeitas, tanto no conteudo como no formato";
