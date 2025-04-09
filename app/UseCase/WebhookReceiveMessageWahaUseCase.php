@@ -52,8 +52,6 @@ class WebhookReceiveMessageWahaUseCase
 
         $event = $payload['event'];
         if ($event == EventsWahaEnum::MESSAGE) {
-
-            // Add try catch para tratamento
             try {
 
                 $number = !empty($payload['payload']['from']) ? $payload['payload']['from'] : false;
@@ -74,46 +72,27 @@ class WebhookReceiveMessageWahaUseCase
                 }
                 Log::info('MESSAGE RECEIVE', ['messageReceive' => $message]);
 
-                // Quebra a string a partir do @ e coleta o primeiro elemento, que é o número do tolefone
+                // Quebra a string a partir do @ e coleta o primeiro elemento, que é o número do telefone
                 $numberSearch = explode('@', $number)[0];
                 $user = $this->userRepository->getUserWithPhoneNumber($numberSearch);
 
-                // Autenticação
-                if (str_contains($message, 'OTPU') && !$user->getIsAuth()) {
-                    $this->AuthUserByCodeOtp($user, $message, $number, $messageId);
-                    return true;
-                }
-
                 // Verifica se o usuário já se autenticou
                 if ($user->getIsAuth()) {
-
-                    // Valida a mensagem
+                    // Validação da mensagem
                     $validation = $this->maliciousMessageValidation($number, $message);
                     if ($validation) {
+                        // Se enviar uma opção valida
+                        if (in_array($message, $this->themes)) {
 
-                        if(in_array($message, $this->themes)){
-
+                            $option = $message;
                             //
 
                         } else {
-
-                            // Reenviando as opções
-                            ResponseMessageJob::dispatch(
-                                $number,
-                                $messageId,
-                                EventsWahaEnum::MESSAGERESEND
-                            )->delay(now()->addSeconds(1));
-
-                            ResponseMessageJob::dispatch(
-                                $number,
-                                $messageId,
-                                EventsWahaEnum::SCOPE
-                            )->delay(now()->addSeconds(2));
-
+                            $this->sendMessage($number, $messageId, EventsWahaEnum::MESSAGERESEND, 2);
+                            $this->sendMessage($number, $messageId, EventsWahaEnum::SCOPE, 2);
                         }
 
                         return true;
-
                     } else {
                         throw new Exception('MESSAGE NOT UNDERSTOOD');
                         Log::info('MESSAGE NOT UNDERSTOOD', [
@@ -121,31 +100,28 @@ class WebhookReceiveMessageWahaUseCase
                             'user' => json_encode($user->toArray())
                         ]);
                     }
-
                 } else {
 
-                    // Envia a mensagem via Job
-                    ResponseMessageJob::dispatch(
-                        $number,
-                        $messageId,
-                        EventsWahaEnum::HI . $user->getName() . EventsWahaEnum::USERNOTAUTH
-                    )->delay(now()->addSeconds(2));
+                    // Faz a autenticação
+                    if (str_contains($message, 'OTPU')) {
+                        $this->AuthUserByCodeOtp($user, $message, $number, $messageId);
+                        return true;
+                    }
+
+                    // Inicia o processo de autenticação enviando mensagem de boas vindas mais código OTP
+                    $this->sendMessage($number, $messageId, EventsWahaEnum::HI . $user->getName() . EventsWahaEnum::USERNOTAUTH, 2);
 
                     // Criar codigo de autenticação
                     $otp = "OTPU" . rand(100000, 999999);
                     $user->setOtpCode($otp);
                     $this->userRepository->updateOTP($user);
-                    Log::info('User OTP update success', [
+                    Log::info('USER OTP UPDATE SUCCESS', [
                         'user' => json_encode($user->toArray()),
                         'otp' => $otp
                     ]);
 
-                    // Envia o email aqui
-                    sendCodeEmailJob::dispatch(
-                        $user->getEmail(),
-                        $user->getName(),
-                        $otp
-                    )->delay(now()->addSeconds(2));
+                    // Envia código para o email
+                    $this->sendEmail($user, $otp, 2);
 
                     return true;
                 }
@@ -177,8 +153,34 @@ class WebhookReceiveMessageWahaUseCase
             'event' => $event,
             'payload' => $payload
         ]);
-
         return false;
+    }
+
+    public function sendMessage(string $number, string $messageId, string $message, int $delay = 0)
+    {
+        try{
+            ResponseMessageJob::dispatch(
+                $number,
+                $messageId,
+                $message
+            )->delay(now()->addSeconds($delay));
+        } catch (Exception $e) {
+        }
+    }
+
+    public function sendEmail(UserEntity $user, string $otp, int $delay = 0)
+    {
+        try {
+            // Envia o email aqui
+            sendCodeEmailJob::dispatch(
+                $user->getEmail(),
+                $user->getName(),
+                $otp
+            )->delay(now()->addSeconds($delay));
+
+        } catch (Exception $e) {
+        }
+        
     }
 
     public function maliciousMessageValidation(string $number, string $message)
@@ -187,8 +189,8 @@ class WebhookReceiveMessageWahaUseCase
         try {
             $validation = $this->IA->geminiFlash()->generateContent(
                 ValidationIAEnum::VALIDCONTENT .
-                ValidationIAEnum::RETURNVALIDCONTENT . 
-                $message
+                    ValidationIAEnum::RETURNVALIDCONTENT .
+                    $message
             );
 
             if (!$validation) {
@@ -207,8 +209,7 @@ class WebhookReceiveMessageWahaUseCase
                 return true;
             }
             return false;
-
-        } catch (Exception $e){
+        } catch (Exception $e) {
             Log::critical('VALIDATION MESSAGE ERROR', [
                 'number' => $number,
                 'message_validation' => $validation,
@@ -217,7 +218,6 @@ class WebhookReceiveMessageWahaUseCase
             ]);
             $this->clientHttp->sendError($number, EventsWahaEnum::MESSAGENOTUNDERSTOOD);
             return false;
-
         }
     }
 
@@ -238,19 +238,9 @@ class WebhookReceiveMessageWahaUseCase
                 $user->setIsAuth(true);
                 $this->userRepository->authUser($user);
 
-                // Envia a mensagem via Job
-                ResponseMessageJob::dispatch(
-                    $number,
-                    $messageId,
-                    $user->getName() . EventsWahaEnum::AWAIT
-                )->delay(now()->addSeconds(1));
-
-                // Envia a mensagem via Job
-                ResponseMessageJob::dispatch(
-                    $number,
-                    $messageId,
-                    EventsWahaEnum::SCOPE
-                )->delay(now()->addSeconds(2));
+                $this->sendMessage($number, $messageId, $user->getName() . EventsWahaEnum::AWAIT, 0);
+                $this->sendMessage($number, $messageId, EventsWahaEnum::AUTHSUCCESS, 1);
+                $this->sendMessage($number, $messageId, EventsWahaEnum::SCOPE, 2);
 
                 Log::info('USER REQUEST AUTH SUCCESS', [
                     'username' => $user->getName(),
@@ -258,8 +248,7 @@ class WebhookReceiveMessageWahaUseCase
                 ]);
             }
             return true;
-
-        } catch (Exception $e){
+        } catch (Exception $e) {
             Log::critical('USER REQUEST AUTH FAILED', [
                 'username' => $user->getName(),
                 'number' => $number,
@@ -267,7 +256,6 @@ class WebhookReceiveMessageWahaUseCase
             ]);
             $this->clientHttp->sendError($number, EventsWahaEnum::MESSAGENOTUNDERSTOOD);
             return false;
-
         }
     }
 

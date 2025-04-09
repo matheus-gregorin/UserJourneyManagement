@@ -38,7 +38,7 @@ class CodeMail extends Mailable
     public function envelope()
     {
         return new Envelope(
-            subject: 'Code Mail',
+            subject: 'Código de verificação',
         );
     }
 

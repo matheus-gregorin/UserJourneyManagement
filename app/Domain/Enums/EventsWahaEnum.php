@@ -8,9 +8,11 @@ enum EventsWahaEnum
     public const MESSAGE = 'message';
 
     // MESSAGES
-    public const AWAIT = "Aguarde um momento enquanto verificamos a mensagem, por favor, não envie mensagens repetidas, isso pode causar lentidão no sistema.";
+    public const AWAIT = " aguarde um momento enquanto verificamos a mensagem...";
 
-    public const SCOPE = "Selecione uma das opções abaixo:\n1 - Verificar seus pontos batidos hoje\n2 - Bater o ponto de entrada\n3 - Bater o ponto de saída para almoço\n4 - Bater o ponto de volta do almoço\n5 - Bater o ponto de saída";
+    public const AUTHSUCCESS = "Certo! verificado.";
+
+    public const SCOPE = "*Digite o número opção desejada:*\n _1 - Verificar seus pontos batidos hoje_\n_2 - Bater o ponto de entrada_\n_3 - Bater o ponto de saída para almoço_\n_4 - Bater o ponto de volta do almoço_\n_5 - Bater o ponto de saída_\n6 - Falar com suporte";
     
     public const THISUSERNAME = " - Nome do usuário: ";
 
@@ -20,7 +22,7 @@ enum EventsWahaEnum
         
     public const MESSAGENOTUNDERSTOOD = "Não foi possivel entender a mensagem, por favor, tente novamente.";
 
-    public const MESSAGERESEND = "Não foi possivel entender a mensagem, escolha uma dessas opções abaixo.";
+    public const MESSAGERESEND = "Não foi possivel entender a mensagem, digite o número de acordo com essas opções.";
 
     public const SERVERERROR = "Tivemos um problema ao processar sua mensagem, por favor, tente novamente mais tarde.";
     
