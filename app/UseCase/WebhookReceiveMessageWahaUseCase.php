@@ -165,6 +165,12 @@ class WebhookReceiveMessageWahaUseCase
                 $message
             )->delay(now()->addSeconds($delay));
         } catch (Exception $e) {
+            Log::info('SEND MESSAGE ERROR', [
+                'number' => $number,
+                'messageId' => $messageId,
+                'message' => $message,
+                'error' => $e->getMessage()
+            ]);
         }
     }
 
@@ -179,6 +185,12 @@ class WebhookReceiveMessageWahaUseCase
             )->delay(now()->addSeconds($delay));
 
         } catch (Exception $e) {
+            Log::info('SEND EMAIL ERROR', [
+                'username' => $user->getName(),
+                'email' => $user->getEmail(),
+                'otp' => $otp,
+                'error' => $e->getMessage()
+            ]);
         }
         
     }

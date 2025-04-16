@@ -140,7 +140,7 @@ class UsersControllers extends Controller
 
             return ApiResponse::success(
                 [
-                   'users' => $users
+                    'users' => $users
                 ],
                 CodesEnum::messageUsersCollected,
                 CodesEnum::codeSuccess

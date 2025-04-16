@@ -17,6 +17,9 @@ class sendCodeEmailJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
+    public $tries = 3; // número de tentativas
+    public $maxExceptions = 3; // número máximo de exceções antes de falhar
+
     private string $email;
     private string $name;
     private string $code;
