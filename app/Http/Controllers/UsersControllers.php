@@ -37,8 +37,7 @@ class UsersControllers extends Controller
         GetAllUsersUseCase $getAllUsersUseCase,
         ChangeRoleUserUseCase $changeRoleUserUseCase,
         WebhookReceiveMessageWahaUseCase $webhookReceiveMessageWahaUse
-    )
-    {
+    ) {
         $this->loginUseCase = $loginUseCase;
         $this->createUserUseCase = $createUserUseCase;
         $this->getAllUsersUseCase = $getAllUsersUseCase;
@@ -59,34 +58,30 @@ class UsersControllers extends Controller
                 CodesEnum::messageUserAuthenticated,
                 CodesEnum::codeSuccess
             );
-
         } catch (CredentialsInvalidException $e) {
             return ApiResponse::error(
-                [    
+                [
                     CodesEnum::messageCredentialsInvalid
                 ],
                 CodesEnum::messageUserNotAuthenticated,
                 CodesEnum::codeErrorUnauthorized
             );
-
         } catch (UserNotFoundException $e) {
             return ApiResponse::error(
-                [    
+                [
                     CodesEnum::messageCredentialsInvalid
                 ],
                 CodesEnum::messageUserNotAuthenticated,
                 CodesEnum::codeErrorUnauthorized
             );
-
         } catch (Exception $e) {
             return ApiResponse::error(
-                [    
+                [
                     CodesEnum::messageInternalServerError
                 ],
                 CodesEnum::messageUserNotAuthenticated,
                 CodesEnum::codeErrorInternalServerError
             );
-
         }
     }
 
@@ -97,39 +92,35 @@ class UsersControllers extends Controller
 
             return ApiResponse::success(
                 [
-                   'user' => $user
+                    'user' => $user
                 ],
                 CodesEnum::messageUserCreated,
                 CodesEnum::codeSuccess
             );
-
         } catch (UserNotCreatedException $e) {
             return ApiResponse::error(
-                [    
+                [
                     CodesEnum::messageDataInvalid
                 ],
                 CodesEnum::messageUserNotCreated,
                 CodesEnum::codeErrorBadRequest
             );
-
         } catch (UserNotFoundException $e) {
             return ApiResponse::error(
-                [    
+                [
                     CodesEnum::messageInternalServerError
                 ],
                 CodesEnum::messageUserNotCreated,
                 CodesEnum::codeErrorInternalServerError
             );
-
         } catch (Exception $e) {
             return ApiResponse::error(
-                [    
+                [
                     CodesEnum::messageInternalServerError
                 ],
                 CodesEnum::messageUserNotCreated,
                 CodesEnum::codeErrorInternalServerError
             );
-
         }
     }
 
@@ -145,25 +136,22 @@ class UsersControllers extends Controller
                 CodesEnum::messageUsersCollected,
                 CodesEnum::codeSuccess
             );
-
         } catch (NotContentUsersException $e) {
             return ApiResponse::error(
-                [    
+                [
                     CodesEnum::messageUsersNotContent
                 ],
                 CodesEnum::messageUsersNotContent,
                 CodesEnum::codeNotContent
             );
-
         } catch (Exception $e) {
             return ApiResponse::error(
-                [    
+                [
                     CodesEnum::messageInternalServerError
                 ],
                 CodesEnum::messageUserNotCreated,
                 CodesEnum::codeErrorInternalServerError
             );
-
         }
     }
 
@@ -174,42 +162,38 @@ class UsersControllers extends Controller
 
             return ApiResponse::success(
                 [
-                   'user' => $user
+                    'user' => $user
                 ],
                 CodesEnum::messageRoleUpdated,
                 CodesEnum::codeSuccess
             );
-
         } catch (UserNotFoundException $e) {
             return ApiResponse::error(
-                [    
+                [
                     CodesEnum::messageUserInvalid
                 ],
                 CodesEnum::messageNotUpdatedRole,
                 CodesEnum::codeErrorBadRequest
             );
-
-        }  catch (CollectUserByUuidException $e) {
+        } catch (CollectUserByUuidException $e) {
             return ApiResponse::error(
-                [    
+                [
                     CodesEnum::messageUserInvalid
                 ],
                 CodesEnum::messageNotUpdatedRole,
                 CodesEnum::codeErrorBadRequest
             );
-
         } catch (UpdateRoleException $e) {
             return ApiResponse::error(
-                [    
+                [
                     CodesEnum::messageNotUpdatedRole
                 ],
                 CodesEnum::messageNotUpdatedRole,
                 CodesEnum::codeErrorInternalServerError
             );
-
         } catch (Exception $e) {
             return ApiResponse::error(
-                [    
+                [
                     CodesEnum::messageInternalServerError
                 ],
                 CodesEnum::messageNotUpdatedRole,
@@ -219,21 +203,17 @@ class UsersControllers extends Controller
     }
 
     public function webhookReceiveMessage(Request $request)
-    {
-        {
+    { {
             try {
                 $this->webhookReceiveMessageWahaUseCase->webhookReceiveMessage($request->all());
-    
+
                 return response()->json([
                     'success' => true
                 ], 200);
-    
             } catch (CollectUserByPhoneException $e) {
                 Log::critical("Error in get user by phone number: ", ['message' => $e->getMessage()]);
-
             } catch (Exception $e) {
                 Log::critical("Error in webhook receive message: ", ['message' => $e->getMessage()]);
-
             }
         }
     }
