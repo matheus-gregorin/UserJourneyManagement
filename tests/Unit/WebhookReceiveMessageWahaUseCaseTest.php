@@ -13,17 +13,6 @@ use Tests\TestCase;
 
 class WebhookReceiveMessageWahaUseCaseTest extends TestCase
 {
-    /**
-     * A basic feature test example.
-     *
-     * @return void
-     */
-    // public function test_example()
-    // {
-    //     $response = $this->get('/');
-
-    //     $response->assertStatus(200);
-    // }
 
     public function test_when_receiving_a_payload_where_the_event_is_not_message_returns_false()
     {
@@ -53,14 +42,6 @@ class WebhookReceiveMessageWahaUseCaseTest extends TestCase
 
         // Mock do Htt Client
         $mockHttpClient = \Mockery::mock(ClientHttpInterface::class);
-        // $mockHttpClient->shouldReceive('sendError')
-        //     ->once()
-        //     ->with('5511956558187', EventsWahaEnum::USERNOTFOUND)
-        //     ->andReturn(new \GuzzleHttp\Psr7\Response(
-        //         200,
-        //         [],
-        //         json_encode(['success' => true])
-        //     ));
 
         // Instanciando a use case com a dependência mockada
         $WebhookReceiveMessageWahaUseCase = new WebhookReceiveMessageWahaUseCase(
@@ -75,4 +56,22 @@ class WebhookReceiveMessageWahaUseCaseTest extends TestCase
         $response = $WebhookReceiveMessageWahaUseCase->webhookReceiveMessage($payload);
         $this->assertFalse($response);
     }
+
+        // Mode de uso para quando precisar usar algum metodo da classe}
+
+        // REPOSITORY
+        // $mockRepository->shouldReceive('create')
+        // ->once()
+        // ->with(['name' => 'John Doe'])
+        // ->andReturn(['id' => 1, 'name' => 'John Doe']);
+
+        // CLIENT
+        // $mockHttpClient->shouldReceive('sendError')
+        //     ->once()
+        //     ->with('5511956558187', EventsWahaEnum::USERNOTFOUND)
+        //     ->andReturn(new \GuzzleHttp\Psr7\Response(
+        //         200,
+        //         [],
+        //         json_encode(['success' => true])
+        //     ));
 }
