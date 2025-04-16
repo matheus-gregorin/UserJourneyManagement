@@ -22,6 +22,8 @@ class UserTest extends TestCase
             'Wilson Menezes',
             'wil@gmail.com',
             '12345678',
+            false,
+            '',
             '5511956558181',
             false,
             'medium',

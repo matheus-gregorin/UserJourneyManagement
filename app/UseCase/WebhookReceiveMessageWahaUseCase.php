@@ -56,7 +56,8 @@ class WebhookReceiveMessageWahaUseCase
 
                 $number = !empty($payload['payload']['from']) ? $payload['payload']['from'] : false;
                 if (!$number) {
-                    throw new Exception('Number not found');
+                    Log::info('NUMBER NOT FOUND', ['payload' => $payload]);
+                    return false;
                 }
                 Log::info('NUMBER', ['number' => $number]);
 
@@ -131,21 +132,21 @@ class WebhookReceiveMessageWahaUseCase
                     'message' => $e->getMessage()
                 ]);
                 $this->clientHttp->sendError($number, EventsWahaEnum::USERNOTFOUND);
-                return true;
+                return false;
             } catch (CollectUserByPhoneException $e) {
                 Log::critical('COLLECT USER BY PHONE EXCEPTION', [
                     'number' => $number,
                     'message' => $e->getMessage()
                 ]);
                 $this->clientHttp->sendError($number, EventsWahaEnum::MESSAGENOTUNDERSTOOD);
-                return true;
+                return false;
             } catch (Exception $e) {
                 Log::critical('PROCESS ERROR', [
                     'number' => $number ?? "Not number",
                     'message' => $e->getMessage()
                 ]);
                 $this->clientHttp->sendError($number, EventsWahaEnum::MESSAGENOTUNDERSTOOD);
-                return true;
+                return false;
             }
         }
 
