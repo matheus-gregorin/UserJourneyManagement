@@ -160,7 +160,7 @@ class WebhookReceiveMessageWahaUseCase
 
     public function sendMessage(string $number, string $messageId, string $message, int $delay = 0)
     {
-        try{
+        try {
             // Envia mensagem aqui
             ResponseMessageJob::dispatch(
                 $number,
@@ -186,7 +186,6 @@ class WebhookReceiveMessageWahaUseCase
                 $user->getName(),
                 $otp
             )->delay(now()->addSeconds($delay));
-
         } catch (Exception $e) {
             Log::info('SEND EMAIL ERROR', [
                 'username' => $user->getName(),
@@ -195,7 +194,6 @@ class WebhookReceiveMessageWahaUseCase
                 'error' => $e->getMessage()
             ]);
         }
-        
     }
 
     public function maliciousMessageValidation(string $number, string $message)
