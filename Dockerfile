@@ -34,7 +34,7 @@ RUN docker-php-ext-enable curl
 RUN docker-php-ext-install sockets
 
 # Instale a extensão do MongoDB com suporte a SSL
-RUN pecl install mongodb && docker-php-ext-enable mongodb
+RUN pecl install mongodb-1.20.0 && docker-php-ext-enable mongodb
 
 # Instalar a extensão phpredis
 RUN pecl install redis \

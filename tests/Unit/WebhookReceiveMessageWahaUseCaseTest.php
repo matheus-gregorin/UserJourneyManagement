@@ -57,7 +57,7 @@ class WebhookReceiveMessageWahaUseCaseTest extends TestCase
         $this->assertFalse($response);
     }
 
-        // Mode de uso para quando precisar usar algum metodo da classe}
+        // Mode de uso para quando precisar usar algum metodo da classe
 
         // REPOSITORY
         // $mockRepository->shouldReceive('create')

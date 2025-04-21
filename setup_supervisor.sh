@@ -19,8 +19,8 @@ autorestart=true
 numprocs=1
 user=root
 redirect_stderr=false
-stdout_logfile=/var/www/html/laravel-worker.stdout.log
-stderr_logfile=/var/www/html/laravel-worker.stderr.log
+# stdout_logfile=/var/www/html/laravel-worker.stdout.log
+# stderr_logfile=/var/www/html/laravel-worker.stderr.log
 EOF
 
   echo "Arquivo de configuração ${CONF_FILE} criado com sucesso."

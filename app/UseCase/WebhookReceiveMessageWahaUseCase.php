@@ -26,11 +26,12 @@ class WebhookReceiveMessageWahaUseCase
     private UserRepositoryInterface $userRepository;
     private ClientHttpInterface $clientHttp;
     private array $themes = [
-        '1' => '',
-        '2' => '',
-        '3' => '',
-        '4' => '',
-        '5' => '',
+        '1' => 'checkThePointsHitToday',
+        '2' => 'CheckIn',
+        '3' => 'clockOutForLunch',
+        '4' => 'clockBackFromLunch',
+        '5' => 'CheckOut',
+        '6' => 'Support'
     ];
 
     public function __construct(
@@ -160,6 +161,7 @@ class WebhookReceiveMessageWahaUseCase
     public function sendMessage(string $number, string $messageId, string $message, int $delay = 0)
     {
         try{
+            // Envia mensagem aqui
             ResponseMessageJob::dispatch(
                 $number,
                 $messageId,
