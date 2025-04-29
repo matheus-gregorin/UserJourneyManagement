@@ -167,6 +167,7 @@ class WebhookReceiveMessageWahaUseCase
                 $messageId,
                 $message
             )->delay(now()->addSeconds($delay));
+            return true;
         } catch (Exception $e) {
             Log::info('SEND MESSAGE ERROR', [
                 'number' => $number,
@@ -198,7 +199,6 @@ class WebhookReceiveMessageWahaUseCase
 
     public function maliciousMessageValidation(string $number, string $message)
     {
-
         try {
             $validation = $this->IA->geminiFlash()->generateContent(
                 ValidationIAEnum::VALIDCONTENT .
@@ -276,10 +276,5 @@ class WebhookReceiveMessageWahaUseCase
     {
 
         // CASE DE OPÇÔES
-        // sendCodeEmailJob::dispatch(
-        //     $user->getEmail(),
-        //     $user->getName(),
-        //     $otp
-        // )->delay(now()->addSeconds(3));
     }
 }

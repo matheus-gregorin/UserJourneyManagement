@@ -15,3 +15,4 @@ use Illuminate\Support\Facades\Route;
 
 // Add middleware to the route group
 Route::get('logs', [\Rap2hpoutre\LaravelLogViewer\LogViewerController::class, 'index']);
+Route::get('/linkedin/callback', [\Rap2hpoutre\LaravelLogViewer\LogViewerController::class, 'index']);
