@@ -30,9 +30,9 @@ class sendCodeEmailJob implements ShouldQueue
      * @return void
      */
     public function __construct(
-      string $email,
-      string $name,
-      string $code
+        string $email,
+        string $name,
+        string $code
     )
     {
         $this->email = $email;

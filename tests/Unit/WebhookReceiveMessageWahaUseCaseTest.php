@@ -169,37 +169,13 @@ class WebhookReceiveMessageWahaUseCaseTest extends TestCase
         $this->assertFalse($response);
     }
 
-    public function test_when_the_message_with_OTPU_arrives_validate_the_client_and_return_true()
+    public function test_when_calling_the_email_and_the_information_is_correct_return_true()
     {
 
-        Log::info("--6--\ntest_when_the_message_with_OTPU_arrives_validate_the_client_and_return_true");
-
-        $user = new UserEntity(
-            "fcb338cf-42f8-4b88-94eb-de2fa94acae7",
-            "Matheus",
-            "math.gregorin@gmail.com",
-            "123",
-            false,
-            "OTPU123",
-            "5511956558187",
-            false,
-            "medium",
-            new DateTime(),
-            new DateTime()
-        );
+        Log::info("--6--\ntest_when_calling_the_email_and_the_information_is_correct_return_true");
 
         // Mock do repositório
         $mockRepository = Mockery::mock(UserRepositoryInterface::class);
-
-        $mockRepository->shouldReceive('getUserWithPhoneNumber')
-            ->once()
-            ->with('5511956558187')
-            ->andReturn($user);
-
-        $mockRepository->shouldReceive('authUser')
-            ->once()
-            ->with($user)
-            ->andReturn($user);
 
         // Mock do Htt Client
         $mockHttpClient = \Mockery::mock(ClientHttpInterface::class);
@@ -210,15 +186,21 @@ class WebhookReceiveMessageWahaUseCaseTest extends TestCase
             $mockHttpClient
         );
 
-        $payload = [
-            'event' => 'message',
-            'payload' => [
-                "from" => "5511956558187@c.us",
-                "id" => "false_5511951651712@c.us_3F21C4FC29E36870B975",
-                "body" => "OTPU123"
-            ]
-        ];
-        $response = $WebhookReceiveMessageWahaUseCase->webhookReceiveMessage($payload);
+        $user = new UserEntity(
+            "123",
+            "matheus",
+            "math@gmail.com",
+            "123",
+            false,
+            "OTPU123",
+            "5511956558188",
+            false,
+            "medium",
+            new DateTime(),
+            new DateTime()
+        );
+
+        $response = $WebhookReceiveMessageWahaUseCase->sendEmail($user, $user->getOtpCode());
         $this->assertTrue($response);
     }
 }

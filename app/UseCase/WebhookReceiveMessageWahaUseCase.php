@@ -187,6 +187,7 @@ class WebhookReceiveMessageWahaUseCase
                 $user->getName(),
                 $otp
             )->delay(now()->addSeconds($delay));
+            return true;
         } catch (Exception $e) {
             Log::info('SEND EMAIL ERROR', [
                 'username' => $user->getName(),
