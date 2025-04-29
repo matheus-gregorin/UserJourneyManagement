@@ -8,7 +8,7 @@ enum EventsWahaEnum
     public const MESSAGE = 'message';
 
     // MESSAGES
-    public const AWAIT = " aguarde um momento enquanto verificamos a mensagem...";
+    public const AWAIT = " aguarde um momento enquanto verificamos...";
 
     public const AUTHSUCCESS = "Certo! verificado.";
 

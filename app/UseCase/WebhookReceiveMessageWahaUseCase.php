@@ -9,15 +9,12 @@ use App\Domain\HttpClients\ClientHttpInterface;
 use App\Domain\Repositories\UserRepositoryInterface;
 use App\Exceptions\CollectUserByPhoneException;
 use App\Exceptions\UserNotFoundException;
-use App\Http\HttpClients\WahaHttpClient;
 use App\Jobs\ResponseMessageJob;
 use App\Jobs\sendCodeEmailJob;
-use App\Mail\CodeMail;
 use Exception;
 use Gemini;
 use Gemini\Client;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
 
 class WebhookReceiveMessageWahaUseCase
 {
@@ -25,18 +22,20 @@ class WebhookReceiveMessageWahaUseCase
     private Client $IA;
     private UserRepositoryInterface $userRepository;
     private ClientHttpInterface $clientHttp;
+    private OptionChoseUseCase $optionChoseUseCase;
     private array $themes = [
-        '1' => 'checkThePointsHitToday',
-        '2' => 'CheckIn',
-        '3' => 'clockOutForLunch',
-        '4' => 'clockBackFromLunch',
-        '5' => 'CheckOut',
-        '6' => 'Support'
+        "1" => 'checkThePointsHitToday',
+        "2" => 'CheckIn',
+        "3" => 'clockOutForLunch',
+        "4" => 'clockBackFromLunch',
+        "5" => 'CheckOut',
+        "6" => 'Support'
     ];
 
     public function __construct(
         UserRepositoryInterface $userRepository,
-        ClientHttpInterface $clientHttp
+        ClientHttpInterface $clientHttp,
+        OptionChoseUseCase $optionChoseUseCase
     ) {
         $this->IA = Gemini::client(env('GEMINIKEY'));
         $this->IA->geminiFlash()->generateContent(
@@ -44,6 +43,7 @@ class WebhookReceiveMessageWahaUseCase
         );
         $this->userRepository = $userRepository;
         $this->clientHttp = $clientHttp;
+        $this->optionChoseUseCase = $optionChoseUseCase;
     }
 
     public function webhookReceiveMessage(array $payload)
@@ -84,10 +84,10 @@ class WebhookReceiveMessageWahaUseCase
                     $validation = $this->maliciousMessageValidation($number, $message);
                     if ($validation) {
                         // Se enviar uma opção valida
-                        if (in_array($message, $this->themes)) {
-
+                        if (array_key_exists($message, $this->themes)) {
                             $option = $message;
-                            //
+                            $method = $this->themes[$option];
+                            $this->optionChoseUseCase->$method();
 
                         } else {
                             $this->sendMessage($number, $messageId, EventsWahaEnum::MESSAGERESEND, 2);
