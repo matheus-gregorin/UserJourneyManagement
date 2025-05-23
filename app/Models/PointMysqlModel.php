@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class UserMysqlModel extends Model
+class PointMysqlModel extends Model
 {
     use HasFactory;
 
@@ -16,7 +16,7 @@ class UserMysqlModel extends Model
      *
      * @var string
      */
-    protected $table = 'usuarios';
+    protected $table = 'pontos';
 
     protected $primaryKey = 'uuid';
 
@@ -28,17 +28,12 @@ class UserMysqlModel extends Model
 
     protected $fillable = [
         'uuid',
-        'name',
-        'email',
-        'password',
-        'is_auth',
-        'phone',
-        'is_admin',
-        'role'
+        'user_uuid',
+        'checked'
     ];
 
-    public function points()
+    public function user()
     {
-        return $this->hasMany(PointMysqlModel::class, 'user_uuid', 'uuid');
+        return $this->belongsTo(UserMysqlModel::class, 'user_uuid', 'uuid');
     }
 }

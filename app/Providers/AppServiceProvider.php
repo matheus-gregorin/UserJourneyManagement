@@ -3,9 +3,11 @@
 namespace App\Providers;
 
 use App\Domain\HttpClients\ClientHttpInterface;
+use App\Domain\Repositories\PointRepositoryInterface;
 use App\Domain\Repositories\UserRepositoryInterface;
 use App\Http\HttpClients\WahaHttpClient;
 use App\Http\Responses\ApiResponse;
+use App\Repositories\PointsMysqlRepository;
 use App\Repositories\UserMongoDbRepository;
 use App\Repositories\UsersMysqlRepository;
 use App\Services\UsersServices;
@@ -57,6 +59,7 @@ class AppServiceProvider extends ServiceProvider
                     Log::critical("DB undefined", Config::get('database.default'));
                 break;
         }
+        $this->app->bind(PointRepositoryInterface::class, PointsMysqlRepository::class);
     }
 
     /**
