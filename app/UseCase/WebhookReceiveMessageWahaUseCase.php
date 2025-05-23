@@ -78,37 +78,47 @@ class WebhookReceiveMessageWahaUseCase
 
                 // Verifica se o usuário já se autenticou
                 if ($user->getIsAuth()) {
-                    // Validação da mensagem
-                    //$validation = $this->maliciousMessageValidation($number, $message);
-                    if (true) {
-                        // Se enviar uma opção valida
-                        if (array_key_exists($message, $this->themes)) {
-                            $option = $message;
-                            $choice = $this->themes[$option];
-                            $this->dispatchOption($user, $choice);
-                        } else {
-                            $this->sendMessage($number, $messageId, EventsWahaEnum::MESSAGERESEND, 2);
-                            $this->sendMessage($number, $messageId, EventsWahaEnum::SCOPE, 2);
-                        }
 
+                    // Se enviar uma opção valida
+                    if (strtoupper($message) == "MENU") {
+                        Log::info('USER REQUEST MENU', [
+                            'username' => $user->getName(),
+                            'is_auth' => $user->getIsAuth()
+                        ]);
+                        $this->sendMessage($number, $messageId, EventsWahaEnum::SCOPE, 2);
                         return true;
+                    } elseif (array_key_exists($message, $this->themes)) {
+                        $option = $message;
+                        $choice = $this->themes[$option];
+
+                        Log::info('USER REQUEST OPTION', [
+                            'username' => $user->getName(),
+                            'is_auth' => $user->getIsAuth(),
+                            'option' => $option,
+                            'choice' => $choice
+                        ]);
+                        $this->dispatchOption($user, $choice);
                     } else {
-                        throw new Exception('MESSAGE NOT UNDERSTOOD');
                         Log::info('MESSAGE NOT UNDERSTOOD', [
                             'message' => $message,
                             'user' => json_encode($user->toArray())
                         ]);
+                        throw new Exception('MESSAGE NOT UNDERSTOOD');
                     }
+                    return true;
                 } else {
 
                     // Faz a autenticação
                     if (str_contains($message, 'OTPU')) {
-                        $this->AuthUserByCodeOtp($user, $message, $number, $messageId);
-                        return true;
+                        $auth = $this->AuthUserByCodeOtp($user, $message, $number, $messageId);
+                        if ($auth) {
+                            return true;
+                        }
                     }
-
-                    // Inicia o processo de autenticação enviando mensagem de boas vindas mais código OTP
-                    $this->sendMessage($number, $messageId, EventsWahaEnum::HI . $user->getName() . EventsWahaEnum::USERNOTAUTH, 2);
+                    if (!str_contains($message, 'OTPU')) {
+                        // Inicia o processo de autenticação enviando mensagem de boas vindas mais código OTP
+                        $this->sendMessage($number, $messageId, EventsWahaEnum::HI . $user->getName() . EventsWahaEnum::USERNOTAUTH, 2);
+                    }
 
                     // Criar codigo de autenticação
                     $otp = "OTPU" . rand(100000, 999999);
@@ -262,8 +272,16 @@ class WebhookReceiveMessageWahaUseCase
                     'username' => $user->getName(),
                     'is_auth' => $user->getIsAuth()
                 ]);
+                return true;
             }
-            return true;
+            Log::critical('CODE OTPU INVALID', [
+                'username' => $user->getName(),
+                'number' => $number,
+                'user_code' => $user->getOtpCode(),
+                'message_code' => $message
+            ]);
+            $this->clientHttp->sendError($number, EventsWahaEnum::CODEINVALIDRESEND);
+            return false;
         } catch (Exception $e) {
             Log::critical('USER REQUEST AUTH FAILED', [
                 'username' => $user->getName(),

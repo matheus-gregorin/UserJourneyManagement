@@ -27,4 +27,6 @@ enum EventsWahaEnum
     public const SERVERERROR = "Tivemos um problema ao processar sua mensagem, por favor, tente novamente mais tarde.";
     
     public const USERNOTFOUND = "Usuário não encontrado, por favor, verifique se você está cadastrado e tente novamente.";
+
+    public const CODEINVALIDRESEND = "Código inválido, vamos tentar novamente.";
 }
