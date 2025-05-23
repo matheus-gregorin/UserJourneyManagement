@@ -9,6 +9,7 @@ use App\Domain\HttpClients\ClientHttpInterface;
 use App\Domain\Repositories\UserRepositoryInterface;
 use App\Exceptions\CollectUserByPhoneException;
 use App\Exceptions\UserNotFoundException;
+use App\Factorys\OptionsFactory;
 use App\Jobs\ResponseMessageJob;
 use App\Jobs\sendCodeEmailJob;
 use Exception;
@@ -22,7 +23,6 @@ class WebhookReceiveMessageWahaUseCase
     private Client $IA;
     private UserRepositoryInterface $userRepository;
     private ClientHttpInterface $clientHttp;
-    private OptionChoseUseCase $optionChoseUseCase;
     private array $themes = [
         "1" => 'checkThePointsHitToday',
         "2" => 'CheckIn',
@@ -34,8 +34,7 @@ class WebhookReceiveMessageWahaUseCase
 
     public function __construct(
         UserRepositoryInterface $userRepository,
-        ClientHttpInterface $clientHttp,
-        OptionChoseUseCase $optionChoseUseCase
+        ClientHttpInterface $clientHttp
     ) {
         $this->IA = Gemini::client(env('GEMINIKEY'));
         $this->IA->geminiFlash()->generateContent(
@@ -43,7 +42,6 @@ class WebhookReceiveMessageWahaUseCase
         );
         $this->userRepository = $userRepository;
         $this->clientHttp = $clientHttp;
-        $this->optionChoseUseCase = $optionChoseUseCase;
     }
 
     public function webhookReceiveMessage(array $payload)
@@ -81,14 +79,13 @@ class WebhookReceiveMessageWahaUseCase
                 // Verifica se o usuário já se autenticou
                 if ($user->getIsAuth()) {
                     // Validação da mensagem
-                    $validation = $this->maliciousMessageValidation($number, $message);
-                    if ($validation) {
+                    //$validation = $this->maliciousMessageValidation($number, $message);
+                    if (true) {
                         // Se enviar uma opção valida
                         if (array_key_exists($message, $this->themes)) {
                             $option = $message;
-                            $method = $this->themes[$option];
-                            $this->optionChoseUseCase->$method();
-
+                            $choice = $this->themes[$option];
+                            $this->dispatchOption($user, $choice);
                         } else {
                             $this->sendMessage($number, $messageId, EventsWahaEnum::MESSAGERESEND, 2);
                             $this->sendMessage($number, $messageId, EventsWahaEnum::SCOPE, 2);
@@ -158,6 +155,12 @@ class WebhookReceiveMessageWahaUseCase
         return false;
     }
 
+    public function dispatchOption(UserEntity $user, string $choice)
+    {
+        $OptionUseCase = OptionsFactory::getOptions($choice);
+        $OptionUseCase->receive($user);
+    }
+
     public function sendMessage(string $number, string $messageId, string $message, int $delay = 0)
     {
         try {
@@ -216,10 +219,9 @@ class WebhookReceiveMessageWahaUseCase
                 return false;
             }
             $validation = json_decode($validation->text(), true);
-
             Log::info('VALIDATION SUCCESS', ['message' => $validation]);
 
-            if ($validation['its_okay']) {
+            if (!empty($validation['its_okay']) && $validation['its_okay']) {
                 return true;
             }
             return false;
@@ -271,11 +273,5 @@ class WebhookReceiveMessageWahaUseCase
             $this->clientHttp->sendError($number, EventsWahaEnum::MESSAGENOTUNDERSTOOD);
             return false;
         }
-    }
-
-    public function options(string $case)
-    {
-
-        // CASE DE OPÇÔES
     }
 }

@@ -20,7 +20,7 @@ use Illuminate\Support\Facades\Route;
 Route::post('/login', [UsersControllers::class, 'login']);
 
 // Core
-Route::group(['middleware' => 'jwt'], function(){
+Route::group(['middleware' => 'jwt'], function () {
     Route::post('/create-user', [UsersControllers::class, 'createUser']);
     Route::get('/all-users', [UsersControllers::class, 'getAllUsers']);
     Route::put('/change-role-user/{uuid}', [UsersControllers::class, 'changeRoleUser']);
