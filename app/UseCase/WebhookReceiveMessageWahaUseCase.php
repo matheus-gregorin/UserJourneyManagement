@@ -87,6 +87,7 @@ class WebhookReceiveMessageWahaUseCase
                         ]);
                         $this->sendMessage($number, $messageId, EventsWahaEnum::SCOPE, 2);
                         return true;
+
                     } elseif (array_key_exists($message, $this->themes)) {
                         $option = $message;
                         $choice = $this->themes[$option];
@@ -97,7 +98,9 @@ class WebhookReceiveMessageWahaUseCase
                             'option' => $option,
                             'choice' => $choice
                         ]);
-                        $this->dispatchOption($user, $choice);
+                        $this->dispatchOption($user, $choice, $number, $messageId);
+                        return true;
+
                     } else {
                         Log::info('MESSAGE NOT UNDERSTOOD', [
                             'message' => $message,
@@ -165,10 +168,15 @@ class WebhookReceiveMessageWahaUseCase
         return false;
     }
 
-    public function dispatchOption(UserEntity $user, string $choice)
+    public function dispatchOption(UserEntity $user, string $choice, string $number, $messageId)
     {
+        Log::info(
+            "OPTION SELECTED: ", [
+                "choice" => $choice
+            ]
+        );
         $OptionUseCase = OptionsFactory::getOptions($choice);
-        $OptionUseCase->receive($user);
+        $OptionUseCase->receive($user, $number, $messageId);
     }
 
     public function sendMessage(string $number, string $messageId, string $message, int $delay = 0)
