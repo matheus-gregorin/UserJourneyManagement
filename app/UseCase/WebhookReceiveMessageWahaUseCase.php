@@ -85,9 +85,18 @@ class WebhookReceiveMessageWahaUseCase
                             'username' => $user->getName(),
                             'is_auth' => $user->getIsAuth()
                         ]);
+                        // ZERAR O SCOPO DELE AQUI
                         $this->sendMessage($number, $messageId, EventsWahaEnum::SCOPE, 2);
                         return true;
+
+                    } elseif ($user->getScope()) {
+
+                        dd("User já tem um scopo", $user->getScope());
+
                     } elseif (array_key_exists($message, $this->themes)) {
+
+                        dd("Sem scopo, mas escolheu uma opção valida", $message, $this->themes[$message]);
+
                         $option = $message;
                         $choice = $this->themes[$option];
 

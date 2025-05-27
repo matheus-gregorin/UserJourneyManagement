@@ -32,6 +32,8 @@ class UserMysqlModel extends Model
         'email',
         'password',
         'is_auth',
+        'otp',
+        'scope',
         'phone',
         'is_admin',
         'role'

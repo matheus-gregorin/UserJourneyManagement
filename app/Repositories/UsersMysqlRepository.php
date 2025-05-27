@@ -137,18 +137,27 @@ class UsersMysqlRepository implements UserRepositoryInterface
 
         $password = $removePass ? "" : $UserMysqlModel->password;
 
-        return new UserEntity(
+        $user = new UserEntity(
             $UserMysqlModel->uuid,
             $UserMysqlModel->name,
             $UserMysqlModel->email,
             $password,
             $UserMysqlModel->is_auth,
-            $UserMysqlModel->otp,
             $UserMysqlModel->phone,
             $UserMysqlModel->is_admin,
             $UserMysqlModel->role,
             $UserMysqlModel->updated_at,
             $UserMysqlModel->created_at
         );
+
+        if (!empty($UserMysqlModel->otp)) {
+            $user->setOtpCode($UserMysqlModel->otp);
+        }
+
+        if (!empty($UserMysqlModel->scope)) {
+            $user->setScope($UserMysqlModel->scope);
+        }
+
+        return $user;
     }
 }

@@ -18,7 +18,9 @@ class UserEntity
 
     private bool $isAuth;
 
-    private ?string $otpCode;
+    private ?string $otpCode = "";
+
+    private ?string $scope = "";
 
     private string $phone;
 
@@ -36,7 +38,6 @@ class UserEntity
         string $email,
         string $password,
         bool $isAuth,
-        ?string $otpCode,
         string $phone,
         bool $isAdmin,
         string $role,
@@ -49,7 +50,6 @@ class UserEntity
         $this->email = $email;
         $this->password = $password;
         $this->isAuth = $isAuth;
-        $this->otpCode = $otpCode;
         $this->phone = $phone;
         $this->isAdmin = $isAdmin;
         $this->role = $this->enterPermission($role);
@@ -119,6 +119,17 @@ class UserEntity
     public function setOtpCode(string $otpCode)
     {
         $this->otpCode = $otpCode;
+        return $this;
+    }
+
+    public function getScope()
+    {
+        return $this->scope;
+    }
+
+    public function setScope(?string $scope)
+    {
+        $this->scope = $scope;
         return $this;
     }
 
@@ -230,6 +241,7 @@ class UserEntity
             "password" => $this->getPassword(),
             "is_auth" => $this->getIsAuth(),
             "otp_code" => $this->getOtpCode(),
+            "scope" => $this->getScope(),
             "phone" => $this->getPhone(),
             "is_admin" => $this->getIsAdmin(),
             "role" => $this->getRole(),

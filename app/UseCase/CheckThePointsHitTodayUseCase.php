@@ -23,6 +23,9 @@ class CheckThePointsHitTodayUseCase implements OptionUseCaseInterface
     public function receive(UserEntity $user, string $number, ?string $messageId = null)
     {
         try {
+
+            dd($user->getScope());
+
             $now = new DateTime();
             $points = $this->pointRepository->getByUserUuidWithDates($user->getUuid(), (clone $now)->setTime(0, 0, 0)->format('Y-m-d H:i:s'), (clone $now)->setTime(23, 59, 0)->format('Y-m-d H:i:s'));
             $this->sendMessage($number, $messageId, 'Colaborador: ' . $user->getName() .".", 0);
@@ -45,6 +48,11 @@ class CheckThePointsHitTodayUseCase implements OptionUseCaseInterface
             Log::info($e->getMessage());
             $this->sendMessage($number, $messageId, "Sem pontos batidos no dia de hoje.", 1);
         }
+    }
+
+    public function setScopeUser(UserEntity $user)
+    {
+        
     }
 
     public function sendMessage(string $number, string $messageId, string $message, int $delay = 0)
