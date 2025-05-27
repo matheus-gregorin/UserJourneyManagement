@@ -87,7 +87,6 @@ class WebhookReceiveMessageWahaUseCase
                         ]);
                         $this->sendMessage($number, $messageId, EventsWahaEnum::SCOPE, 2);
                         return true;
-
                     } elseif (array_key_exists($message, $this->themes)) {
                         $option = $message;
                         $choice = $this->themes[$option];
@@ -100,7 +99,6 @@ class WebhookReceiveMessageWahaUseCase
                         ]);
                         $this->dispatchOption($user, $choice, $number, $messageId);
                         return true;
-
                     } else {
                         Log::info('MESSAGE NOT UNDERSTOOD', [
                             'message' => $message,
@@ -171,7 +169,8 @@ class WebhookReceiveMessageWahaUseCase
     public function dispatchOption(UserEntity $user, string $choice, string $number, $messageId)
     {
         Log::info(
-            "OPTION SELECTED: ", [
+            "OPTION SELECTED: ",
+            [
                 "choice" => $choice
             ]
         );
@@ -274,6 +273,7 @@ class WebhookReceiveMessageWahaUseCase
 
                 $this->sendMessage($number, $messageId, $user->getName() . EventsWahaEnum::AWAIT, 0);
                 $this->sendMessage($number, $messageId, EventsWahaEnum::AUTHSUCCESS, 1);
+                $this->sendMessage($number, $messageId, EventsWahaEnum::MENU, 1);
                 $this->sendMessage($number, $messageId, EventsWahaEnum::SCOPE, 2);
 
                 Log::info('USER REQUEST AUTH SUCCESS', [

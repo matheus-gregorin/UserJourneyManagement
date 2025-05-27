@@ -7,6 +7,7 @@ use App\Domain\Repositories\CheckThePointsHitTodayUseCaseInterface;
 use App\Domain\Repositories\OptionUseCaseInterface;
 use App\Domain\Repositories\PointRepositoryInterface;
 use App\Jobs\ResponseMessageJob;
+use DateTime;
 use Exception;
 use Illuminate\Support\Facades\Log;
 
@@ -22,11 +23,21 @@ class CheckThePointsHitTodayUseCase implements OptionUseCaseInterface
     public function receive(UserEntity $user, string $number, ?string $messageId = null)
     {
         try {
-            $points = $this->pointRepository->getByUserUuidWithDates($user->getUuid(), date('2025-05-23 00:00:00'), date('2025-05-23 23:59:59'));
-            $this->sendMessage($number, $messageId, 'Colaborador: ' . $user->getName() . ', pontos de hoje:', 0);
+            $now = new DateTime();
+            $points = $this->pointRepository->getByUserUuidWithDates($user->getUuid(), (clone $now)->setTime(0, 0, 0)->format('Y-m-d H:i:s'), (clone $now)->setTime(23, 59, 0)->format('Y-m-d H:i:s'));
+            $this->sendMessage($number, $messageId, 'Colaborador: ' . $user->getName() .".", 0);
+            $this->sendMessage($number, $messageId, 'Pontos do dia:', 0);
             $text = "";
-            foreach ($points as $point) {
-                $text = $text . "Data/Hora: " . $point['date'] . PHP_EOL;
+            $indices = [
+                0 => "_*Entrada:*_",
+                1 => "_*Almoço (Início):*_",
+                2 => "_*Almoço (Fim):*_",
+                3 => "_*Saída:*_",
+                4 => "_*Observação:*_"
+            ];
+            foreach ($points as $i => $point) {
+                $index = array_key_exists($i, $indices) ? $indices[$i] : $indices[4];
+                $text = $text . $index . " " . $point['date'] . PHP_EOL;
             }
             $this->sendMessage($number, $messageId, $text, 1);
             return true;

@@ -18,6 +18,8 @@ enum EventsWahaEnum
 
     public const HI = "Olá, ";
 
+    public const MENU = "Lembrando que a qualquer momento você pode enviar a mensagem *menu*, que nós retornamos ao começo.";
+
     public const USERNOTAUTH = ", tudo bem? Você ainda não está autenticado. Para isso, enviei um codigo no seu email. Por favor, verifique se chegou e me envie o código para que eu possa te ajudar.";
         
     public const MESSAGENOTUNDERSTOOD = "Não foi possivel entender a mensagem, por favor, tente novamente.";
