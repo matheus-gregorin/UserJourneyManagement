@@ -10,6 +10,7 @@ use App\Exceptions\CollectUserByUuidException;
 use App\Exceptions\NotContentUsersException;
 use App\Exceptions\UpdateOtpException;
 use App\Exceptions\UpdateRoleException;
+use App\Exceptions\UpdateScopeException;
 use App\Exceptions\UserNotCreatedException;
 use App\Exceptions\UserNotFoundException;
 use App\Models\UserMysqlModel;
@@ -124,6 +125,20 @@ class UsersMysqlRepository implements UserRepositoryInterface
         } catch (Exception $e) {
             Log::critical("Error in update otp: ", ['message' => $e->getMessage()]);
             throw new UpdateOtpException("Error in update otp: " . $e->getMessage(), 400);
+        }
+    }
+
+    public function updateScopeOfTheUser(UserEntity $user, string $scope)
+    {
+        try {
+            $userModel = $this->UserMysqlModel::where('uuid', $user->getUuid())->first();
+            $userModel->scope = $scope;
+            $userModel->save();
+
+            return $user;
+        } catch (Exception $e) {
+            Log::critical("Error in update scope: ", ['message' => $e->getMessage()]);
+            throw new UpdateScopeException("Error in update scope: " . $e->getMessage(), 400);
         }
     }
 

@@ -8,6 +8,7 @@ use App\Domain\Enums\ValidationIAEnum;
 use App\Domain\HttpClients\ClientHttpInterface;
 use App\Domain\Repositories\UserRepositoryInterface;
 use App\Exceptions\CollectUserByPhoneException;
+use App\Exceptions\UpdateScopeException;
 use App\Exceptions\UserNotFoundException;
 use App\Factorys\OptionsFactory;
 use App\Jobs\ResponseMessageJob;
@@ -23,13 +24,25 @@ class WebhookReceiveMessageWahaUseCase
     private Client $IA;
     private UserRepositoryInterface $userRepository;
     private ClientHttpInterface $clientHttp;
-    private array $themes = [
+    private array $scopes = [
         "1" => 'checkThePointsHitToday',
         "2" => 'CheckIn',
         "3" => 'clockOutForLunch',
         "4" => 'clockBackFromLunch',
         "5" => 'CheckOut',
         "6" => 'Support'
+    ];
+
+    private array $options = [
+        'checkThePointsHitToday' => [
+            "1" => 'sendEmailPdf',
+            "2" => 'returnToMenu'
+        ],
+        'CheckIn',
+        'clockOutForLunch',
+        'clockBackFromLunch',
+        'CheckOut',
+        'Support'
     ];
 
     public function __construct(
@@ -85,28 +98,43 @@ class WebhookReceiveMessageWahaUseCase
                             'username' => $user->getName(),
                             'is_auth' => $user->getIsAuth()
                         ]);
-                        // ZERAR O SCOPO DELE AQUI
+                        $this->userRepository->updateScopeOfTheUser($user, "");
                         $this->sendMessage($number, $messageId, EventsWahaEnum::SCOPE, 2);
                         return true;
+                    } elseif (!empty($user->getScope())) {
 
-                    } elseif ($user->getScope()) {
+                        Log::info("USER CONTAIN SCOPE", [
+                            'username' => $user->getName(),
+                            'number' => $number,
+                            'scope' => $user->getScope()
+                        ]);
 
-                        dd("User já tem um scopo", $user->getScope());
+                        $scopeCurrent = $user->getScope();
+                        $option = $this->options[$scopeCurrent];
+                        if (array_key_exists($message, $option)) {
+                            $option = $option[$message];
+                            $this->dispatchOption($user, $scopeCurrent, $option, $number, $messageId);
+                            return true;
+                        }
 
-                    } elseif (array_key_exists($message, $this->themes)) {
-
-                        dd("Sem scopo, mas escolheu uma opção valida", $message, $this->themes[$message]);
+                        Log::info('MESSAGE NOT UNDERSTOOD', [
+                            'message' => $message,
+                            'user' => json_encode($user->toArray())
+                        ]);
+                        throw new Exception('MESSAGE NOT UNDERSTOOD');
+                    } elseif (empty($user->getScope()) && array_key_exists($message, $this->scopes)) {
 
                         $option = $message;
-                        $choice = $this->themes[$option];
+                        $scope = $this->scopes[$option];
 
-                        Log::info('USER REQUEST OPTION', [
+                        Log::info('USER NOT CONTAIN SCOPE, INIT', [
                             'username' => $user->getName(),
                             'is_auth' => $user->getIsAuth(),
                             'option' => $option,
-                            'choice' => $choice
+                            'scope' => $scope
                         ]);
-                        $this->dispatchOption($user, $choice, $number, $messageId);
+                        $this->userRepository->updateScopeOfTheUser($user, $scope);
+                        $this->dispatchOption($user, $scope, "", $number, $messageId);
                         return true;
                     } else {
                         Log::info('MESSAGE NOT UNDERSTOOD', [
@@ -158,6 +186,13 @@ class WebhookReceiveMessageWahaUseCase
                 ]);
                 $this->clientHttp->sendError($number, EventsWahaEnum::MESSAGENOTUNDERSTOOD);
                 return false;
+            } catch (UpdateScopeException $e) {
+                Log::critical('UPDATED SCOPE EXCEPTION', [
+                    'number' => $number,
+                    'message' => $e->getMessage()
+                ]);
+                $this->clientHttp->sendError($number, EventsWahaEnum::MESSAGENOTUNDERSTOOD);
+                return false;
             } catch (Exception $e) {
                 Log::critical('PROCESS ERROR', [
                     'number' => $number ?? "Not number",
@@ -175,16 +210,24 @@ class WebhookReceiveMessageWahaUseCase
         return false;
     }
 
-    public function dispatchOption(UserEntity $user, string $choice, string $number, $messageId)
+    public function dispatchOption(UserEntity $user, string $scope, string $option = "", string $number, string $messageId,)
     {
         Log::info(
             "OPTION SELECTED: ",
             [
-                "choice" => $choice
+                "scope" => $scope,
+                "option" => $option,
             ]
         );
-        $OptionUseCase = OptionsFactory::getOptions($choice);
-        $OptionUseCase->receive($user, $number, $messageId);
+        $scopeUseCase = OptionsFactory::getOptions($scope);
+
+        if (!empty($option)) {
+            $scopeUseCase->$option($user, $number, $messageId);
+            return true;
+        }
+
+        $scopeUseCase->receive($user, $number, $messageId);
+        return true;
     }
 
     public function sendMessage(string $number, string $messageId, string $message, int $delay = 0)

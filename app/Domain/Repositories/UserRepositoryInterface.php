@@ -25,5 +25,7 @@ interface UserRepositoryInterface
 
     public function authUser(UserEntity $user);
 
+    public function updateScopeOfTheUser(UserEntity $user, string $scope);
+
     public function modelToEntity($userModel): UserEntity|Exception;
 }

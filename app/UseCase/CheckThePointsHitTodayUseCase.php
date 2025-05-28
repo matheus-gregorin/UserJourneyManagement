@@ -3,17 +3,27 @@
 namespace App\UseCase;
 
 use App\Domain\Entities\UserEntity;
+use App\Domain\Enums\EventsWahaEnum;
 use App\Domain\Repositories\CheckThePointsHitTodayUseCaseInterface;
 use App\Domain\Repositories\OptionUseCaseInterface;
 use App\Domain\Repositories\PointRepositoryInterface;
 use App\Jobs\ResponseMessageJob;
 use DateTime;
+use Dom\Entity;
 use Exception;
 use Illuminate\Support\Facades\Log;
 
 class CheckThePointsHitTodayUseCase implements OptionUseCaseInterface
 {
     private PointRepositoryInterface $pointRepository;
+
+    private array $indices = [
+        0 => "_*Entrada:*_",
+        1 => "_*Almoço (Início):*_",
+        2 => "_*Almoço (Fim):*_",
+        3 => "_*Saída:*_",
+        4 => "_*Observação:*_"
+    ];
 
     public function __construct(PointRepositoryInterface $pointRepository)
     {
@@ -22,37 +32,62 @@ class CheckThePointsHitTodayUseCase implements OptionUseCaseInterface
 
     public function receive(UserEntity $user, string $number, ?string $messageId = null)
     {
+        $points = $this->getHitsToDay($user);
+        if (empty($points)) {
+            $this->sendMessage($number, $messageId, "Sem pontos batidos no dia de hoje.", 1);
+            $this->sendMessage($number, $messageId, EventsWahaEnum::HITSTODAYMENU, 1);
+            return true;
+        }
+
         try {
-
-            dd($user->getScope());
-
-            $now = new DateTime();
-            $points = $this->pointRepository->getByUserUuidWithDates($user->getUuid(), (clone $now)->setTime(0, 0, 0)->format('Y-m-d H:i:s'), (clone $now)->setTime(23, 59, 0)->format('Y-m-d H:i:s'));
-            $this->sendMessage($number, $messageId, 'Colaborador: ' . $user->getName() .".", 0);
+            $this->sendMessage($number, $messageId, 'Colaborador: ' . $user->getName() . ".", 0);
             $this->sendMessage($number, $messageId, 'Pontos do dia:', 0);
+
             $text = "";
-            $indices = [
-                0 => "_*Entrada:*_",
-                1 => "_*Almoço (Início):*_",
-                2 => "_*Almoço (Fim):*_",
-                3 => "_*Saída:*_",
-                4 => "_*Observação:*_"
-            ];
             foreach ($points as $i => $point) {
-                $index = array_key_exists($i, $indices) ? $indices[$i] : $indices[4];
+                $index = array_key_exists($i, $this->indices) ? $this->indices[$i] : $this->indices[4];
                 $text = $text . $index . " " . $point['date'] . PHP_EOL;
             }
             $this->sendMessage($number, $messageId, $text, 1);
+
+            $this->sendMessage($number, $messageId, EventsWahaEnum::HITSTODAYMENU, 1);
             return true;
         } catch (Exception $e) {
-            Log::info($e->getMessage());
-            $this->sendMessage($number, $messageId, "Sem pontos batidos no dia de hoje.", 1);
+            Log::info("Erro na receive da CheckThePointsHitTodayUseCase.", ['message' => $e->getMessage()]);
+            $this->sendMessage($number, $messageId, EventsWahaEnum::SERVERERROR, 1);
+            return false;
         }
     }
 
-    public function setScopeUser(UserEntity $user)
+    public function getHitsToDay(UserEntity $user)
     {
-        
+        try {
+            $now = new DateTime();
+            return $this->pointRepository->getByUserUuidWithDates($user->getUuid(), (clone $now)->setTime(0, 0, 0)->format('Y-m-d H:i:s'), (clone $now)->setTime(23, 59, 0)->format('Y-m-d H:i:s'));
+        } catch (Exception $e) {
+            Log::info('Erro ao buscar pontos batidos hoje: ', [
+                'uuid' => $user->getUuid(),
+                'message' => $e->getMessage()
+            ]);
+            return [];
+        }
+    }
+
+    public function sendEmailPdf(UserEntity $user, string $number, ?string $messageId = null)
+    {
+        $points = $this->getHitsToDay($user);
+        if (empty($points)) {
+            dd("Enviando email com pontos nulos", $points);
+            // Manda email com os pontos nulos
+            return true;
+        }
+        dd("Enviando email com pontos", $points);
+        // Aqui você pode implementar a lógica para enviar o PDF por email
+    }
+
+    public function returnToMenu(UserEntity $user, string $number, ?string $messageId = null)
+    {
+        dd("Dentro do return to menu");
     }
 
     public function sendMessage(string $number, string $messageId, string $message, int $delay = 0)
