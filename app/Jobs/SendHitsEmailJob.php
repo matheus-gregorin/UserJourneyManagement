@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use App\Mail\HitsMail;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Exception;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
@@ -53,7 +54,17 @@ class SendHitsEmailJob implements ShouldQueue
                 'code' => $this->hits
             ]);
 
-            Mail::to($this->email)->send(new HitsMail($this->name, $this->hits));
+            // 1. Gerar o conteúdo HTML da view PDF
+            $html = view('hits', [
+                'username' => $this->name,
+                'hits' => $this->hits
+            ])->render();
+
+            $pdf = Pdf::loadHtml($html);
+            $pdf->setPaper('A4', 'portrait');
+            $pdfContent = $pdf->output(); // Obtém o conteúdo do PDF
+
+            Mail::to($this->email)->send(new HitsMail($this->name, $this->hits, $pdfContent));
 
             Log::info('Send hits email success', [
                 'email' => $this->email,

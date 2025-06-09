@@ -84,7 +84,16 @@ class CheckThePointsHitTodayUseCase implements OptionUseCaseInterface
     {
         $points = $this->getHitsToDay($user);
         $this->sendEmail($user, $points, 0);
-        dd("Enviando email com pontos", $points);
+        $this->sendMessage($number, $messageId, "Enviamos o email com o pdf ao seu email: " . $user->getEmail() , 0);
+                $this->sendMessage($number, $messageId, "Retornando ao menu..." , 0);
+        $this->returnToMenu($user, $number, $messageId);
+        Log::info('Email enviado com sucesso', [
+            'uuid' => $user->getUuid(),
+            'email' => $user->getEmail(),
+            'number' => $number,
+            'messageId' => $messageId
+        ]);
+        return true;
     }
 
     public function returnToMenu(UserEntity $user, string $number, ?string $messageId = null)

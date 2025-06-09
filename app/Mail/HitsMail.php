@@ -5,6 +5,7 @@ namespace App\Mail;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
+use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
@@ -15,6 +16,7 @@ class HitsMail extends Mailable
 
     private string $username;
     private array $hits;
+    public ?string $pdfContent;
 
     /**
      * Create a new message instance.
@@ -23,10 +25,12 @@ class HitsMail extends Mailable
      */
     public function __construct(
         string $username,
-        array $hits
+        array $hits,
+        ?string $pdfContent = null
     ) {
         $this->username = $username;
         $this->hits = $hits;
+        $this->pdfContent = $pdfContent;
     }
 
     /**
@@ -62,8 +66,15 @@ class HitsMail extends Mailable
      *
      * @return array
      */
-    public function attachments()
+    public function attachments(): array
     {
-        return [];
+        $attachments = [];
+
+        if ($this->pdfContent) {
+            $attachments[] = Attachment::fromData(fn() => $this->pdfContent, 'relatorio_pontos.pdf')
+                ->withMime('application/pdf');
+        }
+
+        return $attachments;
     }
 }
