@@ -9,6 +9,8 @@ use App\Domain\Repositories\OptionUseCaseInterface;
 use App\Domain\Repositories\PointRepositoryInterface;
 use App\Domain\Repositories\UserRepositoryInterface;
 use App\Jobs\ResponseMessageJob;
+use App\Jobs\sendCodeEmailJob;
+use App\Jobs\SendHitsEmailJob;
 use DateTime;
 use Dom\Entity;
 use Exception;
@@ -31,8 +33,7 @@ class CheckThePointsHitTodayUseCase implements OptionUseCaseInterface
     public function __construct(
         PointRepositoryInterface $pointRepository,
         UserRepositoryInterface $userRepository
-    )
-    {
+    ) {
         $this->pointRepository = $pointRepository;
         $this->userRepository = $userRepository;
     }
@@ -82,13 +83,8 @@ class CheckThePointsHitTodayUseCase implements OptionUseCaseInterface
     public function sendEmailPdf(UserEntity $user, string $number, ?string $messageId = null)
     {
         $points = $this->getHitsToDay($user);
-        if (empty($points)) {
-            dd("Enviando email com pontos nulos", $points);
-            // Manda email com os pontos nulos
-            return true;
-        }
+        $this->sendEmail($user, $points, 0);
         dd("Enviando email com pontos", $points);
-        // Aqui você pode implementar a lógica para enviar o PDF por email
     }
 
     public function returnToMenu(UserEntity $user, string $number, ?string $messageId = null)
@@ -101,6 +97,26 @@ class CheckThePointsHitTodayUseCase implements OptionUseCaseInterface
         $this->userRepository->updateScopeOfTheUser($user, "");
         $this->sendMessage($number, $messageId, EventsWahaEnum::SCOPE, 1);
         return true;
+    }
+
+    public function sendEmail(UserEntity $user, array $hits, int $delay = 0)
+    {
+        try {
+            // Envia o email aqui
+            SendHitsEmailJob::dispatch(
+                $user->getEmail(),
+                $user->getName(),
+                $hits
+            )->delay(now()->addSeconds($delay));
+            return true;
+        } catch (Exception $e) {
+            Log::info('SEND EMAIL ERROR', [
+                'username' => $user->getName(),
+                'email' => $user->getEmail(),
+                'otp' => $hits,
+                'error' => $e->getMessage()
+            ]);
+        }
     }
 
     public function sendMessage(string $number, string $messageId, string $message, int $delay = 0)
