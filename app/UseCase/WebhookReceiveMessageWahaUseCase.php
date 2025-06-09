@@ -25,7 +25,9 @@ class WebhookReceiveMessageWahaUseCase
     private UserRepositoryInterface $userRepository;
     private ClientHttpInterface $clientHttp;
     private array $scopes = [
-        "1" => 'checkThePointsHitToday',
+        "1" => [
+            'checkThePointsHitToday'
+        ],
         "2" => 'CheckIn',
         "3" => 'clockOutForLunch',
         "4" => 'clockBackFromLunch',
@@ -37,12 +39,7 @@ class WebhookReceiveMessageWahaUseCase
         'checkThePointsHitToday' => [
             "1" => 'sendEmailPdf',
             "2" => 'returnToMenu'
-        ],
-        'CheckIn',
-        'clockOutForLunch',
-        'clockBackFromLunch',
-        'CheckOut',
-        'Support'
+        ]
     ];
 
     public function __construct(
@@ -66,66 +63,63 @@ class WebhookReceiveMessageWahaUseCase
         if ($event == EventsWahaEnum::MESSAGE) {
             try {
 
-                $number = !empty($payload['payload']['from']) ? $payload['payload']['from'] : false;
-                if (!$number) {
-                    Log::info('NUMBER NOT FOUND', ['payload' => $payload]);
-                    return false;
+                // Valid Payload
+                $handledPayload = $this->validPayload($payload);
+                if (!$handledPayload) {
+                    Log::info('PAYLOAD NOT VALID', ['payload' => $payload]);
+                    return true;
                 }
-                Log::info('NUMBER', ['number' => $number]);
-
-                $messageId = !empty($payload['payload']['id']) ? $payload['payload']['id'] : false;
-                if (!$messageId) {
-                    throw new Exception('Message ID not found');
-                }
-                Log::info('MESSAGE ID', ['messageId' => $messageId]);
-
-                $message = !empty($payload['payload']['body']) ? $payload['payload']['body'] : false;
-                if (!$message) {
-                    throw new Exception('Message not found');
-                }
-                Log::info('MESSAGE RECEIVE', ['messageReceive' => $message]);
 
                 // Quebra a string a partir do @ e coleta o primeiro elemento, que é o número do telefone
-                $numberSearch = explode('@', $number)[0];
+                $numberSearch = explode('@', $handledPayload['number'])[0];
                 $user = $this->userRepository->getUserWithPhoneNumber($numberSearch);
 
                 // Verifica se o usuário já se autenticou
                 if ($user->getIsAuth()) {
 
                     // Se enviar uma opção valida
-                    if (strtoupper($message) == "MENU") {
+                    if (strtoupper($handledPayload['message']) == "MENU") {
                         Log::info('USER REQUEST MENU', [
                             'username' => $user->getName(),
                             'is_auth' => $user->getIsAuth()
                         ]);
                         $this->userRepository->updateScopeOfTheUser($user, "");
-                        $this->sendMessage($number, $messageId, EventsWahaEnum::SCOPE, 2);
+                        $this->sendMessage($handledPayload['number'], $handledPayload['messageId'], EventsWahaEnum::SCOPE, 2);
                         return true;
                     } elseif (!empty($user->getScope())) {
 
                         Log::info("USER CONTAIN SCOPE", [
                             'username' => $user->getName(),
-                            'number' => $number,
+                            'number' => $handledPayload['number'],
                             'scope' => $user->getScope()
                         ]);
 
                         $scopeCurrent = $user->getScope();
-                        $option = $this->options[$scopeCurrent];
-                        if (array_key_exists($message, $option)) {
-                            $option = $option[$message];
-                            $this->dispatchOption($user, $scopeCurrent, $option, $number, $messageId);
-                            return true;
+                        $option = "";
+                        if (array_key_exists($handledPayload['message'], $this->options[$scopeCurrent])) {
+                            $option = $this->options[$scopeCurrent][$handledPayload['message']];
+                        } else {
+                            Log::info('USER SCOPE NOT CONTAIN OPTION', [
+                                'username' => $user->getName(),
+                                'is_auth' => $user->getIsAuth(),
+                                'scope' => $scopeCurrent,
+                                'option' => $handledPayload['message']
+                            ]);
+                            throw new Exception('MESSAGE NOT UNDERSTOOD');
                         }
 
-                        Log::info('MESSAGE NOT UNDERSTOOD', [
-                            'message' => $message,
-                            'user' => json_encode($user->toArray())
-                        ]);
-                        throw new Exception('MESSAGE NOT UNDERSTOOD');
-                    } elseif (empty($user->getScope()) && array_key_exists($message, $this->scopes)) {
+                        $this->dispatchOption($user, $scopeCurrent, $option, $handledPayload['number'], $handledPayload['messageId']);
+                        return true;
 
-                        $option = $message;
-                        $scope = $this->scopes[$option];
+                    } elseif (empty($user->getScope()) && array_key_exists($handledPayload['message'], $this->scopes)) {
+
+                        $option = $handledPayload['message'];
+                        $scopes = $this->scopes[$option];
+
+                        $scope = '';
+                        foreach ($scopes as $scopeCurrent => $values) {
+                            $scope = $scopeCurrent;
+                        }
 
                         Log::info('USER NOT CONTAIN SCOPE, INIT', [
                             'username' => $user->getName(),
@@ -134,11 +128,11 @@ class WebhookReceiveMessageWahaUseCase
                             'scope' => $scope
                         ]);
                         $this->userRepository->updateScopeOfTheUser($user, $scope);
-                        $this->dispatchOption($user, $scope, "", $number, $messageId);
+                        $this->dispatchOption($user, $scope, "", $handledPayload['number'], $handledPayload['messageId']);
                         return true;
                     } else {
                         Log::info('MESSAGE NOT UNDERSTOOD', [
-                            'message' => $message,
+                            'message' => $handledPayload['message'],
                             'user' => json_encode($user->toArray())
                         ]);
                         throw new Exception('MESSAGE NOT UNDERSTOOD');
@@ -147,15 +141,15 @@ class WebhookReceiveMessageWahaUseCase
                 } else {
 
                     // Faz a autenticação
-                    if (str_contains($message, 'OTPU')) {
-                        $auth = $this->AuthUserByCodeOtp($user, $message, $number, $messageId);
+                    if (str_contains($handledPayload['message'], 'OTPU')) {
+                        $auth = $this->AuthUserByCodeOtp($user, $handledPayload['message'], $handledPayload['number'], $handledPayload['messageId']);
                         if ($auth) {
                             return true;
                         }
                     }
-                    if (!str_contains($message, 'OTPU')) {
+                    if (!str_contains($handledPayload['message'], 'OTPU')) {
                         // Inicia o processo de autenticação enviando mensagem de boas vindas mais código OTP
-                        $this->sendMessage($number, $messageId, EventsWahaEnum::HI . $user->getName() . EventsWahaEnum::USERNOTAUTH, 2);
+                        $this->sendMessage($handledPayload['number'], $handledPayload['messageId'], EventsWahaEnum::HI . $user->getName() . EventsWahaEnum::USERNOTAUTH, 2);
                     }
 
                     // Criar codigo de autenticação
@@ -174,31 +168,31 @@ class WebhookReceiveMessageWahaUseCase
                 }
             } catch (UserNotFoundException $e) {
                 Log::critical('USER NOT FOUND EXCEPTION', [
-                    'number' => $number,
+                    'number' => $handledPayload['number'],
                     'message' => $e->getMessage()
                 ]);
-                $this->clientHttp->sendError($number, EventsWahaEnum::USERNOTFOUND);
+                $this->clientHttp->sendError($handledPayload['number'], EventsWahaEnum::USERNOTFOUND);
                 return false;
             } catch (CollectUserByPhoneException $e) {
                 Log::critical('COLLECT USER BY PHONE EXCEPTION', [
-                    'number' => $number,
+                    'number' => $handledPayload['number'],
                     'message' => $e->getMessage()
                 ]);
-                $this->clientHttp->sendError($number, EventsWahaEnum::MESSAGENOTUNDERSTOOD);
+                $this->clientHttp->sendError($handledPayload['number'], EventsWahaEnum::MESSAGENOTUNDERSTOOD);
                 return false;
             } catch (UpdateScopeException $e) {
                 Log::critical('UPDATED SCOPE EXCEPTION', [
-                    'number' => $number,
+                    'number' => $handledPayload['number'],
                     'message' => $e->getMessage()
                 ]);
-                $this->clientHttp->sendError($number, EventsWahaEnum::MESSAGENOTUNDERSTOOD);
+                $this->clientHttp->sendError($handledPayload['number'], EventsWahaEnum::MESSAGENOTUNDERSTOOD);
                 return false;
             } catch (Exception $e) {
                 Log::critical('PROCESS ERROR', [
-                    'number' => $number ?? "Not number",
+                    'number' => $handledPayload['number'] ?? "Not number",
                     'message' => $e->getMessage()
                 ]);
-                $this->clientHttp->sendError($number, EventsWahaEnum::MESSAGENOTUNDERSTOOD);
+                $this->clientHttp->sendError($handledPayload['number'], EventsWahaEnum::MESSAGENOTUNDERSTOOD);
                 return false;
             }
         }
@@ -349,6 +343,40 @@ class WebhookReceiveMessageWahaUseCase
                 'message' => $e->getMessage()
             ]);
             $this->clientHttp->sendError($number, EventsWahaEnum::MESSAGENOTUNDERSTOOD);
+            return false;
+        }
+    }
+
+    public function validPayload(array $payload)
+    {
+        try {
+            $content = [];
+            $number = !empty($payload['payload']['from']) ? $payload['payload']['from'] : false;
+            if (!$number) {
+                Log::info('NUMBER NOT FOUND', ['payload' => $payload]);
+                return false;
+            }
+            $content['number'] = $number;
+            Log::info('NUMBER', ['number' => $content]);
+
+            $messageId = !empty($payload['payload']['id']) ? $payload['payload']['id'] : false;
+            if (!$messageId) {
+                throw new Exception('Message ID not found');
+            }
+            $content['messageId'] = $messageId;
+            Log::info('MESSAGE ID', ['messageId' => $messageId]);
+
+            // Verifica se o payload contém o corpo da mensagem
+            if (empty($payload['payload']['body']) || !is_string($payload['payload']['body']) || $payload['payload']['body'] === "0") {
+                Log::info('MESSAGE NOT FOUND', ['payload' => $payload]);
+                throw new Exception('Message not found');
+            }
+            $content['message'] = $payload['payload']['body'];
+            Log::info('MESSAGE RECEIVE', ['messageReceive' => $payload['payload']['body']]);
+
+            return $content;
+        } catch (Exception $e) {
+            $this->clientHttp->sendError($payload['payload']['from'], EventsWahaEnum::MESSAGENOTUNDERSTOOD);
             return false;
         }
     }

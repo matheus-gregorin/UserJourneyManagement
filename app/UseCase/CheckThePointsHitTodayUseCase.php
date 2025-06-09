@@ -49,7 +49,6 @@ class CheckThePointsHitTodayUseCase implements OptionUseCaseInterface
                 $text = $text . $index . " " . $point['date'] . PHP_EOL;
             }
             $this->sendMessage($number, $messageId, $text, 1);
-
             $this->sendMessage($number, $messageId, EventsWahaEnum::HITSTODAYMENU, 1);
             return true;
         } catch (Exception $e) {
