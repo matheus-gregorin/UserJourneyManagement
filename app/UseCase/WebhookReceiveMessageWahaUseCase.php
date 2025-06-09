@@ -25,9 +25,7 @@ class WebhookReceiveMessageWahaUseCase
     private UserRepositoryInterface $userRepository;
     private ClientHttpInterface $clientHttp;
     private array $scopes = [
-        "1" => [
-            'checkThePointsHitToday'
-        ],
+        "1" => 'checkThePointsHitToday',
         "2" => 'CheckIn',
         "3" => 'clockOutForLunch',
         "4" => 'clockBackFromLunch',
@@ -114,12 +112,7 @@ class WebhookReceiveMessageWahaUseCase
                     } elseif (empty($user->getScope()) && array_key_exists($handledPayload['message'], $this->scopes)) {
 
                         $option = $handledPayload['message'];
-                        $scopes = $this->scopes[$option];
-
-                        $scope = '';
-                        foreach ($scopes as $scopeCurrent => $values) {
-                            $scope = $scopeCurrent;
-                        }
+                        $scope = $this->scopes[$option];
 
                         Log::info('USER NOT CONTAIN SCOPE, INIT', [
                             'username' => $user->getName(),

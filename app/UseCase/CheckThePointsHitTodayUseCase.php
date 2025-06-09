@@ -7,14 +7,17 @@ use App\Domain\Enums\EventsWahaEnum;
 use App\Domain\Repositories\CheckThePointsHitTodayUseCaseInterface;
 use App\Domain\Repositories\OptionUseCaseInterface;
 use App\Domain\Repositories\PointRepositoryInterface;
+use App\Domain\Repositories\UserRepositoryInterface;
 use App\Jobs\ResponseMessageJob;
 use DateTime;
 use Dom\Entity;
 use Exception;
+use Illuminate\Foundation\Auth\User;
 use Illuminate\Support\Facades\Log;
 
 class CheckThePointsHitTodayUseCase implements OptionUseCaseInterface
 {
+    private UserRepositoryInterface $userRepository;
     private PointRepositoryInterface $pointRepository;
 
     private array $indices = [
@@ -25,9 +28,13 @@ class CheckThePointsHitTodayUseCase implements OptionUseCaseInterface
         4 => "_*Observação:*_"
     ];
 
-    public function __construct(PointRepositoryInterface $pointRepository)
+    public function __construct(
+        PointRepositoryInterface $pointRepository,
+        UserRepositoryInterface $userRepository
+    )
     {
         $this->pointRepository = $pointRepository;
+        $this->userRepository = $userRepository;
     }
 
     public function receive(UserEntity $user, string $number, ?string $messageId = null)
@@ -86,7 +93,14 @@ class CheckThePointsHitTodayUseCase implements OptionUseCaseInterface
 
     public function returnToMenu(UserEntity $user, string $number, ?string $messageId = null)
     {
-        dd("Dentro do return to menu");
+        Log::info('Returning to menu for user', [
+            'uuid' => $user->getUuid(),
+            'number' => $number,
+            'messageId' => $messageId
+        ]);
+        $this->userRepository->updateScopeOfTheUser($user, "");
+        $this->sendMessage($number, $messageId, EventsWahaEnum::SCOPE, 1);
+        return true;
     }
 
     public function sendMessage(string $number, string $messageId, string $message, int $delay = 0)
