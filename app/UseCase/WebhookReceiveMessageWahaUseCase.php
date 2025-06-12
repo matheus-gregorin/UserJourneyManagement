@@ -45,9 +45,6 @@ class WebhookReceiveMessageWahaUseCase
         ClientHttpInterface $clientHttp
     ) {
         $this->IA = Gemini::client(env('GEMINIKEY'));
-        $this->IA->geminiFlash()->generateContent(
-            ValidationIAEnum::SETUP
-        );
         $this->userRepository = $userRepository;
         $this->clientHttp = $clientHttp;
     }
@@ -56,6 +53,13 @@ class WebhookReceiveMessageWahaUseCase
     {
 
         Log::info('MESSAGE RECEIVE', ['payload' => $payload]);
+        $send = sendMessage(
+            "5511956558187@c.us",
+            "false_5511951651712@c.us_3F21C4FC29E36870B975",
+            "TESTE",
+            0
+        );
+        dd("Fim", $send);
 
         $event = $payload['event'];
         if ($event == EventsWahaEnum::MESSAGE) {
