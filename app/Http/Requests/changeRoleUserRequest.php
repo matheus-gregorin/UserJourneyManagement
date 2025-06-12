@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests;
 
-use App\Domain\Enums\CodesEnum;
+use Domain\Enums\CodesEnum;
 use App\Http\Responses\ApiResponse;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;

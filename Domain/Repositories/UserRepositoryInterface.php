@@ -1,9 +1,8 @@
 <?php
 
-namespace App\Domain\Repositories;
+namespace Domain\Repositories;
 
-use App\Domain\Entities\UserEntity;
-use App\Exceptions\UpdateOtpException;
+use Domain\Entities\UserEntity;
 use Exception;
 use Illuminate\Database\Eloquent\Collection;
 

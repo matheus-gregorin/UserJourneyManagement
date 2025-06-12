@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Domain\Repositories\UserRepositoryInterface;;
+use Domain\Repositories\UserRepositoryInterface;
 
 class UsersServices
 {

@@ -1,6 +1,6 @@
 <?php
 
-use App\Jobs\ResponseMessageJob;
+use App\Jobs\SendWhatsappMessageJob;
 use Illuminate\Support\Facades\Log;
 
 if (!function_exists('sendMessageWhatsapp')) {
@@ -12,7 +12,7 @@ if (!function_exists('sendMessageWhatsapp')) {
     {
         try {
             // Envia mensagem aqui
-            ResponseMessageJob::dispatch(
+            SendWhatsappMessageJob::dispatch(
                 $number,
                 $messageId,
                 $message

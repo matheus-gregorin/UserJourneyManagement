@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Domain\Entities;
+namespace Domain\Entities;
 
-use App\Domain\Enums\RolesEnum;
+use Domain\Enums\RolesEnum;
 use DateTime;
 
 class UserEntity

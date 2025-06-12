@@ -2,7 +2,7 @@
 
 namespace App\Http\Responses;
 
-use App\Domain\Enums\CodesEnum;
+use Domain\Enums\CodesEnum;
 use Illuminate\Http\JsonResponse;
 
 class ApiResponse

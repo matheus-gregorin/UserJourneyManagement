@@ -2,7 +2,7 @@
 
 namespace App\Jobs;
 
-use App\Domain\HttpClients\ClientHttpInterface;
+use Domain\HttpClients\ClientHttpInterface;
 use Exception;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
@@ -12,7 +12,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 
-class ResponseMessageJob implements ShouldQueue
+class SendWhatsappMessageJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -46,7 +46,7 @@ class ResponseMessageJob implements ShouldQueue
      */
     public function handle(ClientHttpInterface $clientHttp)
     {
-        Log::info('ResponseMessageJob', [
+        Log::info('SendWhatsappMessageJob', [
             'number' => $this->number,
             'messageId' => $this->messageId,
             'response' => $this->response
@@ -61,7 +61,7 @@ class ResponseMessageJob implements ShouldQueue
             $clientHttp->sendResponse($this->number, $this->response);
 
         } catch (Exception $e) {
-            Log::error('Error ResponseMessageJob', [
+            Log::error('Error SendWhatsappMessageJob', [
                 'number' => $this->number,
                 'messageId' => $this->messageId,
                 'response' => $this->response,

@@ -2,9 +2,9 @@
 
 namespace App\Repositories;
 
-use App\Domain\Entities\PointEntity;
-use App\Domain\Repositories\PointRepositoryInterface;
-use App\Domain\Repositories\UserRepositoryInterface;
+use Domain\Entities\PointEntity;
+use Domain\Repositories\PointRepositoryInterface;
+use Domain\Repositories\UserRepositoryInterface;
 use App\Models\PointMysqlModel;
 use Exception;
 use Illuminate\Support\Facades\Log;

@@ -2,8 +2,8 @@
 
 namespace App\Repositories;
 
-use App\Domain\Entities\UserEntity;
-use App\Domain\Repositories\UserRepositoryInterface;
+use Domain\Entities\UserEntity;
+use Domain\Repositories\UserRepositoryInterface;
 use App\Exceptions\CollectUserByPhoneException;
 use App\Exceptions\UpdateOtpException;
 use App\Exceptions\UserNotFoundException;
@@ -114,6 +114,10 @@ class UserMongoDbRepository implements UserRepositoryInterface
             Log::critical("Error in update otp: ", ['message' => $e->getMessage()]);
             throw new UpdateOtpException("Error in update otp: " . $e->getMessage(), 400);
         }
+    }
+
+    public function updateScopeOfTheUser(UserEntity $user, string $scope){
+        // Todo: Implement updateScopeOfTheUser method
     }
 
     public function modelToEntity($UserMongoDbModel, bool $removePass = false): UserEntity|Exception

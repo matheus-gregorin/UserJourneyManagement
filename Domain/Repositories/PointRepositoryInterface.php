@@ -1,8 +1,6 @@
 <?php
 
-namespace App\Domain\Repositories;
-
-use App\Domain\Entities\UserEntity;
+namespace Domain\Repositories;
 
 interface PointRepositoryInterface
 {

@@ -2,7 +2,7 @@
 
 namespace App\Http\HttpClients;
 
-use App\Domain\HttpClients\ClientHttpInterface;
+use Domain\HttpClients\ClientHttpInterface;
 use Exception;
 use GuzzleHttp\Client;
 use Illuminate\Support\Facades\Log;

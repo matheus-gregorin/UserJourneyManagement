@@ -2,9 +2,9 @@
 
 namespace App\UseCase;
 
-use App\Domain\Entities\UserEntity;
-use App\Domain\Enums\EventsWahaEnum;
-use App\Domain\Repositories\UserRepositoryInterface;
+use Domain\Entities\UserEntity;
+use Domain\Enums\EventsWahaEnum;
+use Domain\Repositories\UserRepositoryInterface;
 use App\Exceptions\CollectUserByPhoneException;
 use App\Exceptions\UpdateScopeException;
 use App\Exceptions\UserNotFoundException;

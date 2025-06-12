@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Domain\Repositories;
+namespace Domain\UseCase;
 
-use App\Domain\Entities\UserEntity;
+use Domain\Entities\UserEntity;
 
 interface OptionUseCaseInterface
 {

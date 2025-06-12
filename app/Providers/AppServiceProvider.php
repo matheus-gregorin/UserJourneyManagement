@@ -2,9 +2,9 @@
 
 namespace App\Providers;
 
-use App\Domain\HttpClients\ClientHttpInterface;
-use App\Domain\Repositories\PointRepositoryInterface;
-use App\Domain\Repositories\UserRepositoryInterface;
+use Domain\HttpClients\ClientHttpInterface;
+use Domain\Repositories\PointRepositoryInterface;
+use Domain\Repositories\UserRepositoryInterface;
 use App\Http\HttpClients\WahaHttpClient;
 use App\Http\Responses\ApiResponse;
 use App\Repositories\PointsMysqlRepository;

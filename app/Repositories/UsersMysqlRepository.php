@@ -2,8 +2,8 @@
 
 namespace App\Repositories;
 
-use App\Domain\Entities\UserEntity;
-use App\Domain\Repositories\UserRepositoryInterface;
+use Domain\Entities\UserEntity;
+use Domain\Repositories\UserRepositoryInterface;
 use App\Exceptions\CollectUserByEmailException;
 use App\Exceptions\CollectUserByPhoneException;
 use App\Exceptions\CollectUserByUuidException;

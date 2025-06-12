@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Domain\Enums\CodesEnum;
+use Domain\Enums\CodesEnum;
 use App\Exceptions\CollectUserByPhoneException;
 use App\Exceptions\CollectUserByUuidException;
 use App\Exceptions\CredentialsInvalidException;

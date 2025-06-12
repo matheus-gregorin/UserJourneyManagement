@@ -2,19 +2,15 @@
 
 namespace App\UseCase;
 
-use App\Domain\Entities\UserEntity;
-use App\Domain\Enums\EventsWahaEnum;
-use App\Domain\Repositories\CheckThePointsHitTodayUseCaseInterface;
-use App\Domain\Repositories\OptionUseCaseInterface;
-use App\Domain\Repositories\PointRepositoryInterface;
-use App\Domain\Repositories\UserRepositoryInterface;
-use App\Jobs\ResponseMessageJob;
-use App\Jobs\sendCodeEmailJob;
+use Domain\Entities\UserEntity;
+use Domain\Enums\EventsWahaEnum;
+use Domain\UseCase\OptionUseCaseInterface;
+use Domain\Repositories\PointRepositoryInterface;
+use Domain\Repositories\UserRepositoryInterface;
+use App\Jobs\SendWhatsappMessageJob;
 use App\Jobs\SendHitsEmailJob;
 use DateTime;
-use Dom\Entity;
 use Exception;
-use Illuminate\Foundation\Auth\User;
 use Illuminate\Support\Facades\Log;
 
 class CheckThePointsHitTodayUseCase implements OptionUseCaseInterface
@@ -132,7 +128,7 @@ class CheckThePointsHitTodayUseCase implements OptionUseCaseInterface
     {
         try {
             // Envia mensagem aqui
-            ResponseMessageJob::dispatch(
+            SendWhatsappMessageJob::dispatch(
                 $number,
                 $messageId,
                 $message
