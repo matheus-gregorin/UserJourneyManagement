@@ -2,9 +2,8 @@
 
 namespace App\UseCase;
 
-use App\Domain\Repositories\UserRepositoryInterface;
+use Domain\Repositories\UserRepositoryInterface;
 use App\Exceptions\NotContentUsersException;
-use Exception;
 use Illuminate\Support\Facades\Log;
 
 class GetAllUsersUseCase

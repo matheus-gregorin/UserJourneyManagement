@@ -14,7 +14,7 @@ enum EventsWahaEnum
 
     public const SCOPE = "*Digite o número opção desejada:*\n _1 - Verificar seus pontos batidos hoje_\n_2 - Bater o ponto de entrada_\n_3 - Bater o ponto de saída para almoço_\n_4 - Bater o ponto de volta do almoço_\n_5 - Bater o ponto de saída_\n_6 - Falar com suporte_";
 
-    public const HITSTODAYMENU = "*O que deseja fazer?:*\n_1 - Baixar em PDF o comprovante_\n_2- Retornar ao MENU_";
+    public const HITSTODAYMENU = "*O que deseja fazer?:*\n_1 - Baixar em PDF o comprovante_\n_2 - Retornar ao MENU_";
     
     public const THISUSERNAME = " - Nome do usuário: ";
 

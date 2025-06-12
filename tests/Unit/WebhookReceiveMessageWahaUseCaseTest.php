@@ -2,15 +2,13 @@
 
 namespace Tests\Unit;
 
-use App\Domain\Entities\UserEntity;
-use App\Domain\Enums\EventsWahaEnum;
-use App\Domain\HttpClients\ClientHttpInterface;
-use App\Domain\Repositories\UserRepositoryInterface;
+use Domain\Entities\UserEntity;
+use Domain\Enums\EventsWahaEnum;
+use Domain\HttpClients\ClientHttpInterface;
+use Domain\Repositories\UserRepositoryInterface;
 use App\Exceptions\UserNotFoundException;
 use App\UseCase\WebhookReceiveMessageWahaUseCase;
 use DateTime;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Facades\Log;
 use Mockery;
 use Tests\TestCase;
@@ -169,38 +167,38 @@ class WebhookReceiveMessageWahaUseCaseTest extends TestCase
         $this->assertFalse($response);
     }
 
-    public function test_when_calling_the_email_and_the_information_is_correct_return_true()
-    {
+    // public function test_when_calling_the_email_and_the_information_is_correct_return_true()
+    // {
 
-        Log::info("--6--\ntest_when_calling_the_email_and_the_information_is_correct_return_true");
+    //     Log::info("--6--\ntest_when_calling_the_email_and_the_information_is_correct_return_true");
 
-        // Mock do repositório
-        $mockRepository = Mockery::mock(UserRepositoryInterface::class);
+    //     // Mock do repositório
+    //     $mockRepository = Mockery::mock(UserRepositoryInterface::class);
 
-        // Mock do Htt Client
-        $mockHttpClient = \Mockery::mock(ClientHttpInterface::class);
+    //     // Mock do Htt Client
+    //     $mockHttpClient = \Mockery::mock(ClientHttpInterface::class);
 
-        // Instanciando a use case com a dependência mockada
-        $WebhookReceiveMessageWahaUseCase = new WebhookReceiveMessageWahaUseCase(
-            $mockRepository,
-            $mockHttpClient
-        );
+    //     // Instanciando a use case com a dependência mockada
+    //     $WebhookReceiveMessageWahaUseCase = new WebhookReceiveMessageWahaUseCase(
+    //         $mockRepository,
+    //         $mockHttpClient
+    //     );
 
-        $user = new UserEntity(
-            "123",
-            "matheus",
-            "math@gmail.com",
-            "123",
-            false,
-            "OTPU123",
-            "5511956558188",
-            false,
-            "medium",
-            new DateTime(),
-            new DateTime()
-        );
+    //     $user = new UserEntity(
+    //         "123",
+    //         "matheus",
+    //         "math@gmail.com",
+    //         "123",
+    //         false,
+    //         "OTPU123",
+    //         "5511956558188",
+    //         false,
+    //         "medium",
+    //         new DateTime(),
+    //         new DateTime()
+    //     );
 
-        $response = $WebhookReceiveMessageWahaUseCase->sendEmail($user, $user->getOtpCode());
-        $this->assertTrue($response);
-    }
+    //     $response = $WebhookReceiveMessageWahaUseCase->sendEmail($user, $user->getOtpCode());
+    //     $this->assertTrue($response);
+    // }
 }

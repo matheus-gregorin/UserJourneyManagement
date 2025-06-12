@@ -2,7 +2,7 @@
 
 namespace App\UseCase;
 
-use App\Domain\Repositories\UserRepositoryInterface;
+use Domain\Repositories\UserRepositoryInterface;
 use App\Exceptions\CredentialsInvalidException;
 use Firebase\JWT\JWT;
 use Illuminate\Support\Facades\Hash;

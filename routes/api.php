@@ -1,8 +1,6 @@
 <?php
 
-use App\Http\Controllers\UsersControllers;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\UsersControllers;;
 use Illuminate\Support\Facades\Route;
 
 /*

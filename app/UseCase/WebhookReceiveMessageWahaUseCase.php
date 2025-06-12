@@ -246,7 +246,7 @@ class WebhookReceiveMessageWahaUseCase
                 $user->setIsAuth(true);
                 $this->userRepository->authUser($user);
 
-                sendMessageWhatsapp($number, $messageId, $user->getName() . EventsWahaEnum::AWAIT, 0);
+                // sendMessageWhatsapp($number, $messageId, $user->getName() . EventsWahaEnum::AWAIT, 0);
                 sendMessageWhatsapp($number, $messageId, EventsWahaEnum::AUTHSUCCESS, 0);
                 sendMessageWhatsapp($number, $messageId, EventsWahaEnum::MENU, 1);
                 sendMessageWhatsapp($number, $messageId, EventsWahaEnum::SCOPE, 1);

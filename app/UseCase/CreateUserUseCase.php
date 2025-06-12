@@ -2,8 +2,8 @@
 
 namespace App\UseCase;
 
-use App\Domain\Entities\UserEntity;
-use App\Domain\Repositories\UserRepositoryInterface;
+use Domain\Entities\UserEntity;
+use Domain\Repositories\UserRepositoryInterface;
 use App\Exceptions\UserNotCreatedException;
 use DateTime;
 use Exception;

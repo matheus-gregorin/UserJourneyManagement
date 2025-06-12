@@ -38,22 +38,22 @@ class CheckThePointsHitTodayUseCase implements OptionUseCaseInterface
     {
         $points = $this->getHitsToDay($user);
         if (empty($points)) {
-            $this->sendMessage($number, $messageId, "Sem pontos batidos no dia de hoje.", 1);
+            $this->sendMessage($number, $messageId, "Sem pontos batidos no dia de hoje.", 0);
             $this->sendMessage($number, $messageId, EventsWahaEnum::HITSTODAYMENU, 1);
             return true;
         }
 
         try {
             $this->sendMessage($number, $messageId, 'Colaborador: ' . $user->getName() . ".", 0);
-            $this->sendMessage($number, $messageId, 'Pontos do dia:', 0);
+            $this->sendMessage($number, $messageId, 'Pontos do dia:', 1);
 
             $text = "";
             foreach ($points as $i => $point) {
                 $index = array_key_exists($i, $this->indices) ? $this->indices[$i] : $this->indices[4];
                 $text = $text . $index . " " . $point['date'] . PHP_EOL;
             }
-            $this->sendMessage($number, $messageId, $text, 1);
-            $this->sendMessage($number, $messageId, EventsWahaEnum::HITSTODAYMENU, 1);
+            $this->sendMessage($number, $messageId, $text, 2);
+            $this->sendMessage($number, $messageId, EventsWahaEnum::HITSTODAYMENU, 3);
             return true;
         } catch (Exception $e) {
             Log::info("Erro na receive da CheckThePointsHitTodayUseCase.", ['message' => $e->getMessage()]);
@@ -80,15 +80,18 @@ class CheckThePointsHitTodayUseCase implements OptionUseCaseInterface
     {
         $points = $this->getHitsToDay($user);
         $this->sendEmail($user, $points, 0);
-        $this->sendMessage($number, $messageId, "Enviamos o email com o pdf ao seu email: " . $user->getEmail() , 0);
-                $this->sendMessage($number, $messageId, "Retornando ao menu..." , 0);
-        $this->returnToMenu($user, $number, $messageId);
+
+        sendMessageWhatsapp($number, $messageId, "Enviamos o email com o pdf ao seu email: " . $user->getEmail(), 0);
+        sendMessageWhatsapp($number, $messageId, "Retornando ao menu...", 1);
+
         Log::info('Email enviado com sucesso', [
             'uuid' => $user->getUuid(),
             'email' => $user->getEmail(),
             'number' => $number,
             'messageId' => $messageId
         ]);
+
+        $this->returnToMenu($user, $number, $messageId);
         return true;
     }
 
