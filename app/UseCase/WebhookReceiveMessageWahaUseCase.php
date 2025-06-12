@@ -4,33 +4,23 @@ namespace App\UseCase;
 
 use App\Domain\Entities\UserEntity;
 use App\Domain\Enums\EventsWahaEnum;
-use App\Domain\Enums\ValidationIAEnum;
-use App\Domain\HttpClients\ClientHttpInterface;
 use App\Domain\Repositories\UserRepositoryInterface;
 use App\Exceptions\CollectUserByPhoneException;
 use App\Exceptions\UpdateScopeException;
 use App\Exceptions\UserNotFoundException;
 use App\Factorys\OptionsFactory;
-use App\Jobs\ResponseMessageJob;
 use App\Jobs\sendCodeEmailJob;
 use Exception;
-use Gemini;
-use Gemini\Client;
 use Illuminate\Support\Facades\Log;
 
 class WebhookReceiveMessageWahaUseCase
 {
-
-    private Client $IA;
     private UserRepositoryInterface $userRepository;
-    private ClientHttpInterface $clientHttp;
+
     private array $scopes = [
         "1" => 'checkThePointsHitToday',
         "2" => 'CheckIn',
-        "3" => 'clockOutForLunch',
-        "4" => 'clockBackFromLunch',
-        "5" => 'CheckOut',
-        "6" => 'Support'
+        "3" => 'clockOutForLunch'
     ];
 
     private array $options = [
@@ -42,33 +32,25 @@ class WebhookReceiveMessageWahaUseCase
 
     public function __construct(
         UserRepositoryInterface $userRepository,
-        ClientHttpInterface $clientHttp
     ) {
-        $this->IA = Gemini::client(env('GEMINIKEY'));
         $this->userRepository = $userRepository;
-        $this->clientHttp = $clientHttp;
     }
 
     public function webhookReceiveMessage(array $payload)
     {
 
         Log::info('MESSAGE RECEIVE', ['payload' => $payload]);
-        $send = sendMessage(
-            "5511956558187@c.us",
-            "false_5511951651712@c.us_3F21C4FC29E36870B975",
-            "TESTE",
-            0
-        );
-        dd("Fim", $send);
 
         $event = $payload['event'];
         if ($event == EventsWahaEnum::MESSAGE) {
             try {
 
-                // Valid Payload
+                // Valid Payload receive
                 $handledPayload = $this->validPayload($payload);
                 if (!$handledPayload) {
-                    Log::info('PAYLOAD NOT VALID', ['payload' => $payload]);
+                    Log::info('PAYLOAD NOT IS VALID', [
+                        'payload' => $payload
+                    ]);
                     return true;
                 }
 
@@ -86,7 +68,7 @@ class WebhookReceiveMessageWahaUseCase
                             'is_auth' => $user->getIsAuth()
                         ]);
                         $this->userRepository->updateScopeOfTheUser($user, "");
-                        $this->sendMessage($handledPayload['number'], $handledPayload['messageId'], EventsWahaEnum::SCOPE, 2);
+                        sendMessageWhatsapp($handledPayload['number'], $handledPayload['messageId'], EventsWahaEnum::SCOPE, 0);
                         return true;
                     } elseif (!empty($user->getScope())) {
 
@@ -97,22 +79,20 @@ class WebhookReceiveMessageWahaUseCase
                         ]);
 
                         $scopeCurrent = $user->getScope();
-                        $option = "";
                         if (array_key_exists($handledPayload['message'], $this->options[$scopeCurrent])) {
                             $option = $this->options[$scopeCurrent][$handledPayload['message']];
-                        } else {
-                            Log::info('USER SCOPE NOT CONTAIN OPTION', [
-                                'username' => $user->getName(),
-                                'is_auth' => $user->getIsAuth(),
-                                'scope' => $scopeCurrent,
-                                'option' => $handledPayload['message']
-                            ]);
-                            throw new Exception('MESSAGE NOT UNDERSTOOD');
+                            $this->dispatchOption($user, $scopeCurrent, $option, $handledPayload['number'], $handledPayload['messageId']);
+                            return true;
                         }
 
-                        $this->dispatchOption($user, $scopeCurrent, $option, $handledPayload['number'], $handledPayload['messageId']);
-                        return true;
-
+                        // Se não for uma opção válida, verifica se o usuário tem o escopo atual
+                        Log::info('USER SCOPE NOT CONTAIN OPTION', [
+                            'username' => $user->getName(),
+                            'is_auth' => $user->getIsAuth(),
+                            'scope' => $scopeCurrent,
+                            'option' => $handledPayload['message']
+                        ]);
+                        throw new Exception('MESSAGE NOT UNDERSTOOD');
                     } elseif (empty($user->getScope()) && array_key_exists($handledPayload['message'], $this->scopes)) {
 
                         $option = $handledPayload['message'];
@@ -144,14 +124,17 @@ class WebhookReceiveMessageWahaUseCase
                             return true;
                         }
                     }
+
+                    // Inicia o processo de autenticação enviando mensagem de boas vindas mais código OTP
                     if (!str_contains($handledPayload['message'], 'OTPU')) {
-                        // Inicia o processo de autenticação enviando mensagem de boas vindas mais código OTP
-                        $this->sendMessage($handledPayload['number'], $handledPayload['messageId'], EventsWahaEnum::HI . $user->getName() . EventsWahaEnum::USERNOTAUTH, 2);
+                        sendMessageWhatsapp($handledPayload['number'], $handledPayload['messageId'], EventsWahaEnum::HI . $user->getName() . EventsWahaEnum::USERNOTAUTH, 2);
                     }
 
                     // Criar codigo de autenticação
                     $otp = "OTPU" . rand(100000, 999999);
                     $user->setOtpCode($otp);
+
+                    // Atualiza o usuário com o código OTP
                     $this->userRepository->updateOTP($user);
                     Log::info('USER OTP UPDATE SUCCESS', [
                         'user' => json_encode($user->toArray()),
@@ -168,28 +151,28 @@ class WebhookReceiveMessageWahaUseCase
                     'number' => $handledPayload['number'],
                     'message' => $e->getMessage()
                 ]);
-                $this->clientHttp->sendError($handledPayload['number'], EventsWahaEnum::USERNOTFOUND);
+                sendMessageWhatsapp($handledPayload['number'], $handledPayload['messageId'], EventsWahaEnum::USERNOTFOUND, 0);
                 return false;
             } catch (CollectUserByPhoneException $e) {
                 Log::critical('COLLECT USER BY PHONE EXCEPTION', [
                     'number' => $handledPayload['number'],
                     'message' => $e->getMessage()
                 ]);
-                $this->clientHttp->sendError($handledPayload['number'], EventsWahaEnum::MESSAGENOTUNDERSTOOD);
+                sendMessageWhatsapp($handledPayload['number'], $handledPayload['messageId'], EventsWahaEnum::MESSAGENOTUNDERSTOOD, 0);
                 return false;
             } catch (UpdateScopeException $e) {
                 Log::critical('UPDATED SCOPE EXCEPTION', [
                     'number' => $handledPayload['number'],
                     'message' => $e->getMessage()
                 ]);
-                $this->clientHttp->sendError($handledPayload['number'], EventsWahaEnum::MESSAGENOTUNDERSTOOD);
+                sendMessageWhatsapp($handledPayload['number'], $handledPayload['messageId'], EventsWahaEnum::MESSAGENOTUNDERSTOOD, 0);
                 return false;
             } catch (Exception $e) {
                 Log::critical('PROCESS ERROR', [
                     'number' => $handledPayload['number'] ?? "Not number",
                     'message' => $e->getMessage()
                 ]);
-                $this->clientHttp->sendError($handledPayload['number'], EventsWahaEnum::MESSAGENOTUNDERSTOOD);
+                sendMessageWhatsapp($handledPayload['number'], $handledPayload['messageId'], EventsWahaEnum::MESSAGENOTUNDERSTOOD, 0);
                 return false;
             }
         }
@@ -206,10 +189,15 @@ class WebhookReceiveMessageWahaUseCase
         Log::info(
             "OPTION SELECTED: ",
             [
+                "username" => $user->getName(),
                 "scope" => $scope,
                 "option" => $option,
+                "number" => $number,
+                "messageId" => $messageId
             ]
         );
+
+        // Verifica se o escopo existe e se a opção é válida
         $scopeUseCase = OptionsFactory::getOptions($scope);
 
         if (!empty($option)) {
@@ -219,26 +207,6 @@ class WebhookReceiveMessageWahaUseCase
 
         $scopeUseCase->receive($user, $number, $messageId);
         return true;
-    }
-
-    public function sendMessage(string $number, string $messageId, string $message, int $delay = 0)
-    {
-        try {
-            // Envia mensagem aqui
-            ResponseMessageJob::dispatch(
-                $number,
-                $messageId,
-                $message
-            )->delay(now()->addSeconds($delay));
-            return true;
-        } catch (Exception $e) {
-            Log::info('SEND MESSAGE ERROR', [
-                'number' => $number,
-                'messageId' => $messageId,
-                'message' => $message,
-                'error' => $e->getMessage()
-            ]);
-        }
     }
 
     public function sendEmail(UserEntity $user, string $otp, int $delay = 0)
@@ -261,42 +229,6 @@ class WebhookReceiveMessageWahaUseCase
         }
     }
 
-    public function maliciousMessageValidation(string $number, string $message)
-    {
-        try {
-            $validation = $this->IA->geminiFlash()->generateContent(
-                ValidationIAEnum::VALIDCONTENT .
-                    ValidationIAEnum::RETURNVALIDCONTENT .
-                    $message
-            );
-
-            if (!$validation) {
-                Log::info('VALIDATION MESSAGE FAILED', [
-                    'number' => $number,
-                    'message_validation' => $validation,
-                    'message' => $message
-                ]);
-                return false;
-            }
-            $validation = json_decode($validation->text(), true);
-            Log::info('VALIDATION SUCCESS', ['message' => $validation]);
-
-            if (!empty($validation['its_okay']) && $validation['its_okay']) {
-                return true;
-            }
-            return false;
-        } catch (Exception $e) {
-            Log::critical('VALIDATION MESSAGE ERROR', [
-                'number' => $number,
-                'message_validation' => $validation,
-                'message' => $message,
-                'message' => $e->getMessage()
-            ]);
-            $this->clientHttp->sendError($number, EventsWahaEnum::MESSAGENOTUNDERSTOOD);
-            return false;
-        }
-    }
-
     public function AuthUserByCodeOtp(UserEntity $user, string $message, string $number, string $messageId)
     {
         try {
@@ -314,10 +246,10 @@ class WebhookReceiveMessageWahaUseCase
                 $user->setIsAuth(true);
                 $this->userRepository->authUser($user);
 
-                $this->sendMessage($number, $messageId, $user->getName() . EventsWahaEnum::AWAIT, 0);
-                $this->sendMessage($number, $messageId, EventsWahaEnum::AUTHSUCCESS, 1);
-                $this->sendMessage($number, $messageId, EventsWahaEnum::MENU, 1);
-                $this->sendMessage($number, $messageId, EventsWahaEnum::SCOPE, 2);
+                sendMessageWhatsapp($number, $messageId, $user->getName() . EventsWahaEnum::AWAIT, 0);
+                sendMessageWhatsapp($number, $messageId, EventsWahaEnum::AUTHSUCCESS, 0);
+                sendMessageWhatsapp($number, $messageId, EventsWahaEnum::MENU, 1);
+                sendMessageWhatsapp($number, $messageId, EventsWahaEnum::SCOPE, 1);
 
                 Log::info('USER REQUEST AUTH SUCCESS', [
                     'username' => $user->getName(),
@@ -331,7 +263,7 @@ class WebhookReceiveMessageWahaUseCase
                 'user_code' => $user->getOtpCode(),
                 'message_code' => $message
             ]);
-            $this->clientHttp->sendError($number, EventsWahaEnum::CODEINVALIDRESEND);
+            sendMessageWhatsapp($number, $messageId, EventsWahaEnum::CODEINVALIDRESEND, 0);
             return false;
         } catch (Exception $e) {
             Log::critical('USER REQUEST AUTH FAILED', [
@@ -339,7 +271,7 @@ class WebhookReceiveMessageWahaUseCase
                 'number' => $number,
                 'message' => $e->getMessage()
             ]);
-            $this->clientHttp->sendError($number, EventsWahaEnum::MESSAGENOTUNDERSTOOD);
+            sendMessageWhatsapp($number, $messageId, EventsWahaEnum::MESSAGENOTUNDERSTOOD, 0);
             return false;
         }
     }
@@ -373,7 +305,6 @@ class WebhookReceiveMessageWahaUseCase
 
             return $content;
         } catch (Exception $e) {
-            $this->clientHttp->sendError($payload['payload']['from'], EventsWahaEnum::MESSAGENOTUNDERSTOOD);
             return false;
         }
     }

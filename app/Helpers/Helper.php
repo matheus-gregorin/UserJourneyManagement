@@ -3,12 +3,12 @@
 use App\Jobs\ResponseMessageJob;
 use Illuminate\Support\Facades\Log;
 
-if (!function_exists('sendMessage')) {
+if (!function_exists('sendMessageWhatsapp')) {
     /**
      * Função helper para apresentar um log.
      *
      */
-    function sendMessage(string $number, string $messageId, string $message, int $delay = 0)
+    function sendMessageWhatsapp(string $number, string $messageId, string $message, int $delay = 0)
     {
         try {
             // Envia mensagem aqui

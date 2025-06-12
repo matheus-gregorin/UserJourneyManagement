@@ -56,7 +56,7 @@ class ResponseMessageJob implements ShouldQueue
 
             $clientHttp->sendViewMessage($this->number, $this->messageId);
             $clientHttp->startTyping($this->number);
-            sleep(5);
+            sleep(3);
             $clientHttp->stopTyping($this->number);
             $clientHttp->sendResponse($this->number, $this->response);
 
