@@ -142,7 +142,7 @@ class WebhookReceiveMessageWahaUseCase
                     ]);
 
                     // Envia código para o email
-                    $this->sendEmail($user, $otp, 2);
+                    sendCodeOtpToEmail($user, $otp, 2);
 
                     return true;
                 }

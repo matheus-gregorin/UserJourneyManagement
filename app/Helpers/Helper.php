@@ -1,11 +1,14 @@
 <?php
 
+use App\Jobs\sendCodeEmailJob;
+use App\Jobs\SendHitsEmailJob;
 use App\Jobs\SendWhatsappMessageJob;
+use Domain\Entities\UserEntity;
 use Illuminate\Support\Facades\Log;
 
 if (!function_exists('sendMessageWhatsapp')) {
     /**
-     * Função helper para apresentar um log.
+     * Função helper para enviar mensagem no whatsapp.
      *
      */
     function sendMessageWhatsapp(string $number, string $messageId, array $messages, int $delay = 0)
@@ -35,6 +38,60 @@ if (!function_exists('sendMessageWhatsapp')) {
                 'error' => $e->getMessage()
             ]);
             return false;
+        }
+    }
+}
+
+
+if (!function_exists('sendCodeOtpToEmail')) {
+    /**
+     * Função helper para enviar código de autenticação no email.
+     *
+     */
+    function sendCodeOtpToEmail(UserEntity $user, string $otp, int $delay = 0)
+    {
+        try {
+            // Envia o email aqui
+            sendCodeEmailJob::dispatch(
+                $user->getEmail(),
+                $user->getName(),
+                $otp
+            )->delay(now()->addSeconds($delay));
+            return true;
+        } catch (Exception $e) {
+            Log::info('SEND EMAIL ERROR', [
+                'username' => $user->getName(),
+                'email' => $user->getEmail(),
+                'otp' => $otp,
+                'error' => $e->getMessage()
+            ]);
+        }
+    }
+}
+
+if (!function_exists('sendPdfHitsTodayEmail')) {
+    /**
+     * Função helper para enviar pdf de pontos batidos hoje.
+     *
+     */
+
+    function sendPdfHitsTodayEmail(UserEntity $user, array $hits, int $delay = 0)
+    {
+        try {
+            // Envia o email aqui
+            SendHitsEmailJob::dispatch(
+                $user->getEmail(),
+                $user->getName(),
+                $hits
+            )->delay(now()->addSeconds($delay));
+            return true;
+        } catch (Exception $e) {
+            Log::info('SEND EMAIL ERROR', [
+                'username' => $user->getName(),
+                'email' => $user->getEmail(),
+                'otp' => $hits,
+                'error' => $e->getMessage()
+            ]);
         }
     }
 }

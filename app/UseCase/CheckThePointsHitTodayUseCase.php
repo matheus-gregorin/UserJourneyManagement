@@ -100,7 +100,7 @@ class CheckThePointsHitTodayUseCase implements OptionUseCaseInterface
     public function sendEmailPdf(UserEntity $user, string $number, ?string $messageId = null)
     {
         $points = $this->getHitsToDay($user);
-        $this->sendEmail($user, $points, 0);
+        sendPdfHitsTodayEmail($user, $points, 0);
 
         sendMessageWhatsapp(
             $number,
@@ -140,25 +140,5 @@ class CheckThePointsHitTodayUseCase implements OptionUseCaseInterface
             1
         );
         return true;
-    }
-
-    public function sendEmail(UserEntity $user, array $hits, int $delay = 0)
-    {
-        try {
-            // Envia o email aqui
-            SendHitsEmailJob::dispatch(
-                $user->getEmail(),
-                $user->getName(),
-                $hits
-            )->delay(now()->addSeconds($delay));
-            return true;
-        } catch (Exception $e) {
-            Log::info('SEND EMAIL ERROR', [
-                'username' => $user->getName(),
-                'email' => $user->getEmail(),
-                'otp' => $hits,
-                'error' => $e->getMessage()
-            ]);
-        }
     }
 }
