@@ -8,21 +8,30 @@ if (!function_exists('sendMessageWhatsapp')) {
      * Função helper para apresentar um log.
      *
      */
-    function sendMessageWhatsapp(string $number, string $messageId, string $message, int $delay = 0)
+    function sendMessageWhatsapp(string $number, string $messageId, array $messages, int $delay = 0)
     {
         try {
-            // Envia mensagem aqui
-            SendWhatsappMessageJob::dispatch(
-                $number,
-                $messageId,
-                $message
-            )->delay(now()->addSeconds($delay));
+            foreach ($messages as $message) {
+                // Envia mensagem aqui
+                SendWhatsappMessageJob::dispatch(
+                    $number,
+                    $messageId,
+                    $message
+                )->delay(now()->addSeconds($delay));
+
+                Log::info('SEND MESSAGE SUCCESS', [
+                    'number' => $number,
+                    'messageId' => $messageId,
+                    'message' => $message
+                ]);
+            }
+
             return true;
         } catch (Exception $e) {
             Log::info('SEND MESSAGE ERROR', [
                 'number' => $number,
                 'messageId' => $messageId,
-                'message' => $message,
+                'message' => $messages,
                 'error' => $e->getMessage()
             ]);
             return false;

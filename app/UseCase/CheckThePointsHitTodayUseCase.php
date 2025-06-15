@@ -7,7 +7,6 @@ use Domain\Enums\EventsWahaEnum;
 use Domain\UseCase\OptionUseCaseInterface;
 use Domain\Repositories\PointRepositoryInterface;
 use Domain\Repositories\UserRepositoryInterface;
-use App\Jobs\SendWhatsappMessageJob;
 use App\Jobs\SendHitsEmailJob;
 use DateTime;
 use Exception;
@@ -38,26 +37,48 @@ class CheckThePointsHitTodayUseCase implements OptionUseCaseInterface
     {
         $points = $this->getHitsToDay($user);
         if (empty($points)) {
-            $this->sendMessage($number, $messageId, "Sem pontos batidos no dia de hoje.", 0);
-            $this->sendMessage($number, $messageId, EventsWahaEnum::HITSTODAYMENU, 1);
+            sendMessageWhatsapp(
+                $number,
+                $messageId,
+                [
+                    "Sem pontos batidos no dia de hoje.",
+                    EventsWahaEnum::HITSTODAYMENU
+                ],
+                0
+            );
             return true;
         }
 
         try {
-            $this->sendMessage($number, $messageId, 'Colaborador: ' . $user->getName() . ".", 0);
-            $this->sendMessage($number, $messageId, 'Pontos do dia:', 1);
+            sendMessageWhatsapp(
+                $number,
+                $messageId,
+                [
+                    'Colaborador: ' . $user->getName() . ".",
+                    'Pontos do dia:'
+                ],
+                0
+            );
 
             $text = "";
             foreach ($points as $i => $point) {
                 $index = array_key_exists($i, $this->indices) ? $this->indices[$i] : $this->indices[4];
                 $text = $text . $index . " " . $point['date'] . PHP_EOL;
             }
-            $this->sendMessage($number, $messageId, $text, 2);
-            $this->sendMessage($number, $messageId, EventsWahaEnum::HITSTODAYMENU, 3);
+            sendMessageWhatsapp(
+                $number,
+                $messageId,
+                [
+                    $text,
+                    EventsWahaEnum::HITSTODAYMENU
+                ],
+                2
+            );
+
             return true;
         } catch (Exception $e) {
             Log::info("Erro na receive da CheckThePointsHitTodayUseCase.", ['message' => $e->getMessage()]);
-            $this->sendMessage($number, $messageId, EventsWahaEnum::SERVERERROR, 1);
+            sendMessageWhatsapp($number, $messageId, [EventsWahaEnum::SERVERERROR], 1);
             return false;
         }
     }
@@ -81,8 +102,15 @@ class CheckThePointsHitTodayUseCase implements OptionUseCaseInterface
         $points = $this->getHitsToDay($user);
         $this->sendEmail($user, $points, 0);
 
-        sendMessageWhatsapp($number, $messageId, "Enviamos o email com o pdf ao seu email: " . $user->getEmail(), 0);
-        sendMessageWhatsapp($number, $messageId, "Retornando ao menu...", 1);
+        sendMessageWhatsapp(
+            $number,
+            $messageId,
+            [
+                "Enviamos o email com o pdf ao seu email: " . $user->getEmail(),
+                "Retornando ao menu..."
+            ],
+            0
+        );
 
         Log::info('Email enviado com sucesso', [
             'uuid' => $user->getUuid(),
@@ -103,7 +131,14 @@ class CheckThePointsHitTodayUseCase implements OptionUseCaseInterface
             'messageId' => $messageId
         ]);
         $this->userRepository->updateScopeOfTheUser($user, "");
-        $this->sendMessage($number, $messageId, EventsWahaEnum::SCOPE, 1);
+        sendMessageWhatsapp(
+            $number,
+            $messageId,
+            [
+                EventsWahaEnum::SCOPE
+            ],
+            1
+        );
         return true;
     }
 
@@ -122,26 +157,6 @@ class CheckThePointsHitTodayUseCase implements OptionUseCaseInterface
                 'username' => $user->getName(),
                 'email' => $user->getEmail(),
                 'otp' => $hits,
-                'error' => $e->getMessage()
-            ]);
-        }
-    }
-
-    public function sendMessage(string $number, string $messageId, string $message, int $delay = 0)
-    {
-        try {
-            // Envia mensagem aqui
-            SendWhatsappMessageJob::dispatch(
-                $number,
-                $messageId,
-                $message
-            )->delay(now()->addSeconds($delay));
-            return true;
-        } catch (Exception $e) {
-            Log::info('SEND MESSAGE ERROR', [
-                'number' => $number,
-                'messageId' => $messageId,
-                'message' => $message,
                 'error' => $e->getMessage()
             ]);
         }
