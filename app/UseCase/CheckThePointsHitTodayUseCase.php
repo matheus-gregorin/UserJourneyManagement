@@ -41,8 +41,7 @@ class CheckThePointsHitTodayUseCase implements OptionUseCaseInterface
                 $number,
                 $messageId,
                 [
-                    "Sem pontos batidos no dia de hoje.",
-                    EventsWahaEnum::HITSTODAYMENU
+                    "Sem pontos batidos no dia de hoje."
                 ],
                 0
             );
@@ -54,8 +53,7 @@ class CheckThePointsHitTodayUseCase implements OptionUseCaseInterface
                 $number,
                 $messageId,
                 [
-                    'Colaborador: ' . $user->getName() . ".",
-                    'Pontos do dia:'
+                    'Colaborador: ' . $user->getName() . "."
                 ],
                 0
             );
@@ -101,7 +99,6 @@ class CheckThePointsHitTodayUseCase implements OptionUseCaseInterface
     {
         $points = $this->getHitsToDay($user);
         sendPdfHitsTodayEmail($user, $points, 0);
-
         sendMessageWhatsapp(
             $number,
             $messageId,
@@ -135,6 +132,7 @@ class CheckThePointsHitTodayUseCase implements OptionUseCaseInterface
             $number,
             $messageId,
             [
+                "Retornando ao menu principal...",
                 EventsWahaEnum::SCOPE
             ],
             1
