@@ -53,7 +53,7 @@ class CheckThePointsHitTodayUseCase implements OptionUseCaseInterface
                 $number,
                 $messageId,
                 [
-                    'Colaborador: ' . $user->getName() . "."
+                    'Colaborador: ' . $user->getName()
                 ],
                 0
             );
@@ -70,7 +70,7 @@ class CheckThePointsHitTodayUseCase implements OptionUseCaseInterface
                     $text,
                     EventsWahaEnum::HITSTODAYMENU
                 ],
-                2
+                1
             );
 
             return true;
@@ -103,8 +103,7 @@ class CheckThePointsHitTodayUseCase implements OptionUseCaseInterface
             $number,
             $messageId,
             [
-                "Enviamos o email com o pdf ao seu email: " . $user->getEmail(),
-                "Retornando ao menu..."
+                "Enviamos o email com o pdf ao seu email: " . $user->getEmail()
             ],
             0
         );
