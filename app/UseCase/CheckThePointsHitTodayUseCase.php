@@ -61,8 +61,10 @@ class CheckThePointsHitTodayUseCase implements OptionUseCaseInterface
             $text = "";
             foreach ($points as $i => $point) {
                 $index = array_key_exists($i, $this->indices) ? $this->indices[$i] : $this->indices[4];
-                $text = $text . $index . " " . $point['date'] . PHP_EOL;
+                $obs = empty($point['observation']) ? ' sem observação' : $point['observation'];
+                $text = $text . "📌 " . $index . " " . $point['date'] . PHP_EOL . "⤷ " . $obs . PHP_EOL;
             }
+
             sendMessageWhatsapp(
                 $number,
                 $messageId,

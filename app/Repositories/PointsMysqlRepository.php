@@ -57,6 +57,7 @@ class PointsMysqlRepository implements PointRepositoryInterface
 
         $point = new PointEntity(
             $pointMysqlModel->uuid,
+            $pointMysqlModel->observation,
             $pointMysqlModel->checked,
             $pointMysqlModel->updated_at,
             $pointMysqlModel->created_at

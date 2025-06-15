@@ -14,6 +14,7 @@ use App\Exceptions\UpdateScopeException;
 use App\Exceptions\UserNotCreatedException;
 use App\Exceptions\UserNotFoundException;
 use App\Models\UserMysqlModel;
+use Domain\Entities\PointEntity;
 use Exception;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Log;

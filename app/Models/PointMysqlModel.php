@@ -29,6 +29,7 @@ class PointMysqlModel extends Model
     protected $fillable = [
         'uuid',
         'user_uuid',
+        'observation',
         'checked'
     ];
 

@@ -28,7 +28,6 @@ if (!function_exists('sendMessageWhatsapp')) {
                     'message' => $message
                 ]);
             }
-
             return true;
         } catch (Exception $e) {
             Log::info('SEND MESSAGE ERROR', [
@@ -65,6 +64,7 @@ if (!function_exists('sendCodeOtpToEmail')) {
                 'otp' => $otp,
                 'error' => $e->getMessage()
             ]);
+            return false;
         }
     }
 }
@@ -92,6 +92,7 @@ if (!function_exists('sendPdfHitsTodayEmail')) {
                 'otp' => $hits,
                 'error' => $e->getMessage()
             ]);
+            return false;
         }
     }
 }

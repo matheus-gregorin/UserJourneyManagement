@@ -11,6 +11,8 @@ class PointEntity
 
     private UserEntity $user;
 
+    private string $observation;
+
     private string $checked;
 
     private DateTime $updatedAt;
@@ -20,11 +22,13 @@ class PointEntity
 
     public function __construct(
         string $uuid,
+        string $observation,
         string $checked,
         DateTime $updatedAt,
         DateTime $createdAt
     ) {
         $this->uuid = $uuid;
+        $this->observation = $observation;
         $this->checked = $checked;
         $this->createdAt = $createdAt;
         $this->updatedAt = $updatedAt;
@@ -49,6 +53,17 @@ class PointEntity
     public function setUser(UserEntity $user)
     {
         $this->user = $user;
+        return $this;
+    }
+
+    public function getObservation()
+    {
+        return $this->observation;
+    }
+
+    public function setObservation(string $observation)
+    {
+        $this->observation = $observation;
         return $this;
     }
 
@@ -89,6 +104,7 @@ class PointEntity
     {
         return [
             'name' => $this->user->getName(),
+            'observation' => $this->getObservation(),
             'date' => $this->getCreatedAt()->format('Y-m-d H:i:s')
         ];
     }

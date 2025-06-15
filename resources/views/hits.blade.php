@@ -39,26 +39,46 @@
             padding-bottom: 10px;
         }
 
-        /* Novo estilo para o contêiner de rolagem */
-        .scrollable-hits {
-            max-height: 250px;
-            /* Defina a altura máxima antes da rolagem */
-            overflow-y: auto;
-            /* Adiciona a barra de rolagem vertical quando o conteúdo excede a altura máxima */
+        /* Contêiner de hits: borda e padding */
+        .hits-container {
             border: 1px solid #e0e0e0;
-            /* Opcional: Adiciona uma borda para visualmente separar a área de rolagem */
             border-radius: 5px;
             padding: 10px;
-            /* Espaçamento interno */
             margin-bottom: 20px;
-            /* Espaçamento após a caixa de rolagem */
+        }
+
+        /* Estilos para rolagem APENAS em tela (HTML) */
+        @media screen {
+            .scrollable-on-screen {
+                max-height: 250px;
+                overflow-y: auto;
+            }
+        }
+
+        /* Estilos para impressão/PDF (ignora rolagem) */
+        @media print {
+            .scrollable-on-screen {
+                max-height: none !important;
+                overflow-y: visible !important;
+            }
+
+            body {
+                background-color: #fff;
+                /* Fundo branco para impressão */
+            }
+
+            .container {
+                box-shadow: none;
+                /* Remove sombra para impressão */
+                border: 1px solid #ddd;
+                /* Borda simples para PDF */
+            }
         }
 
         ul {
             list-style-type: none;
             padding: 0;
             margin: 0;
-            /* Removido margin padrão do ul que pode causar problemas */
         }
 
         li {
@@ -66,25 +86,61 @@
             margin-bottom: 10px;
             padding: 12px 15px;
             border-radius: 5px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
             font-size: 16px;
+            /* Usar display: block para maior compatibilidade,
+               e controlar quebras de linha manualmente ou com divs internas */
+            display: block;
         }
 
         li:last-child {
             margin-bottom: 0;
         }
 
+        .hit-line {
+            display: table;
+            /* Usar table/table-row/table-cell para layout de colunas */
+            width: 100%;
+            margin-bottom: 5px;
+            /* Espaço entre a linha principal e a observação */
+        }
+
+        .hit-name,
+        .hit-date {
+            display: table-cell;
+            vertical-align: top;
+            /* Alinha o texto ao topo da célula */
+        }
+
         .hit-name {
             font-weight: bold;
             color: #2980b9;
-            margin-right: 4px;
+            width: 70%;
+            /* Ajuste a largura conforme necessário */
         }
 
         .hit-date {
             color: #7f8c8d;
             font-size: 14px;
+            text-align: right;
+            /* Alinha a data à direita */
+            width: 30%;
+            /* Ajuste a largura conforme necessário */
+        }
+
+        .hit-observation {
+            font-size: 14px;
+            color: #555;
+            margin-top: 5px;
+            /* Espaço acima da observação */
+            /* Display em linha com emoji, se necessário */
+        }
+
+        .hit-observation .emoji {
+            margin-right: 5px;
+            font-size: 16px;
+            line-height: 1;
+            vertical-align: middle;
+            /* Alinha o emoji verticalmente com o texto */
         }
 
         .no-hits {
@@ -113,9 +169,8 @@
 
         @if (!empty($hits))
         <h2>Detalhes dos Seus Pontos:</h2>
-        {{-- Adicionado o novo contêiner para rolagem --}}
-        <div class="scrollable-hits">
-            {{-- Define os rótulos em um array para facilitar a leitura --}}
+        {{-- Contêiner de hits com rolagem APENAS em tela --}}
+        <div class="hits-container scrollable-on-screen">
             @php
             $hitLabels = [
             'Entrada',
@@ -128,14 +183,22 @@
             <ul>
                 @foreach ($hits as $key => $hit)
                 <li>
-                    <span class="hit-name">
-                        {{ $hitLabels[$key] ?? 'Observação' }}:
-                    </span>
-                    <span class="hit-date">{{ \Carbon\Carbon::parse($hit['date'])->format('d/m/Y H:i:s') }}</span>
+                    <div class="hit-line">
+                        <span class="hit-name">
+                            📌 {{ $hitLabels[$key] ?? 'Observação' }}:
+                        </span>
+                        <span class="hit-date">{{ \Carbon\Carbon::parse($hit['date'])->format('d/m/Y H:i:s') }}</span>
+                    </div>
+                    {{-- Adiciona a observação se ela existir --}}
+                    @if (!empty($hit['observation']))
+                    <div class="hit-observation">
+                        <span class="emoji"> 📝 </span> <span> {{ $hit['observation'] }}</span>
+                    </div>
+                    @endif
                 </li>
                 @endforeach
             </ul>
-        </div> {{-- Fim do contêiner de rolagem --}}
+        </div>
         @else
         <p class="no-hits">Parece que você não registrou nenhum ponto hoje.</p>
         @endif

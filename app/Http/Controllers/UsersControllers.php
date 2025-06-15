@@ -14,6 +14,7 @@ use App\Http\Requests\changeRoleUserRequest;
 use App\Http\Requests\CreateUserRequest;
 use App\Http\Requests\LoginRequest;
 use App\Http\Responses\ApiResponse;
+use App\Repositories\UsersMysqlRepository;
 use App\UseCase\ChangeRoleUserUseCase;
 use App\UseCase\CreateUserUseCase;
 use App\UseCase\GetAllUsersUseCase;
