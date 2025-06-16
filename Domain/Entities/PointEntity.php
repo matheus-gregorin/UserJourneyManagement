@@ -105,6 +105,7 @@ class PointEntity
         return [
             'name' => $this->user->getName(),
             'observation' => $this->getObservation(),
+            'checked' => $this->getChecked(),
             'date' => $this->getCreatedAt()->format('Y-m-d H:i:s')
         ];
     }
