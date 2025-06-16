@@ -7,7 +7,6 @@ use Domain\Enums\EventsWahaEnum;
 use Domain\UseCase\OptionUseCaseInterface;
 use Domain\Repositories\PointRepositoryInterface;
 use Domain\Repositories\UserRepositoryInterface;
-use App\Jobs\SendHitsEmailJob;
 use DateTime;
 use Exception;
 use Illuminate\Support\Facades\Log;
@@ -45,6 +44,7 @@ class CheckThePointsHitTodayUseCase implements OptionUseCaseInterface
                 ],
                 0
             );
+            $this->returnToMenu($user, $number, $messageId);
             return true;
         }
 
@@ -62,7 +62,8 @@ class CheckThePointsHitTodayUseCase implements OptionUseCaseInterface
             foreach ($points as $i => $point) {
                 $index = array_key_exists($i, $this->indices) ? $this->indices[$i] : $this->indices[4];
                 $obs = empty($point['observation']) ? ' sem observação' : $point['observation'];
-                $text = $text . "📌 " . $index . " " . $point['date'] . PHP_EOL . "⤷ " . $obs . PHP_EOL;
+                $confirmed = $point['checked'] == 'true' ? "✅" : "❌";
+                $text = $text . "📌 " . $index . " " . $point['date'] . PHP_EOL . "⤷ Obs: " . $obs . PHP_EOL . "⤷ Confirmado: " . $confirmed . PHP_EOL;
             }
 
             sendMessageWhatsapp(
@@ -83,6 +84,73 @@ class CheckThePointsHitTodayUseCase implements OptionUseCaseInterface
         }
     }
 
+    public function sendEmailPdf(UserEntity $user, string $number, ?string $messageId = null)
+    {
+        try {
+            $points = $this->getHitsToDay($user);
+            sendPdfHitsTodayEmail($user, $points, 0);
+            sendMessageWhatsapp(
+                $number,
+                $messageId,
+                [
+                    "Enviamos o email com o pdf ao seu email: " . $user->getEmail()
+                ],
+                0
+            );
+
+            Log::info('Email enviado com sucesso', [
+                'uuid' => $user->getUuid(),
+                'email' => $user->getEmail(),
+                'number' => $number,
+                'messageId' => $messageId
+            ]);
+
+            $this->returnToMenu($user, $number, $messageId);
+            return true;
+        } catch (Exception $e) {
+            Log::info("Erro ao enviar email com PDF dos pontos batidos hoje.", [
+                'uuid' => $user->getUuid(),
+                'message' => $e->getMessage()
+            ]);
+            sendMessageWhatsapp(
+                $number,
+                $messageId,
+                [EventsWahaEnum::SERVERERROR],
+                1
+            );
+            return false;
+        }
+    }
+
+    public function returnToMenu(UserEntity $user, string $number, ?string $messageId = null)
+    {
+        Log::info('Returning to menu for user', [
+            'uuid' => $user->getUuid(),
+            'number' => $number,
+            'messageId' => $messageId
+        ]);
+        $this->userRepository->updateScopeOfTheUser($user, "");
+
+        sendMessageWhatsapp(
+            $number,
+            $messageId,
+            [
+                "Retornando ao menu principal...",
+            ],
+            1
+        );
+        sendMessageWhatsapp(
+            $number,
+            $messageId,
+            [
+
+                EventsWahaEnum::SCOPE
+            ],
+            3
+        );
+        return true;
+    }
+
     public function getHitsToDay(UserEntity $user)
     {
         try {
@@ -95,49 +163,5 @@ class CheckThePointsHitTodayUseCase implements OptionUseCaseInterface
             ]);
             return [];
         }
-    }
-
-    public function sendEmailPdf(UserEntity $user, string $number, ?string $messageId = null)
-    {
-        $points = $this->getHitsToDay($user);
-        sendPdfHitsTodayEmail($user, $points, 0);
-        sendMessageWhatsapp(
-            $number,
-            $messageId,
-            [
-                "Enviamos o email com o pdf ao seu email: " . $user->getEmail()
-            ],
-            0
-        );
-
-        Log::info('Email enviado com sucesso', [
-            'uuid' => $user->getUuid(),
-            'email' => $user->getEmail(),
-            'number' => $number,
-            'messageId' => $messageId
-        ]);
-
-        $this->returnToMenu($user, $number, $messageId);
-        return true;
-    }
-
-    public function returnToMenu(UserEntity $user, string $number, ?string $messageId = null)
-    {
-        Log::info('Returning to menu for user', [
-            'uuid' => $user->getUuid(),
-            'number' => $number,
-            'messageId' => $messageId
-        ]);
-        $this->userRepository->updateScopeOfTheUser($user, "");
-        sendMessageWhatsapp(
-            $number,
-            $messageId,
-            [
-                "Retornando ao menu principal...",
-                EventsWahaEnum::SCOPE
-            ],
-            1
-        );
-        return true;
     }
 }
