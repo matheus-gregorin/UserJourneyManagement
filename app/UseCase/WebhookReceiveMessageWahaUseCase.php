@@ -19,15 +19,19 @@ class WebhookReceiveMessageWahaUseCase
 
     private array $scopes = [
         "1" => 'checkThePointsHitToday',
-        "2" => 'CheckIn',
-        "3" => 'clockOutForLunch'
+        "2" => 'hitPoint',
+        "3" => 'support'
     ];
 
     private array $options = [
         'checkThePointsHitToday' => [
             "1" => 'sendEmailPdf',
             "2" => 'returnToMenu'
-        ]
+        ],
+        'hitPoint' => [
+            "1" => 'validatePoint',
+            "2" => 'returnToMenu'
+        ],
     ];
 
     public function __construct(
