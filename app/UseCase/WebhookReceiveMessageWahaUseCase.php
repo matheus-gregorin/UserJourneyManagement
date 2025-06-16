@@ -213,26 +213,6 @@ class WebhookReceiveMessageWahaUseCase
         return true;
     }
 
-    public function sendEmail(UserEntity $user, string $otp, int $delay = 0)
-    {
-        try {
-            // Envia o email aqui
-            sendCodeEmailJob::dispatch(
-                $user->getEmail(),
-                $user->getName(),
-                $otp
-            )->delay(now()->addSeconds($delay));
-            return true;
-        } catch (Exception $e) {
-            Log::info('SEND EMAIL ERROR', [
-                'username' => $user->getName(),
-                'email' => $user->getEmail(),
-                'otp' => $otp,
-                'error' => $e->getMessage()
-            ]);
-        }
-    }
-
     public function AuthUserByCodeOtp(UserEntity $user, string $message, string $number, string $messageId)
     {
         try {
