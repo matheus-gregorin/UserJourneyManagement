@@ -194,6 +194,21 @@
                     <div class="hit-observation">
                         <span class="emoji"> 📝 </span> <span> {{ $hit['observation'] }}</span>
                     </div>
+                    @else
+                    <div class="hit-observation">
+                        <span class="emoji"> ❗ </span> <span> Nenhuma observação registrada</span>
+                    </div>
+                    @endif
+
+                    @if (!empty($hit['checked']) && $hit['checked'] === 'true')
+                    {{-- Exibe o emoji de verificado se o ponto foi verificado --}}
+                    <div class="hit-observation">
+                        <span class="emoji"> ✅ </span> <span> Ponto verificado</span>
+                    </div>
+                    @else
+                    <div class="hit-observation">
+                        <span class="emoji"> ❌ </span> <span> Ponto não verificado</span>
+                    </div>
                     @endif
                 </li>
                 @endforeach

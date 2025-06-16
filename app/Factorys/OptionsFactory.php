@@ -3,6 +3,7 @@
 namespace App\Factorys;
 
 use App\UseCase\CheckThePointsHitTodayUseCase;
+use App\UseCase\HitPointUseCase;
 
 class OptionsFactory
 {
@@ -12,9 +13,12 @@ class OptionsFactory
             case 'checkThePointsHitToday':
                 return app(CheckThePointsHitTodayUseCase::class);
                 break;
+
+            case 'hitPoint':
+                return app(HitPointUseCase::class);
+                break;
             
             default:
-                # code...
                 break;
         }
     }
