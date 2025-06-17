@@ -1,1 +1,1 @@
-User Manager Api
+User Manager Api Application
