@@ -19,8 +19,8 @@ queue-restart:
 
 down:
 	@echo "Down all containers..."
-	docker composer down
+	docker compose down
 
 up:
 	@echo "Down all containers..."
-	docker composer up -d
+	docker compose up -d
