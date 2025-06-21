@@ -47,7 +47,7 @@ class UsersServices
             $user->getPhone(),
             "notContains",
             [
-                "😔 Parece que não temos notícias suas há algum tempo! Para garantir a segurança da sua conta, precisaremos reiniciar o seu processo de login. Quando estiver pronto, é só fazer login novamente para continuar de onde parou, ok? até mais!"
+                "🙍🏻‍♂️ Parece que não temos notícias suas há algum tempo! Para garantir a segurança da sua conta, precisaremos reiniciar o seu processo de login. Quando estiver pronto, é só fazer login novamente para continuar de onde parou, ok? até mais!"
             ],
             0,
             false
