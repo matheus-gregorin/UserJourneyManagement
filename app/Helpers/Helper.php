@@ -11,7 +11,7 @@ if (!function_exists('sendMessageWhatsapp')) {
      * Função helper para enviar mensagem no whatsapp.
      *
      */
-    function sendMessageWhatsapp(string $number, string $messageId, array $messages, int $delay = 0)
+    function sendMessageWhatsapp(string $number, string $messageId, array $messages, int $delay = 0, bool $sendView = true)
     {
         try {
             foreach ($messages as $message) {
@@ -19,7 +19,8 @@ if (!function_exists('sendMessageWhatsapp')) {
                 SendWhatsappMessageJob::dispatch(
                     $number,
                     $messageId,
-                    $message
+                    $message,
+                    $sendView
                 )->delay(now()->addSeconds($delay));
 
                 Log::info('SEND MESSAGE SUCCESS', [

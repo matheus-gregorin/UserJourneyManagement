@@ -22,6 +22,7 @@ class SendWhatsappMessageJob implements ShouldQueue
     private string $number;
     private string $messageId;
     private string $response;
+    private bool $sendView = true;
 
     /**
      * Create a new job instance.
@@ -31,12 +32,13 @@ class SendWhatsappMessageJob implements ShouldQueue
     public function __construct(
         string $number,
         string $messageId,
-        string $response
-    )
-    {
+        string $response,
+        bool $sendView = true
+    ) {
         $this->number = $number;
         $this->messageId = $messageId;
         $this->response = $response;
+        $this->sendView = $sendView;
     }
 
     /**
@@ -54,12 +56,13 @@ class SendWhatsappMessageJob implements ShouldQueue
 
         try {
 
-            $clientHttp->sendViewMessage($this->number, $this->messageId);
+            if ($this->sendView) {
+                $clientHttp->sendViewMessage($this->number, $this->messageId);
+            }
             $clientHttp->startTyping($this->number);
             sleep(3);
             $clientHttp->stopTyping($this->number);
             $clientHttp->sendResponse($this->number, $this->response);
-
         } catch (Exception $e) {
             Log::error('Error SendWhatsappMessageJob', [
                 'number' => $this->number,

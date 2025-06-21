@@ -8,6 +8,7 @@ use App\Exceptions\CollectUserByEmailException;
 use App\Exceptions\CollectUserByPhoneException;
 use App\Exceptions\CollectUserByUuidException;
 use App\Exceptions\NotContentUsersException;
+use App\Exceptions\RestartUserException;
 use App\Exceptions\UpdateOtpException;
 use App\Exceptions\UpdateRoleException;
 use App\Exceptions\UpdateScopeException;
@@ -87,6 +88,26 @@ class UsersMysqlRepository implements UserRepositoryInterface
         }
     }
 
+    public function getUserWithContainsScopes()
+    {
+        try {
+
+            $users = $this->UserMysqlModel::select('uuid', 'name', 'phone', 'updated_at')
+                ->whereNotNull('scope')
+                ->where('scope', '!=', '')
+                ->get();
+
+            // Retornando users direto, por conta da seletiva de dados do "select"
+            // O modelToEntity precisa de todos os dados.
+            return $users;
+        } catch (Exception $e) {
+            Log::info("Error in collect users with scopes: ", [
+                'message' => $e->getMessage()
+            ]);
+            return [];
+        }
+    }
+
     public function updateRole(UserEntity $user): UserEntity|null|Exception
     {
         try {
@@ -140,6 +161,22 @@ class UsersMysqlRepository implements UserRepositoryInterface
         } catch (Exception $e) {
             Log::critical("Error in update scope: ", ['message' => $e->getMessage()]);
             throw new UpdateScopeException("Error in update scope: " . $e->getMessage(), 400);
+        }
+    }
+
+    public function restartUser(UserEntity $user)
+    {
+        try {
+            $userModel = $this->UserMysqlModel::where('uuid', $user->getUuid())->first();
+            $userModel->is_auth = false;
+            $userModel->otp = "";
+            $userModel->scope = "";
+            $userModel->save();
+
+            return $user;
+        } catch (Exception $e) {
+            Log::critical("Error in restart user: ", ['message' => $e->getMessage()]);
+            throw new RestartUserException("Error in restart user: " . $e->getMessage(), 400);
         }
     }
 

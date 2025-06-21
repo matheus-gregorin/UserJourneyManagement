@@ -31,14 +31,7 @@ Route::group(['middleware' => 'jwt'], function () {
 // Webhook
 Route::post('/whatsapp-receive', [UsersControllers::class, 'webhookReceiveMessage']);
 
-Route::post('/teste', function (Request $request) {
-    Log::info(" Requisição de teste", [
-        "request" => $request->all(),
-        "date" => now()
-    ]);
-
-    return response()->json([
-        "message" => "Success",
-        "date" => now()
-    ]);
+// Automations
+Route::group(['middleware' => 'automations'], function () {
+    Route::post('/validate-users-off', [UsersControllers::class, 'validateUsersOff']);
 });

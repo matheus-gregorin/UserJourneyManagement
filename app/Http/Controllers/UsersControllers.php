@@ -7,7 +7,9 @@ use App\Exceptions\CollectUserByPhoneException;
 use App\Exceptions\CollectUserByUuidException;
 use App\Exceptions\CredentialsInvalidException;
 use App\Exceptions\NotContentUsersException;
+use App\Exceptions\RestartUserException;
 use App\Exceptions\UpdateRoleException;
+use App\Exceptions\UpdateScopeException;
 use App\Exceptions\UserNotCreatedException;
 use App\Exceptions\UserNotFoundException;
 use App\Http\Requests\changeRoleUserRequest;
@@ -15,6 +17,7 @@ use App\Http\Requests\CreateUserRequest;
 use App\Http\Requests\LoginRequest;
 use App\Http\Responses\ApiResponse;
 use App\Repositories\UsersMysqlRepository;
+use App\Services\UsersServices;
 use App\UseCase\ChangeRoleUserUseCase;
 use App\UseCase\CreateUserUseCase;
 use App\UseCase\GetAllUsersUseCase;
@@ -32,18 +35,22 @@ class UsersControllers extends Controller
     private ChangeRoleUserUseCase $changeRoleUserUseCase;
     private WebhookReceiveMessageWahaUseCase $webhookReceiveMessageWahaUseCase;
 
+    private UsersServices $usersServices;
+
     public function __construct(
         LoginUseCase $loginUseCase,
         CreateUserUseCase $createUserUseCase,
         GetAllUsersUseCase $getAllUsersUseCase,
         ChangeRoleUserUseCase $changeRoleUserUseCase,
-        WebhookReceiveMessageWahaUseCase $webhookReceiveMessageWahaUse
+        WebhookReceiveMessageWahaUseCase $webhookReceiveMessageWahaUse,
+        UsersServices $usersServices
     ) {
         $this->loginUseCase = $loginUseCase;
         $this->createUserUseCase = $createUserUseCase;
         $this->getAllUsersUseCase = $getAllUsersUseCase;
         $this->changeRoleUserUseCase = $changeRoleUserUseCase;
         $this->webhookReceiveMessageWahaUseCase = $webhookReceiveMessageWahaUse;
+        $this->usersServices = $usersServices;
     }
 
     public function login(LoginRequest $request)
@@ -216,6 +223,57 @@ class UsersControllers extends Controller
             } catch (Exception $e) {
                 Log::critical("Error in webhook receive message: ", ['message' => $e->getMessage()]);
             }
+        }
+    }
+
+    public function validateUsersOff(Request $request)
+    {
+        try {
+
+            Log::info("Verify users off", []);
+            $this->usersServices->validateUsersOff();
+
+            return ApiResponse::success(
+                [],
+                "Automation dispatch",
+                200
+            );
+        } catch (UserNotFoundException $e) {
+            Log::critical("Error in get user with scope: ", ['message' => $e->getMessage()]);
+            return ApiResponse::error(
+                [
+                    $e->getMessage()
+                ],
+                "Automation dispatch error",
+                500
+            );
+        } catch (CollectUserByPhoneException $e) {
+            Log::critical("Error in collect user phone with scope: ", ['message' => $e->getMessage()]);
+            return ApiResponse::error(
+                [
+                    $e->getMessage()
+                ],
+                "Automation dispatch error",
+                500
+            );
+        } catch (RestartUserException $e) {
+            Log::critical("Error in restart user with scope: ", ['message' => $e->getMessage()]);
+            return ApiResponse::error(
+                [
+                    $e->getMessage()
+                ],
+                "Automation dispatch error",
+                500
+            );
+        } catch (Exception $e) {
+            Log::critical("Error in process users with scope: ", ['message' => $e->getMessage()]);
+            return ApiResponse::error(
+                [
+                    $e->getMessage()
+                ],
+                "Automation dispatch error",
+                500
+            );
         }
     }
 }

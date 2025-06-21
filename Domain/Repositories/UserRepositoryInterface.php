@@ -18,6 +18,8 @@ interface UserRepositoryInterface
 
     public function getUserWithPhoneNumber(string $number): UserEntity|null|Exception;
 
+    public function getUserWithContainsScopes();
+
     public function updateRole(UserEntity $user): UserEntity|null|Exception;
 
     public function updateOTP(UserEntity $user);
@@ -25,6 +27,8 @@ interface UserRepositoryInterface
     public function authUser(UserEntity $user);
 
     public function updateScopeOfTheUser(UserEntity $user, string $scope);
+
+    public function restartUser(UserEntity $user);
 
     public function modelToEntity($userModel): UserEntity|Exception;
 }

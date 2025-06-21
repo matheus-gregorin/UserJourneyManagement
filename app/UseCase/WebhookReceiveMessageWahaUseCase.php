@@ -9,7 +9,6 @@ use App\Exceptions\CollectUserByPhoneException;
 use App\Exceptions\UpdateScopeException;
 use App\Exceptions\UserNotFoundException;
 use App\Factorys\OptionsFactory;
-use App\Jobs\sendCodeEmailJob;
 use Exception;
 use Illuminate\Support\Facades\Log;
 
@@ -36,8 +35,7 @@ class WebhookReceiveMessageWahaUseCase
 
     public function __construct(
         UserRepositoryInterface $userRepository,
-    ) 
-    {
+    ) {
         $this->userRepository = $userRepository;
     }
 
@@ -156,7 +154,7 @@ class WebhookReceiveMessageWahaUseCase
                     'number' => $handledPayload['number'],
                     'message' => $e->getMessage()
                 ]);
-                sendMessageWhatsapp($handledPayload['number'], $handledPayload['messageId'], [EventsWahaEnum::USERNOTFOUND], 0);
+                //sendMessageWhatsapp($handledPayload['number'], $handledPayload['messageId'], [EventsWahaEnum::USERNOTFOUND], 0);
                 return false;
             } catch (CollectUserByPhoneException $e) {
                 Log::critical('COLLECT USER BY PHONE EXCEPTION', [
@@ -231,16 +229,9 @@ class WebhookReceiveMessageWahaUseCase
                 $user->setIsAuth(true);
                 $this->userRepository->authUser($user);
 
-                sendMessageWhatsapp(
-                    $number,
-                    $messageId,
-                    [
-                        EventsWahaEnum::AUTHSUCCESS,
-                        EventsWahaEnum::MENU,
-                        EventsWahaEnum::SCOPE
-                    ],
-                    0
-                );
+                sendMessageWhatsapp($number, $messageId, [EventsWahaEnum::AUTHSUCCESS], 0);
+                sendMessageWhatsapp($number, $messageId, [EventsWahaEnum::MENU], 1);
+                sendMessageWhatsapp($number, $messageId, [EventsWahaEnum::SCOPE], 2);
 
                 Log::info('USER REQUEST AUTH SUCCESS', [
                     'username' => $user->getName(),

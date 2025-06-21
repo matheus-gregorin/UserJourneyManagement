@@ -12,6 +12,9 @@ services:
       - app_data:/var/www/html/public/uploads
     networks:
       - mynetwork
+    depends_on:
+      - bott_postgres
+      - bott_redis
 
   waha:
     image: devlikeapro/waha
@@ -22,7 +25,7 @@ services:
     stdin_open: true  # Habilita interação com o terminal (equivalente a -it)
     tty: true  # Habilita o terminal para o contêiner
     volumes:
-      - waha_data:/data
+      - ./waha_data:/app
     networks:
       - mynetwork
     env_file:

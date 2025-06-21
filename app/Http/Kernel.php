@@ -2,6 +2,7 @@
 
 namespace App\Http;
 
+use App\Http\Middleware\Automations;
 use App\Http\Middleware\JwtMiddleware;
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
 
@@ -58,6 +59,7 @@ class Kernel extends HttpKernel
         'auth.basic' => \Illuminate\Auth\Middleware\AuthenticateWithBasicAuth::class,
         'auth.session' => \Illuminate\Session\Middleware\AuthenticateSession::class,
         'jwt' => JwtMiddleware::class,
+        'automations' => Automations::class,
         'cache.headers' => \Illuminate\Http\Middleware\SetCacheHeaders::class,
         'can' => \Illuminate\Auth\Middleware\Authorize::class,
         'guest' => \App\Http\Middleware\RedirectIfAuthenticated::class,
