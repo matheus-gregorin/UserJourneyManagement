@@ -45,7 +45,7 @@ class HitPointUseCase implements OptionUseCaseInterface
                 $number,
                 $messageId,
                 [
-                    "Limite de tentativas excedido. Procure o administrador do sistema para mais informações."
+                    "🚫 Limite de tentativas excedido. Procure o administrador do sistema para mais informações."
                 ],
                 0
             );
@@ -119,8 +119,8 @@ class HitPointUseCase implements OptionUseCaseInterface
                 $text = $text . "📌 " . $index . " " . $point['date'] . PHP_EOL . "⤷ " . $obs . PHP_EOL . "⤷ Confirmado: " . $confirmed . PHP_EOL;
             }
 
-            sendMessageWhatsapp($number, $messageId, ["ponto confirmado com sucesso."], 0);
-            sendMessageWhatsapp($number, $messageId, [$text], 0);
+            sendMessageWhatsapp($number, $messageId, ["✅ ponto confirmado com sucesso."], 0);
+            sendMessageWhatsapp($number, $messageId, [$text], 1);
 
             Log::info('Email enviado com sucesso', [
                 'uuid' => $user->getUuid(),
@@ -155,8 +155,8 @@ class HitPointUseCase implements OptionUseCaseInterface
         ]);
         $this->userRepository->updateScopeOfTheUser($user, "");
 
-        sendMessageWhatsapp($number, $messageId, ["Retornando ao menu principal..."], 0);
-        sendMessageWhatsapp($number, $messageId, [EventsWahaEnum::SCOPE], 0);
+        sendMessageWhatsapp($number, $messageId, ["🔙 Retornando ao menu principal"], 0);
+        sendMessageWhatsapp($number, $messageId, [EventsWahaEnum::SCOPE], 1);
         return true;
     }
 

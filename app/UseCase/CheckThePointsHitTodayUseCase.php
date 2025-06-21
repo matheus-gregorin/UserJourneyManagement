@@ -49,14 +49,9 @@ class CheckThePointsHitTodayUseCase implements OptionUseCaseInterface
         }
 
         try {
-            sendMessageWhatsapp(
-                $number,
-                $messageId,
-                [
-                    'Colaborador: ' . $user->getName()
-                ],
-                0
-            );
+            sendMessageWhatsapp($number, $messageId, ['Colaborador: ' . $user->getName()], 0);
+            // Enviar nome da empresa
+            //sendMessageWhatsapp($number, $messageId, ['Colaborador: ' . $user->getName()], 0);
 
             $text = "";
             foreach ($points as $i => $point) {
@@ -66,15 +61,8 @@ class CheckThePointsHitTodayUseCase implements OptionUseCaseInterface
                 $text = $text . "📌 " . $index . " " . $point['date'] . PHP_EOL . "⤷ Obs: " . $obs . PHP_EOL . "⤷ Confirmado: " . $confirmed . PHP_EOL;
             }
 
-            sendMessageWhatsapp(
-                $number,
-                $messageId,
-                [
-                    $text,
-                    EventsWahaEnum::HITSTODAYMENU
-                ],
-                1
-            );
+            sendMessageWhatsapp($number, $messageId, [$text], 0);
+            sendMessageWhatsapp($number, $messageId, [EventsWahaEnum::HITSTODAYMENU], 1);
 
             return true;
         } catch (Exception $e) {
@@ -93,7 +81,7 @@ class CheckThePointsHitTodayUseCase implements OptionUseCaseInterface
                 $number,
                 $messageId,
                 [
-                    "Enviamos o email com o pdf ao seu email: " . $user->getEmail()
+                    "✉️ Enviamos o email com o pdf ao seu email: " . $user->getEmail()
                 ],
                 0
             );
@@ -131,23 +119,8 @@ class CheckThePointsHitTodayUseCase implements OptionUseCaseInterface
         ]);
         $this->userRepository->updateScopeOfTheUser($user, "");
 
-        sendMessageWhatsapp(
-            $number,
-            $messageId,
-            [
-                "Retornando ao menu principal...",
-            ],
-            1
-        );
-        sendMessageWhatsapp(
-            $number,
-            $messageId,
-            [
-
-                EventsWahaEnum::SCOPE
-            ],
-            3
-        );
+        sendMessageWhatsapp($number, $messageId, ["🔙 Retornando ao menu principal"], 0);
+        sendMessageWhatsapp($number, $messageId, [EventsWahaEnum::SCOPE], 1);
         return true;
     }
 
