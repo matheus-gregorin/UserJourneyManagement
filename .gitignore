@@ -18,3 +18,5 @@ yarn-error.log
 /.vscode
 laravel-worker.stderr.log
 laravel-worker.stdout.log
+/pg_data
+/n8n_data

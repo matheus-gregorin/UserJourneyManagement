@@ -36,7 +36,8 @@ class WebhookReceiveMessageWahaUseCase
 
     public function __construct(
         UserRepositoryInterface $userRepository,
-    ) {
+    ) 
+    {
         $this->userRepository = $userRepository;
     }
 

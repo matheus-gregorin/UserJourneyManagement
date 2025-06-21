@@ -3,37 +3,102 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    container_name: bott_manager
+    restart: unless-stopped
     ports:
       - "8000:8000"
     volumes:
       - .:/var/www/html
       - app_data:/var/www/html/public/uploads
-    container_name: user_manager
     networks:
       - mynetwork
 
   waha:
     image: devlikeapro/waha
-    container_name: waha-monitoring
+    container_name: waha_app
+    restart: always
     ports:
       - "3001:3001"
     stdin_open: true  # Habilita interação com o terminal (equivalente a -it)
     tty: true  # Habilita o terminal para o contêiner
-    environment:
-      - WHATSAPP_API_PORT=3001
-      - WHATSAPP_DEFAULT_ENGINE=WEBJS
     volumes:
       - waha_data:/data
     networks:
       - mynetwork
+    env_file:
+      - .env
 
-  redis_monitor:
+  bott_redis:
     image: redis:latest
     container_name: bott_redis
+    restart: always
     ports:
       - "6379:6379"
     networks:
       - mynetwork
+
+  bott_postgres:
+    image: postgres:latest
+    container_name: bott_postgres
+    restart: always
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./pg_data:/var/lib/postgresql/data/pgdata
+    networks:
+      - mynetwork
+    env_file:
+      - .env
+
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: n8n
+    restart: always
+    ports:
+      - "${SERVER_EXTERNAL_PORT_N8N_APP}:${N8N_PORT}"
+    volumes:
+      - ./n8n_data:/home/node/.n8n
+    networks:
+      - mynetwork
+    env_file:
+      - .env
+    depends_on:
+      - bott_postgres
+      - bott_redis
+
+  n8n_workers:
+    image: n8nio/n8n:latest
+    container_name: n8n_workers
+    restart: always
+    ports:
+      - "${SERVER_EXTERNAL_PORT_N8N_WORKERS}:${N8N_PORT}"
+    volumes:
+      - ./n8n_data:/home/node/.n8n
+    networks:
+      - mynetwork
+    env_file:
+      - .env
+    depends_on:
+      - bott_postgres
+      - bott_redis
+    command: worker
+
+  n8n_webhooks:
+    image: n8nio/n8n:latest
+    container_name: n8n_webhooks
+    restart: always
+    ports:
+      - "${SERVER_EXTERNAL_PORT_N8N_WEBHOOKS}:${N8N_PORT}"
+    volumes:
+      - ./n8n_data:/home/node/.n8n
+    networks:
+      - mynetwork
+    env_file:
+      - .env
+    depends_on:
+      - bott_postgres
+      - bott_redis
+    command: webhook
 
 volumes:
   app_data:
@@ -41,3 +106,4 @@ volumes:
 
 networks:
   mynetwork:
+    driver: bridge
