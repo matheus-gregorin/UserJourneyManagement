@@ -88,18 +88,19 @@ class UsersMysqlRepository implements UserRepositoryInterface
         }
     }
 
-    public function getUserWithContainsScopes()
+    public function getUserWithContainsScopesOrAuth(): array
     {
         try {
 
-            $users = $this->UserMysqlModel::select('uuid', 'name', 'phone', 'updated_at')
-                ->whereNotNull('scope')
-                ->where('scope', '!=', '')
+            $users = $this->UserMysqlModel::where('is_auth', true)
                 ->get();
 
-            // Retornando users direto, por conta da seletiva de dados do "select"
-            // O modelToEntity precisa de todos os dados.
-            return $users;
+            $usersList = [];
+            foreach ($users as $key => $user) {
+                $usersList[] = $this->modelToEntity($user);
+            }
+
+            return $usersList;
         } catch (Exception $e) {
             Log::info("Error in collect users with scopes: ", [
                 'message' => $e->getMessage()

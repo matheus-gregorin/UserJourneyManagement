@@ -18,7 +18,7 @@ interface UserRepositoryInterface
 
     public function getUserWithPhoneNumber(string $number): UserEntity|null|Exception;
 
-    public function getUserWithContainsScopes();
+    public function getUserWithContainsScopesOrAuth(): array;
 
     public function updateRole(UserEntity $user): UserEntity|null|Exception;
 

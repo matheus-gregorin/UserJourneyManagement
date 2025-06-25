@@ -25,7 +25,7 @@ services:
     stdin_open: true  # Habilita interação com o terminal (equivalente a -it)
     tty: true  # Habilita o terminal para o contêiner
     volumes:
-      - ./waha_data:/app
+      - waha_data:/app
     networks:
       - mynetwork
     env_file:
