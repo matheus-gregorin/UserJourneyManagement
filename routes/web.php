@@ -14,12 +14,4 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-// Add middleware to the route group
-Route::get('/login', function (Request $request){
-    return view('index');
-});
-Route::get('/dash', function (Request $request) {
-    return view('dash');
-});
-//Route::get('logs', [\Rap2hpoutre\LaravelLogViewer\LogViewerController::class, 'index']);
-//Route::get('/linkedin/callback', [\Rap2hpoutre\LaravelLogViewer\LogViewerController::class, 'index']);
+Route::get('logs', [\Rap2hpoutre\LaravelLogViewer\LogViewerController::class, 'index']);
