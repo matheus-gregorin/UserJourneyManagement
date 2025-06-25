@@ -19,7 +19,7 @@ class WebhookReceiveMessageWahaUseCase
     private array $scopes = [
         "1" => 'checkThePointsHitToday',
         "2" => 'hitPoint',
-        "3" => 'support'
+        //"3" => 'support'
     ];
 
     private array $options = [
@@ -29,7 +29,8 @@ class WebhookReceiveMessageWahaUseCase
         ],
         'hitPoint' => [
             "1" => 'validatePoint',
-            "2" => 'returnToMenu'
+            "2" => 'deletePoint',
+            "3" => 'returnToMenu'
         ],
     ];
 

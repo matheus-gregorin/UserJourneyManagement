@@ -16,7 +16,7 @@ enum EventsWahaEnum
 
     public const HITSTODAYMENU = "*O que deseja fazer:*\n_1 - Receber PDF no email_\n_2 - Retornar ao MENU_";
 
-    public const HITPOINTMENU = "*O que deseja fazer:*\n_1 - Validar ponto_\n_2 - Retornar ao MENU_";
+    public const HITPOINTMENU = "*O que deseja fazer:*\n_1 - Validar ponto_\n_2 - Deletar ponto_\n_3 - Retornar ao MENU_";
 
     public const THISUSERNAME = " - Nome do usuário: ";
 

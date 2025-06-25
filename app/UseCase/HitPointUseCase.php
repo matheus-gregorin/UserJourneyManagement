@@ -83,6 +83,7 @@ class HitPointUseCase implements OptionUseCaseInterface
                 $text = $text . "📌 " . $index . " " . $point['date'] . PHP_EOL . "⤷ " . $obs . PHP_EOL . "⤷ Confirmado: " . $confirmed . PHP_EOL;
             }
 
+            sendMessageWhatsapp($number, $messageId, ["✅ ponto criado com sucesso."], 0);
             sendMessageWhatsapp($number, $messageId, [$text], 0);
             sendMessageWhatsapp($number, $messageId, [EventsWahaEnum::HITPOINTMENU], 1);
             return true;
@@ -146,6 +147,54 @@ class HitPointUseCase implements OptionUseCaseInterface
         }
     }
 
+    public function deletePoint(UserEntity $user, string $number, ?string $messageId = null)
+    {
+        Log::info('Delete point...', [
+            'uuid' => $user->getUuid(),
+            'number' => $number,
+            'messageId' => $messageId
+        ]);
+
+        try {
+
+            $point = $this->pointRepository->deleteLastPoint($user);
+
+            $points = $this->getHitsToDay($user);
+            $text = "";
+            foreach ($points as $i => $point) {
+                $index = array_key_exists($i, $this->indices) ? $this->indices[$i] : $this->indices[4];
+                $obs = empty($point['observation']) ? ' sem observação' : $point['observation'];
+                $confirmed = $point['checked'] == 'true' ? "✅" : "❌";
+                $text = $text . "📌 " . $index . " " . $point['date'] . PHP_EOL . "⤷ " . $obs . PHP_EOL . "⤷ Confirmado: " . $confirmed . PHP_EOL;
+            }
+
+            sendMessageWhatsapp($number, $messageId, ["✅ ponto deletado com sucesso."], 0);
+            sendMessageWhatsapp($number, $messageId, [$text], 1);
+
+            Log::info('Email enviado com sucesso', [
+                'uuid' => $user->getUuid(),
+                'email' => $user->getEmail(),
+                'number' => $number,
+                'messageId' => $messageId
+            ]);
+
+            $this->returnToMenu($user, $number, $messageId);
+            return true;
+        } catch (Exception $e) {
+            Log::info("Erro ao validar ponto.", [
+                'uuid' => $user->getUuid(),
+                'message' => $e->getMessage()
+            ]);
+            sendMessageWhatsapp(
+                $number,
+                $messageId,
+                [EventsWahaEnum::SERVERERROR],
+                1
+            );
+            return false;
+        }
+    }
+
     public function returnToMenu(UserEntity $user, string $number, ?string $messageId = null)
     {
         Log::info('Returning to menu for user', [
@@ -155,8 +204,8 @@ class HitPointUseCase implements OptionUseCaseInterface
         ]);
         $this->userRepository->updateScopeOfTheUser($user, "");
 
-        sendMessageWhatsapp($number, $messageId, ["🔙 Retornando ao menu principal"], 0);
-        sendMessageWhatsapp($number, $messageId, [EventsWahaEnum::SCOPE], 1);
+        sendMessageWhatsapp($number, $messageId, ["🔙 Retornando ao menu principal"], 3);
+        sendMessageWhatsapp($number, $messageId, [EventsWahaEnum::SCOPE], 5);
         return true;
     }
 

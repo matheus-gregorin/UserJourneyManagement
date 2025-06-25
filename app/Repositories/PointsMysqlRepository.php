@@ -50,8 +50,8 @@ class PointsMysqlRepository implements PointRepositoryInterface
                 ->get();
 
             $points = [];
-            
-            if($pointsModel->isEmpty()){
+
+            if ($pointsModel->isEmpty()) {
                 throw new Exception("Points empty ", 400);
             }
 
@@ -81,6 +81,27 @@ class PointsMysqlRepository implements PointRepositoryInterface
             $pointMysqlModel->save();
 
             return $this->modelToEntity($pointMysqlModel);
+        } catch (Exception $e) {
+            Log::critical("Error in validate last point: ", ['message' => $e->getMessage()]);
+            throw new Exception("Error in validate last point: " . $e->getMessage(), 400);
+        }
+    }
+
+    public function deleteLastPoint(UserEntity $user): PointEntity|true|Exception
+    {
+        try {
+            $pointMysqlModel = $this->pointMysqlModel
+                ->where('user_uuid', $user->getUuid())
+                ->orderBy('created_at', 'desc')
+                ->first();
+
+            if (is_null($pointMysqlModel)) {
+                throw new Exception("No points found for user", 400);
+            }
+
+            $pointMysqlModel->delete();
+
+            return true;
         } catch (Exception $e) {
             Log::critical("Error in validate last point: ", ['message' => $e->getMessage()]);
             throw new Exception("Error in validate last point: " . $e->getMessage(), 400);
