@@ -72,7 +72,7 @@ class CheckThePointsHitTodayUseCase implements OptionUseCaseInterface
         }
     }
 
-    public function sendEmailPdf(UserEntity $user, string $number, ?string $messageId = null)
+    public function sendEmailPdf(UserEntity $user, string $number, ?string $messageId = null, ?string $message = "")
     {
         try {
             $points = $this->getHitsToDay($user);
@@ -110,7 +110,7 @@ class CheckThePointsHitTodayUseCase implements OptionUseCaseInterface
         }
     }
 
-    public function returnToMenu(UserEntity $user, string $number, ?string $messageId = null)
+    public function returnToMenu(UserEntity $user, string $number, ?string $messageId = null, ?string $message = "")
     {
         Log::info('Returning to menu for user', [
             'uuid' => $user->getUuid(),
@@ -119,8 +119,8 @@ class CheckThePointsHitTodayUseCase implements OptionUseCaseInterface
         ]);
         $this->userRepository->updateScopeOfTheUser($user, "");
 
-        sendMessageWhatsapp($number, $messageId, ["🔙 Retornando ao menu principal"], 0);
-        sendMessageWhatsapp($number, $messageId, [EventsWahaEnum::SCOPE], 1);
+        sendMessageWhatsapp($number, $messageId, ["🔙 Retornando ao menu principal"], 3);
+        sendMessageWhatsapp($number, $messageId, [EventsWahaEnum::SCOPE], 3);
         return true;
     }
 

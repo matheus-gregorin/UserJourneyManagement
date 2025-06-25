@@ -10,6 +10,7 @@ use Domain\Repositories\PointRepositoryInterface;
 use Domain\Repositories\UserRepositoryInterface;
 use Domain\UseCase\OptionUseCaseInterface;
 use Exception;
+use Gemini;
 use Illuminate\Support\Facades\Log;
 use Ramsey\Uuid\Uuid;
 
@@ -99,7 +100,7 @@ class HitPointUseCase implements OptionUseCaseInterface
         }
     }
 
-    public function validatePoint(UserEntity $user, string $number, ?string $messageId = null)
+    public function validatePoint(UserEntity $user, string $number, ?string $messageId = null, ?string $message = "")
     {
         Log::info('Validating point...', [
             'uuid' => $user->getUuid(),
@@ -147,7 +148,66 @@ class HitPointUseCase implements OptionUseCaseInterface
         }
     }
 
-    public function deletePoint(UserEntity $user, string $number, ?string $messageId = null)
+    public function addObservation(UserEntity $user, string $number, ?string $messageId = null, string $message = "")
+    {
+        Log::info('Add observation to point...', [
+            'uuid' => $user->getUuid(),
+            'number' => $number,
+            'messageId' => $messageId,
+            'message' => $message
+        ]);
+
+        try {
+
+            if (empty($message)) {
+                throw new Exception("Empty observation");
+            }
+            $validate = $this->geminiValidMessage($message);
+            if($validate){
+                sendMessageWhatsapp($number, $messageId, ["❌ Não aceitamos esse tipo de mensagem, usuário poderá ser bloqueado se insistir em continuar ❌"], 0, true);
+                $this->returnToMenu($user, $number, $messageId, $message);
+                return true;
+            }
+
+            $point = $this->pointRepository->addObservationToLastPoint($user, $message);
+
+            $points = $this->getHitsToDay($user);
+            $text = "";
+            foreach ($points as $i => $point) {
+                $index = array_key_exists($i, $this->indices) ? $this->indices[$i] : $this->indices[4];
+                $obs = empty($point['observation']) ? ' sem observação' : $point['observation'];
+                $confirmed = $point['checked'] == 'true' ? "✅" : "❌";
+                $text = $text . "📌 " . $index . " " . $point['date'] . PHP_EOL . "⤷ " . $obs . PHP_EOL . "⤷ Confirmado: " . $confirmed . PHP_EOL;
+            }
+
+            sendMessageWhatsapp($number, $messageId, ["✅ Observação criada com sucesso."], 0);
+            sendMessageWhatsapp($number, $messageId, [$text], 1);
+
+            Log::info('Email enviado com sucesso', [
+                'uuid' => $user->getUuid(),
+                'email' => $user->getEmail(),
+                'number' => $number,
+                'messageId' => $messageId
+            ]);
+
+            $this->returnToMenu($user, $number, $messageId);
+            return true;
+        } catch (Exception $e) {
+            Log::info("Erro ao colocar observação no ponto.", [
+                'uuid' => $user->getUuid(),
+                'message' => $e->getMessage()
+            ]);
+            sendMessageWhatsapp(
+                $number,
+                $messageId,
+                [EventsWahaEnum::SERVERERROR],
+                1
+            );
+            return false;
+        }
+    }
+
+    public function deletePoint(UserEntity $user, string $number, ?string $messageId = null, string $message = "")
     {
         Log::info('Delete point...', [
             'uuid' => $user->getUuid(),
@@ -181,7 +241,7 @@ class HitPointUseCase implements OptionUseCaseInterface
             $this->returnToMenu($user, $number, $messageId);
             return true;
         } catch (Exception $e) {
-            Log::info("Erro ao validar ponto.", [
+            Log::info("Erro ao deletar ponto.", [
                 'uuid' => $user->getUuid(),
                 'message' => $e->getMessage()
             ]);
@@ -195,7 +255,7 @@ class HitPointUseCase implements OptionUseCaseInterface
         }
     }
 
-    public function returnToMenu(UserEntity $user, string $number, ?string $messageId = null)
+    public function returnToMenu(UserEntity $user, string $number, ?string $messageId = null, ?string $message = "")
     {
         Log::info('Returning to menu for user', [
             'uuid' => $user->getUuid(),
@@ -204,8 +264,8 @@ class HitPointUseCase implements OptionUseCaseInterface
         ]);
         $this->userRepository->updateScopeOfTheUser($user, "");
 
-        sendMessageWhatsapp($number, $messageId, ["🔙 Retornando ao menu principal"], 3);
-        sendMessageWhatsapp($number, $messageId, [EventsWahaEnum::SCOPE], 5);
+        sendMessageWhatsapp($number, $messageId, ["🔙 Retornando ao menu principal"], 1);
+        sendMessageWhatsapp($number, $messageId, [EventsWahaEnum::SCOPE], 3);
         return true;
     }
 
@@ -220,6 +280,32 @@ class HitPointUseCase implements OptionUseCaseInterface
                 'message' => $e->getMessage()
             ]);
             return [];
+        }
+    }
+
+    public function geminiValidMessage(string $message)
+    {
+        try {
+
+            $gemini = Gemini::client(env('GEMINIKEY'));
+
+            $response = $gemini->geminiFlash()->generateContent(
+                "Me diga sim se essa mensagem for maliciosa ou dizer palavras de baixo calão, ou não se não for, sem quebra de linhas. mensagem: " . $message
+            );
+
+            $message = $response->text();
+            $message = str_replace('\n', '', $message);
+
+            if($message == "Sim\n"){
+                return true;
+            }
+
+            return false;
+        } catch (Exception $e) {
+            log::error("Gemini error", [
+                'message' => $e->getMessage()
+            ]);
+            return false;
         }
     }
 }

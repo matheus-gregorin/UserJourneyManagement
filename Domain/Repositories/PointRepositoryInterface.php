@@ -12,5 +12,6 @@ interface PointRepositoryInterface
         public function hitPoint(PointEntity $point): PointEntity|Exception;
         public function getByUserUuidWithDates(string $userUuid, string $startDate, string $endDate);
         public function validateLastPoint(UserEntity $user);
+        public function addObservationToLastPoint(UserEntity $user, string $message);
         public function deleteLastPoint(UserEntity $user);
 }

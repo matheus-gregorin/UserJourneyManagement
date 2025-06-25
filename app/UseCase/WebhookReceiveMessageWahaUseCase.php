@@ -29,8 +29,9 @@ class WebhookReceiveMessageWahaUseCase
         ],
         'hitPoint' => [
             "1" => 'validatePoint',
-            "2" => 'deletePoint',
-            "3" => 'returnToMenu'
+            "2" => 'addObservation',
+            "3" => 'deletePoint',
+            "4" => 'returnToMenu'
         ],
     ];
 
@@ -83,9 +84,16 @@ class WebhookReceiveMessageWahaUseCase
                         ]);
 
                         $scopeCurrent = $user->getScope();
+                        $messageObservation = "";
+                        if(stripos($handledPayload['message'], ",")){
+                            $arrayMessage = explode(',', $handledPayload['message']);
+                            $handledPayload['message'] = trim($arrayMessage[0]);
+                            $messageObservation = trim($arrayMessage[1]);
+                        }
+
                         if (array_key_exists($handledPayload['message'], $this->options[$scopeCurrent])) {
                             $option = $this->options[$scopeCurrent][$handledPayload['message']];
-                            $this->dispatchOption($user, $scopeCurrent, $option, $handledPayload['number'], $handledPayload['messageId']);
+                            $this->dispatchOption($user, $scopeCurrent, $option, $handledPayload['number'], $handledPayload['messageId'], $messageObservation);
                             return true;
                         }
 
@@ -188,7 +196,7 @@ class WebhookReceiveMessageWahaUseCase
         return false;
     }
 
-    public function dispatchOption(UserEntity $user, string $scope, string $option = "", string $number, string $messageId,)
+    public function dispatchOption(UserEntity $user, string $scope, string $option = "", string $number, string $messageId, string $message = "")
     {
         Log::info(
             "OPTION SELECTED: ",
@@ -197,7 +205,8 @@ class WebhookReceiveMessageWahaUseCase
                 "scope" => $scope,
                 "option" => $option,
                 "number" => $number,
-                "messageId" => $messageId
+                "messageId" => $messageId,
+                'message' => $message
             ]
         );
 
@@ -205,7 +214,7 @@ class WebhookReceiveMessageWahaUseCase
         $scopeUseCase = OptionsFactory::getOptions($scope);
 
         if (!empty($option)) {
-            $scopeUseCase->$option($user, $number, $messageId);
+            $scopeUseCase->$option($user, $number, $messageId, $message);
             return true;
         }
 

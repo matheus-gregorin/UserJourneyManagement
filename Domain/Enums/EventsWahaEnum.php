@@ -16,7 +16,7 @@ enum EventsWahaEnum
 
     public const HITSTODAYMENU = "*O que deseja fazer:*\n_1 - Receber PDF no email_\n_2 - Retornar ao MENU_";
 
-    public const HITPOINTMENU = "*O que deseja fazer:*\n_1 - Validar ponto_\n_2 - Deletar ponto_\n_3 - Retornar ao MENU_";
+    public const HITPOINTMENU = "*O que deseja fazer:*\n_1 - Validar ponto_\n_2 - Adicionar observação (Para essa opção digite: '2, *<sua observação aqui>*')_\n_3 - Deletar ponto_\n_4 - Retornar ao MENU_";
 
     public const THISUSERNAME = " - Nome do usuário: ";
 
@@ -30,7 +30,7 @@ enum EventsWahaEnum
 
     public const MESSAGERESEND = "🙎🏻‍♂️ Não foi possivel entender a mensagem, digite o número de acordo com essas opções.";
 
-    public const SERVERERROR = "🤦🏻‍♂️ Tivemos um problema ao processar sua mensagem, por favor, tente novamente mais tarde.";
+    public const SERVERERROR = "🤦🏻‍♂️ Tivemos um problema ao processar sua mensagem, por favor, tente novamente.";
 
     public const USERNOTFOUND = "🙅🏻‍♂️ Usuário não encontrado, por favor, verifique se você está cadastrado e tente novamente.";
 
