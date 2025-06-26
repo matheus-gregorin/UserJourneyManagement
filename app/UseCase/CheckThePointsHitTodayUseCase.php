@@ -119,7 +119,7 @@ class CheckThePointsHitTodayUseCase implements OptionUseCaseInterface
         ]);
         $this->userRepository->updateScopeOfTheUser($user, "");
 
-        sendMessageWhatsapp($number, $messageId, ["🔙 Retornando ao menu principal"], 3);
+        sendMessageWhatsapp($number, $messageId, ["🔙 Retornando ao menu principal"], 1);
         sendMessageWhatsapp($number, $messageId, [EventsWahaEnum::SCOPE], 3);
         return true;
     }
