@@ -17,6 +17,11 @@ queue-restart:
 	docker exec -it bott_manager php artisan queue:restart
 	@echo "Comando de reinício da fila enviado para o background."
 
+queue-listen:
+	@echo "Reiniciando a fila em background no container bott_manager..."
+	docker exec -it bott_manager php artisan queue:listen
+	@echo "Comando de reinício da fila enviado para o background."
+
 down:
 	@echo "Down all containers..."
 	docker compose down
