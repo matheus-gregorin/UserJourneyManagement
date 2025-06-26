@@ -112,7 +112,6 @@ class PointsMysqlRepository implements PointRepositoryInterface
     public function confirmHits(string $uuid)
     {
         try {
-            //dd($uuid);
             $pointMysqlModel = $this->pointMysqlModel::where('uuid', '=', $uuid)->first();
 
             if (is_null($pointMysqlModel)) {
