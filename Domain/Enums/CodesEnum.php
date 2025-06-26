@@ -14,6 +14,7 @@ enum CodesEnum
     public const messageUserNotCreated = 'user not created';
     public const messageUsersCollected = 'users collected';
     public const messageRoleUpdated = 'role updated';
+    public const automationDispatchSuccess = 'automation dispatch success';
 
     // Messages errors
     public const messageUserNotAuthenticated = 'user not authenticated';
@@ -24,6 +25,11 @@ enum CodesEnum
     public const messageValidationError = 'Validation error';
     public const messageUsersNotContent = 'not content users';
     public const messageNotUpdatedRole = 'not updated role';
+    public const messageErrorUserNotContainScope = 'user not contain scope';
+    public const messageErrorUserRestartScope = 'Error in restart user with scope';
+    public const automationDispatchError = 'automation dispatch error';
+    public const messageErrorGetUserByPhone  = 'Error in get user by phone number';
+    public const messageErrorReceiveMessage  = 'Error in webhook receive message';
 
     // Codes
     public const codeSuccess = 200;

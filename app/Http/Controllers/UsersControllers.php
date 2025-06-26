@@ -26,6 +26,7 @@ use App\UseCase\WebhookReceiveMessageWahaUseCase;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use League\CommonMark\Extension\CommonMark\Node\Inline\Code;
 
 class UsersControllers extends Controller
 {
@@ -219,9 +220,9 @@ class UsersControllers extends Controller
                     'success' => true
                 ], 200);
             } catch (CollectUserByPhoneException $e) {
-                Log::critical("Error in get user by phone number: ", ['message' => $e->getMessage()]);
+                Log::critical(CodesEnum::messageErrorGetUserByPhone , ['message' => $e->getMessage()]);
             } catch (Exception $e) {
-                Log::critical("Error in webhook receive message: ", ['message' => $e->getMessage()]);
+                Log::critical(CodesEnum::messageErrorReceiveMessage, ['message' => $e->getMessage()]);
             }
         }
     }
@@ -229,14 +230,13 @@ class UsersControllers extends Controller
     public function validateUsersOff(Request $request)
     {
         try {
-
-            Log::info("Verify users off", []);
+            // Validate users off
             $this->usersServices->validateUsersOff();
 
             return ApiResponse::success(
                 [],
-                "Automation dispatch",
-                200
+                CodesEnum::automationDispatchSuccess,
+                CodesEnum::codeSuccess
             );
         } catch (UserNotFoundException $e) {
             Log::critical("Error in get user with scope: ", ['message' => $e->getMessage()]);
@@ -244,35 +244,35 @@ class UsersControllers extends Controller
                 [
                     $e->getMessage()
                 ],
-                "Automation dispatch error",
-                500
+                CodesEnum::automationDispatchError,
+                CodesEnum::codeErrorBadRequest
             );
         } catch (CollectUserByPhoneException $e) {
-            Log::critical("Error in collect user phone with scope: ", ['message' => $e->getMessage()]);
+            Log::critical(CodesEnum::messageErrorGetUserByPhone, ['message' => $e->getMessage()]);
             return ApiResponse::error(
                 [
                     $e->getMessage()
                 ],
-                "Automation dispatch error",
-                500
+                CodesEnum::automationDispatchError,
+                CodesEnum::codeErrorBadRequest
             );
         } catch (RestartUserException $e) {
-            Log::critical("Error in restart user with scope: ", ['message' => $e->getMessage()]);
+            Log::critical(CodesEnum::messageErrorUserRestartScope, ['message' => $e->getMessage()]);
             return ApiResponse::error(
                 [
                     $e->getMessage()
                 ],
-                "Automation dispatch error",
-                500
+                CodesEnum::automationDispatchError,
+                CodesEnum::codeErrorInternalServerError
             );
         } catch (Exception $e) {
-            Log::critical("Error in process users with scope: ", ['message' => $e->getMessage()]);
+            Log::critical(CodesEnum::messageInternalServerError, ['message' => $e->getMessage()]);
             return ApiResponse::error(
                 [
                     $e->getMessage()
                 ],
-                "Automation dispatch error",
-                500
+                CodesEnum::automationDispatchError,
+                CodesEnum::codeErrorInternalServerError
             );
         }
     }
