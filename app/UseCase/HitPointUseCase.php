@@ -46,7 +46,7 @@ class HitPointUseCase implements OptionUseCaseInterface
                 $number,
                 $messageId,
                 [
-                    "🚫 Limite de tentativas excedido. Procure o administrador do sistema para mais informações."
+                    "🚫 Limite de confirmações excedido. Procure o administrador do sistema para mais informações."
                 ],
                 0
             );
