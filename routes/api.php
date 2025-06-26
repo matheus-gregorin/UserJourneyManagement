@@ -2,9 +2,8 @@
 
 use App\Http\Controllers\UsersControllers;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Log;;
 
-;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -21,11 +20,17 @@ use Illuminate\Support\Facades\Route;
 // Login
 Route::post('/login', [UsersControllers::class, 'login']);
 
-// Core
+// Core | User |
 Route::group(['middleware' => 'jwt'], function () {
     Route::post('/create-user', [UsersControllers::class, 'createUser']);
     Route::get('/all-users', [UsersControllers::class, 'getAllUsers']);
     Route::put('/change-role-user/{uuid}', [UsersControllers::class, 'changeRoleUser']);
+});
+
+// Core | Company |
+Route::group(['middleware' => 'jwt'], function () {
+    Route::post('/create-company', [UsersControllers::class, 'createUser']);
+    Route::get('/all-companies', [UsersControllers::class, 'createUser']);
 });
 
 // Webhook

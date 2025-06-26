@@ -24,7 +24,6 @@ use App\UseCase\WebhookReceiveMessageWahaUseCase;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use League\CommonMark\Extension\CommonMark\Node\Inline\Code;
 
 class UsersControllers extends Controller
 {
