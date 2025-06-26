@@ -47,11 +47,11 @@
             margin-bottom: 20px;
         }
 
-        /* Estilos para rolagem APENAS em tela (HTML) */
+        /* Removendo estilos para rolagem em tela para que a div cresça com o conteúdo */
         @media screen {
             .scrollable-on-screen {
-                max-height: 250px;
-                overflow-y: auto;
+                /* max-height: 250px; REMOVIDO */
+                /* overflow-y: auto; REMOVIDO */
             }
         }
 
@@ -88,7 +88,7 @@
             border-radius: 5px;
             font-size: 16px;
             /* Usar display: block para maior compatibilidade,
-               e controlar quebras de linha manualmente ou com divs internas */
+                e controlar quebras de linha manualmente ou com divs internas */
             display: block;
         }
 
