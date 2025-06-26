@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CompaniesControllers;
 use App\Http\Controllers\UsersControllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;;
@@ -29,8 +30,8 @@ Route::group(['middleware' => 'jwt'], function () {
 
 // Core | Company |
 Route::group(['middleware' => 'jwt'], function () {
-    Route::post('/create-company', [UsersControllers::class, 'createUser']);
-    Route::get('/all-companies', [UsersControllers::class, 'createUser']);
+    Route::post('/create-company', [CompaniesControllers::class, 'createCompany']);
+    Route::get('/all-companies', [CompaniesControllers::class, 'getAllCompanies']);
 });
 
 // Webhook

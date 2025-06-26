@@ -2,6 +2,8 @@
 
 namespace Domain\Entities;
 
+use DateTime;
+
 class CompanyEntity
 {
     private string $uuid;
@@ -16,9 +18,9 @@ class CompanyEntity
 
     private bool $active;
 
-    private string $createdAt;
+    private DateTime $createdAt;
 
-    private string $updatedAt;
+    private DateTime $updatedAt;
 
     public function __construct(
         string $uuid,
@@ -27,8 +29,8 @@ class CompanyEntity
         string $cnpj,
         string $plan,
         bool $active,
-        string $createdAt,
-        string $updatedAt
+        DateTime $createdAt,
+        DateTime $updatedAt
     ) {
         $this->uuid = $uuid;
         $this->corporateReason = $corporateReason;
@@ -106,23 +108,23 @@ class CompanyEntity
         return $this;
     }
 
-    public function getCreatedAt(): string
+    public function getCreatedAt(): DateTime
     {
         return $this->createdAt;
     }
 
-    public function setCreatedAt(string $createdAt): self
+    public function setCreatedAt(DateTime $createdAt): self
     {
         $this->createdAt = $createdAt;
         return $this;
     }
 
-    public function getUpdatedAt(): string
+    public function getUpdatedAt(): DateTime
     {
         return $this->updatedAt;
     }
 
-    public function setUpdatedAt(string $updatedAt): self
+    public function setUpdatedAt(DateTime $updatedAt): self
     {
         $this->updatedAt = $updatedAt;
         return $this;
@@ -132,15 +134,13 @@ class CompanyEntity
     {
         return [
             'uuid' => $this->getUuid(),
-            'corporateReason' => $this->getCorporateReason(),
-            'fantasyName' => $this->getFantasyName(),
+            'corporate_reason' => $this->getCorporateReason(),
+            'fantasy_name' => $this->getFantasyName(),
             'cnpj' => $this->getCnpj(),
             'plan' => $this->getPlan(),
             'active' => $this->isActive(),
-            'createdAt' => $this->getCreatedAt(),
-            'updatedAt' => $this->getUpdatedAt()
+            "updated_at" => $this->getUpdatedAt()->format('Y-m-d H:i:s'),
+            "created_at" => $this->getCreatedAt()->format('Y-m-d H:i:s')
         ];
     }
-
-    
 }

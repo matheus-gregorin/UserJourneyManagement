@@ -11,6 +11,7 @@ use App\Exceptions\RestartUserException;
 use App\Exceptions\UpdateRoleException;
 use App\Exceptions\UserNotCreatedException;
 use App\Exceptions\UserNotFoundException;
+use App\Exceptions\UserNotIsAdminException;
 use App\Http\Requests\changeRoleUserRequest;
 use App\Http\Requests\CreateUserRequest;
 use App\Http\Requests\LoginRequest;
@@ -32,7 +33,6 @@ class UsersControllers extends Controller
     private GetAllUsersUseCase $getAllUsersUseCase;
     private ChangeRoleUserUseCase $changeRoleUserUseCase;
     private WebhookReceiveMessageWahaUseCase $webhookReceiveMessageWahaUseCase;
-
     private UsersServices $usersServices;
 
     public function __construct(
@@ -79,6 +79,14 @@ class UsersControllers extends Controller
                 ],
                 CodesEnum::messageUserNotAuthenticated,
                 CodesEnum::codeErrorUnauthorized
+            );
+        } catch (UserNotIsAdminException $e) {
+            return ApiResponse::error(
+                [
+                    CodesEnum::messageUserNotIsAdmin
+                ],
+                CodesEnum::messageUserNotAuthenticated,
+                CodesEnum::codeErrorForbidden
             );
         } catch (Exception $e) {
             return ApiResponse::error(

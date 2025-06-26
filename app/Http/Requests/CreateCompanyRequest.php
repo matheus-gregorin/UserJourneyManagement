@@ -4,12 +4,11 @@ namespace App\Http\Requests;
 
 use Domain\Enums\CodesEnum;
 use App\Http\Responses\ApiResponse;
-use Illuminate\Contracts\Validation\Validator;
-use Illuminate\Http\Exceptions\HttpResponseException;
-
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Contracts\Validation\Validator;
 
-class CreateUserRequest extends FormRequest
+class CreateCompanyRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -29,12 +28,11 @@ class CreateUserRequest extends FormRequest
     public function rules()
     {
         return [
-            'name' => 'required|max:50',
-            'email' => 'required|max:50|email|unique:usuarios,email',
-            'password' => 'required|size:8',
-            'phone' => 'required|unique:usuarios,phone|size:13',
-            'is_admin' => 'required|boolean',
-            'role' => 'required'
+            'corporate_reason' => 'required|string|max:50|unique:company,corporate_reason',
+            'fantasy_name' => 'nullable|max:50',
+            'cnpj' => 'required|size:14|unique:company,cnpj|regex:/^\d{14}$/',
+            'plan' => 'required|string|in:basic,premium',
+            'active' => 'required|boolean'
         ];
     }
 

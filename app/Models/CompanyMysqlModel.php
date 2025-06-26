@@ -28,12 +28,12 @@ class CompanyMysqlModel extends Model
 
     protected $fillable = [
         'uuid',
-        'corporateReason',
-        'fantasyName',
+        'corporate_reason',
+        'fantasy_name',
         'cnpj',
         'plan',
         'active',
-        'createdAt',
-        'updatedAt'
+        'created_at',
+        'updated_at'
     ];
 }

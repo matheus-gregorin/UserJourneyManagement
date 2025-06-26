@@ -35,10 +35,15 @@ class LoginRequest extends FormRequest
 
     protected function failedValidation(Validator $validator)
     {
+        $messageErrors = "";
+        foreach ($validator->errors()->messages() as $key => $error) {
+            $messageErrors = $error[0];
+        }
+
         throw new HttpResponseException(
             ApiResponse::error(
-                [    
-                    $validator->errors()
+                [
+                    $messageErrors
                 ],
                 CodesEnum::messageValidationError,
                 CodesEnum::codeErrorUnprocessableEntity

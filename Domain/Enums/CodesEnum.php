@@ -15,10 +15,12 @@ enum CodesEnum
     public const messageUsersCollected = 'users collected';
     public const messageRoleUpdated = 'role updated';
     public const automationDispatchSuccess = 'automation dispatch success';
+    public const messageCompanyCreated = 'company created';
 
     // Messages errors
     public const messageUserNotAuthenticated = 'user not authenticated';
     public const messageUserInvalid = 'user invalid';
+    public const messageUserNotIsAdmin = 'action not allowed';
     public const messageCredentialsInvalid = 'credentials invalid';
     public const messageDataInvalid = 'data invalid';
     public const messageInternalServerError = 'server error';
@@ -30,9 +32,11 @@ enum CodesEnum
     public const automationDispatchError = 'automation dispatch error';
     public const messageErrorGetUserByPhone  = 'Error in get user by phone number';
     public const messageErrorReceiveMessage  = 'Error in webhook receive message';
+    public const messageCompanyNotCreated = 'company not created';
 
     // Codes
     public const codeSuccess = 200;
+    public const codeCreated = 201;
     public const codeNotContent = 204;
     public const codeErrorBadRequest = 400;
     public const codeErrorUnauthorized = 401;

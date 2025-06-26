@@ -7,6 +7,7 @@ use Domain\Repositories\PointRepositoryInterface;
 use Domain\Repositories\UserRepositoryInterface;
 use App\Http\HttpClients\WahaHttpClient;
 use App\Http\Responses\ApiResponse;
+use App\Repositories\CompanyMysqlRepository;
 use App\Repositories\PointsMysqlRepository;
 use App\Repositories\UserMongoDbRepository;
 use App\Repositories\UsersMysqlRepository;
@@ -16,6 +17,7 @@ use App\UseCase\CreateUserUseCase;
 use App\UseCase\GetAllUsersUseCase;
 use App\UseCase\LoginUseCase;
 use App\UseCase\WebhookReceiveMessageWahaUseCase;
+use Domain\Repositories\CompanyRepositoryInterface;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\ServiceProvider;
@@ -50,16 +52,17 @@ class AppServiceProvider extends ServiceProvider
         // Repository Adapters
         switch (Config::get('database.default')) {
             case 'mysql':
-                    $this->app->bind(UserRepositoryInterface::class, UsersMysqlRepository::class);
+                $this->app->bind(UserRepositoryInterface::class, UsersMysqlRepository::class);
                 break;
             case 'mongodb':
-                    $this->app->bind(UserRepositoryInterface::class, UserMongoDbRepository::class);
+                $this->app->bind(UserRepositoryInterface::class, UserMongoDbRepository::class);
                 break;
             default:
-                    Log::critical("DB undefined", Config::get('database.default'));
+                Log::critical("DB undefined", Config::get('database.default'));
                 break;
         }
         $this->app->bind(PointRepositoryInterface::class, PointsMysqlRepository::class);
+        $this->app->bind(CompanyRepositoryInterface::class, CompanyMysqlRepository::class);
     }
 
     /**

@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Http\Responses\ApiResponse;
 use Closure;
 use Exception;
 use Firebase\JWT\JWT;
@@ -47,10 +48,13 @@ class JwtMiddleware
             throw new Exception('headers invalid', 401);
 
         } catch (Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage()
-            ]);
+            return ApiResponse::error(
+                [
+                    $e->getMessage()
+                ],
+                'Unauthorized',
+                401
+            );
         }
     }
 }
