@@ -62,6 +62,21 @@ class WebhookReceiveMessageWahaUseCase
                 $numberSearch = explode('@', $handledPayload['number'])[0];
                 $user = $this->userRepository->getUserWithPhoneNumber($numberSearch);
 
+                $validCompany = $this->validCompanyIsActive($user);
+                if (!$validCompany) {
+                    Log::info('COMPANY NOT ACTIVE', [
+                        'user' => json_encode($user->toArray()),
+                        'number' => $handledPayload['number']
+                    ]);
+                    sendMessageWhatsapp(
+                        $handledPayload['number'],
+                        $handledPayload['messageId'],
+                        ["🙍🏻‍♂️ Olá! sua empresa não está ativa no momento. Por favor, entre em contato com o suporte."],
+                        0
+                    );
+                    return false;
+                }
+
                 // Verifica se o usuário já se autenticou
                 if ($user->getIsAuth()) {
 
@@ -84,7 +99,7 @@ class WebhookReceiveMessageWahaUseCase
 
                         $scopeCurrent = $user->getScope();
                         $messageObservation = "";
-                        if(stripos($handledPayload['message'], ",")){
+                        if (stripos($handledPayload['message'], ",")) {
                             $arrayMessage = explode(',', $handledPayload['message']);
                             $handledPayload['message'] = trim($arrayMessage[0]);
                             $messageObservation = trim($arrayMessage[1]);
@@ -296,6 +311,33 @@ class WebhookReceiveMessageWahaUseCase
 
             return $content;
         } catch (Exception $e) {
+            return false;
+        }
+    }
+
+    public function validCompanyIsActive(UserEntity $user)
+    {
+        try {
+            if (!$user->getCompany()) {
+                Log::info('USER NOT HAVE COMPANY', [
+                    'user' => json_encode($user->toArray())
+                ]);
+                return false;
+            }
+
+            if (!$user->getCompany()->isActive()) {
+                Log::info('COMPANY NOT ACTIVE', [
+                    'company' => json_encode($user->getCompany()->toArray())
+                ]);
+                return false;
+            }
+
+            return true;
+        } catch (Exception $e) {
+            Log::critical('VALID COMPANY IS ACTIVE ERROR', [
+                'message' => $e->getMessage(),
+                'user' => json_encode($user->toArray())
+            ]);
             return false;
         }
     }

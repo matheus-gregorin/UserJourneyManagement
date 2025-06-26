@@ -29,25 +29,36 @@ class CompanyMysqlRepository implements CompanyRepositoryInterface
         }
     }
 
-    public function modelToEntity($companyMysqlModel, bool $removePass = false): CompanyEntity|Exception
+    public function getCompanyByUuid(string $uuid): CompanyEntity|Exception
+    {
+        try {
+            $companyModel = $this->companyMysqlModel::where('uuid', '=', $uuid)->first();
+            return $this->modelToEntity($companyModel);
+        } catch (Exception $e) {
+            Log::critical("Error in get company by uuid: ", ['message' => $e->getMessage()]);
+            throw new CompanyNotFoundException("Company not found", 400);
+        }
+    }
+
+    public function modelToEntity($companyModel, bool $removePass = false): CompanyEntity|Exception
     {
 
-        if (is_null($companyMysqlModel)) {
-            Log::critical("Company not found: ", ['user' => json_encode($companyMysqlModel)]);
+        if (is_null($companyModel)) {
+            Log::critical("Company not found: ", ['user' => json_encode($companyModel)]);
             throw new CompanyNotFoundException("Company not found", 400);
         }
 
-        $password = $removePass ? "" : $companyMysqlModel->password;
+        $password = $removePass ? "" : $companyModel->password;
 
         $company = new CompanyEntity(
-            $companyMysqlModel->uuid,
-            $companyMysqlModel->corporate_reason,
-            $companyMysqlModel->fantasy_name,
-            $companyMysqlModel->cnpj,
-            $companyMysqlModel->plan,
-            $companyMysqlModel->active,
-            $companyMysqlModel->created_at,
-            $companyMysqlModel->updated_at
+            $companyModel->uuid,
+            $companyModel->corporate_reason,
+            $companyModel->fantasy_name,
+            $companyModel->cnpj,
+            $companyModel->plan,
+            $companyModel->active,
+            $companyModel->created_at,
+            $companyModel->updated_at
         );
 
         return $company;

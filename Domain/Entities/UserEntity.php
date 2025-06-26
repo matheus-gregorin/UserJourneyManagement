@@ -28,6 +28,8 @@ class UserEntity
 
     private string $role;
 
+    private CompanyEntity $company;
+
     private DateTime $updatedAt;
 
     private DateTime $createdAt;
@@ -41,6 +43,7 @@ class UserEntity
         string $phone,
         bool $isAdmin,
         string $role,
+        CompanyEntity $company,
         DateTime $updatedAt,
         DateTime $createdAt
     )
@@ -53,6 +56,7 @@ class UserEntity
         $this->phone = $phone;
         $this->isAdmin = $isAdmin;
         $this->role = $this->enterPermission($role);
+        $this->company = $company;
         $this->updatedAt = $updatedAt;
         $this->createdAt = $createdAt;
     }
@@ -166,6 +170,17 @@ class UserEntity
         return $this;
     }
 
+    public function getCompany(): CompanyEntity
+    {
+        return $this->company;
+    }
+
+    public function setCompany(CompanyEntity $company)
+    {
+        $this->company = $company;
+        return $this;
+    }
+
     public function getUpdatedAt()
     {
         return $this->updatedAt;
@@ -245,6 +260,7 @@ class UserEntity
             "phone" => $this->getPhone(),
             "is_admin" => $this->getIsAdmin(),
             "role" => $this->getRole(),
+            "company" => $this->getCompany()->toArray(),
             "updated_at" => $this->getUpdatedAt()->format('Y-m-d H:i:s'),
             "created_at" => $this->getCreatedAt()->format('Y-m-d H:i:s')
         ];

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Domain\Enums\CodesEnum;
 use App\Exceptions\CollectUserByPhoneException;
 use App\Exceptions\CollectUserByUuidException;
+use App\Exceptions\CompanyNotFoundException;
 use App\Exceptions\CredentialsInvalidException;
 use App\Exceptions\NotContentUsersException;
 use App\Exceptions\RestartUserException;
@@ -126,6 +127,14 @@ class UsersControllers extends Controller
                 ],
                 CodesEnum::messageUserNotCreated,
                 CodesEnum::codeErrorInternalServerError
+            );
+        } catch (CompanyNotFoundException $e) {
+            return ApiResponse::error(
+                [
+                    CodesEnum::messageCompanyNotFound
+                ],
+                CodesEnum::messageUserNotCreated,
+                CodesEnum::codeErrorBadRequest
             );
         } catch (Exception $e) {
             return ApiResponse::error(

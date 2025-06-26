@@ -34,7 +34,8 @@ class CreateUserRequest extends FormRequest
             'password' => 'required|size:8',
             'phone' => 'required|unique:usuarios,phone|size:13',
             'is_admin' => 'required|boolean',
-            'role' => 'required'
+            'role' => 'required',
+            'company_uuid' => 'required|uuid|exists:company,uuid',
         ];
     }
 

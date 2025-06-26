@@ -16,6 +16,7 @@ use App\Exceptions\UserNotCreatedException;
 use App\Exceptions\UserNotFoundException;
 use App\Models\UserMysqlModel;
 use Domain\Entities\PointEntity;
+use Domain\Repositories\CompanyRepositoryInterface;
 use Exception;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Log;
@@ -23,16 +24,32 @@ use Illuminate\Support\Facades\Log;
 class UsersMysqlRepository implements UserRepositoryInterface
 {
     private UserMysqlModel $UserMysqlModel;
+    private CompanyRepositoryInterface $CompanyRepositoryInterface;
 
-    public function __construct(UserMysqlModel $UserMysqlModel)
+    public function __construct(UserMysqlModel $UserMysqlModel, CompanyRepositoryInterface $CompanyRepositoryInterface)
     {
         $this->UserMysqlModel = $UserMysqlModel;
+        $this->CompanyRepositoryInterface = $CompanyRepositoryInterface;
     }
 
-    public function createUser(array $data): UserEntity|null|Exception
+    public function createUser(UserEntity $user): UserEntity|null|Exception
     {
         try {
-            return $this->modelToEntity($this->UserMysqlModel::create($data), true);
+            return $this->modelToEntity($this->UserMysqlModel::create([
+                'uuid' => $user->getUuid(),
+                'name' => $user->getName(),
+                'email' => $user->getEmail(),
+                'password' => $user->getPassword(),
+                'is_auth' => $user->getIsAuth(),
+                'otp' => $user->getOtpCode(),
+                'scope' => $user->getScope(),
+                'phone' => $user->getPhone(),
+                'is_admin' => $user->getIsAdmin(),
+                'role' => $user->getRole(),
+                'company_uuid' => $user->getCompany()->getUuid(),
+                'created_at' => $user->getCreatedAt(),
+                'updated_at' => $user->getUpdatedAt()
+            ]), true);
         } catch (Exception $e) {
             Log::critical("Error in created user: ", ['message' => $e->getMessage()]);
             throw new UserNotCreatedException("Error in created user", 400);
@@ -200,6 +217,7 @@ class UsersMysqlRepository implements UserRepositoryInterface
             $UserMysqlModel->phone,
             $UserMysqlModel->is_admin,
             $UserMysqlModel->role,
+            $this->CompanyRepositoryInterface->getCompanyByUuid($UserMysqlModel->company_uuid),
             $UserMysqlModel->updated_at,
             $UserMysqlModel->created_at
         );

@@ -33,6 +33,7 @@ enum CodesEnum
     public const messageErrorGetUserByPhone  = 'Error in get user by phone number';
     public const messageErrorReceiveMessage  = 'Error in webhook receive message';
     public const messageCompanyNotCreated = 'company not created';
+    public const messageCompanyNotFound = 'company not found';
 
     // Codes
     public const codeSuccess = 200;

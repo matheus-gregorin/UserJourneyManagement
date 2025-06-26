@@ -23,15 +23,15 @@ Route::post('/login', [UsersControllers::class, 'login']);
 
 // Core | User |
 Route::group(['middleware' => 'jwt'], function () {
-    Route::post('/create-user', [UsersControllers::class, 'createUser']);
     Route::get('/all-users', [UsersControllers::class, 'getAllUsers']);
     Route::put('/change-role-user/{uuid}', [UsersControllers::class, 'changeRoleUser']);
+    Route::post('/create-user', [UsersControllers::class, 'createUser']);
 });
 
 // Core | Company |
 Route::group(['middleware' => 'jwt'], function () {
-    Route::post('/create-company', [CompaniesControllers::class, 'createCompany']);
     Route::get('/all-companies', [CompaniesControllers::class, 'getAllCompanies']);
+    Route::post('/create-company', [CompaniesControllers::class, 'createCompany']);
 });
 
 // Webhook

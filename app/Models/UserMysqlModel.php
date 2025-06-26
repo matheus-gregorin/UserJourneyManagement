@@ -36,11 +36,17 @@ class UserMysqlModel extends Model
         'scope',
         'phone',
         'is_admin',
-        'role'
+        'role',
+        'company_uuid'
     ];
 
     public function points()
     {
         return $this->hasMany(PointMysqlModel::class, 'user_uuid', 'uuid');
+    }
+
+    public function company()
+    {
+        return $this->belongsTo(CompanyMysqlModel::class, 'company_uuid', 'uuid');
     }
 }
