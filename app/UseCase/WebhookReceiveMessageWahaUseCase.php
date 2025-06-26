@@ -28,10 +28,9 @@ class WebhookReceiveMessageWahaUseCase
             "2" => 'returnToMenu'
         ],
         'hitPoint' => [
-            "1" => 'validatePoint',
-            "2" => 'addObservation',
-            "3" => 'deletePoint',
-            "4" => 'returnToMenu'
+            "1" => 'addObservation',
+            "2" => 'deletePoint',
+            "3" => 'returnToMenu'
         ],
     ];
 

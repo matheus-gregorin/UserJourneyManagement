@@ -16,7 +16,7 @@ enum EventsWahaEnum
 
     public const HITSTODAYMENU = "*O que deseja fazer:*\n_1 - Receber PDF no email_\n_2 - Retornar ao MENU_";
 
-    public const HITPOINTMENU = "*O que deseja fazer:*\n_1 - Validar ponto_\n_2 - Adicionar observação (Para essa opção digite: '2, *<sua observação aqui>*')_\n_3 - Deletar ponto_\n_4 - Retornar ao MENU_";
+    public const HITPOINTMENU = "*O que deseja fazer:*\n_1 - Adicionar observação_\n_2 - Deletar ponto_\n_3 - Retornar ao MENU_\n\n\n_*Para adicionar uma observação*_ _Digite o numero da opção seguido da virgula e a descriação da observação, por exemplo: 1, Cheguei atrasado porque o trânsito estava ruim._";
 
     public const THISUSERNAME = " - Nome do usuário: ";
 

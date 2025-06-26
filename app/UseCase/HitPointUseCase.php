@@ -100,54 +100,6 @@ class HitPointUseCase implements OptionUseCaseInterface
         }
     }
 
-    public function validatePoint(UserEntity $user, string $number, ?string $messageId = null, ?string $message = "")
-    {
-        Log::info('Validating point...', [
-            'uuid' => $user->getUuid(),
-            'number' => $number,
-            'messageId' => $messageId
-        ]);
-
-        try {
-
-            $point = $this->pointRepository->validateLastPoint($user);
-
-            $points = $this->getHitsToDay($user);
-            $text = "";
-            foreach ($points as $i => $point) {
-                $index = array_key_exists($i, $this->indices) ? $this->indices[$i] : $this->indices[4];
-                $obs = empty($point['observation']) ? ' sem observação' : $point['observation'];
-                $confirmed = $point['checked'] == 'true' ? "✅" : "❌";
-                $text = $text . "📌 " . $index . " " . $point['date'] . PHP_EOL . "⤷ " . $obs . PHP_EOL . "⤷ Confirmado: " . $confirmed . PHP_EOL;
-            }
-
-            sendMessageWhatsapp($number, $messageId, ["✅ ponto confirmado com sucesso."], 0);
-            sendMessageWhatsapp($number, $messageId, [$text], 1);
-
-            Log::info('Email enviado com sucesso', [
-                'uuid' => $user->getUuid(),
-                'email' => $user->getEmail(),
-                'number' => $number,
-                'messageId' => $messageId
-            ]);
-
-            $this->returnToMenu($user, $number, $messageId);
-            return true;
-        } catch (Exception $e) {
-            Log::info("Erro ao validar ponto.", [
-                'uuid' => $user->getUuid(),
-                'message' => $e->getMessage()
-            ]);
-            sendMessageWhatsapp(
-                $number,
-                $messageId,
-                [EventsWahaEnum::SERVERERROR],
-                1
-            );
-            return false;
-        }
-    }
-
     public function addObservation(UserEntity $user, string $number, ?string $messageId = null, string $message = "")
     {
         Log::info('Add observation to point...', [
