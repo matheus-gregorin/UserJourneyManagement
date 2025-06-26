@@ -40,7 +40,7 @@ class CheckThePointsHitTodayUseCase implements OptionUseCaseInterface
                 $number,
                 $messageId,
                 [
-                    "Sem pontos batidos no dia de hoje."
+                    "❌ Sem pontos marcados no dia de hoje."
                 ],
                 0
             );
@@ -50,8 +50,7 @@ class CheckThePointsHitTodayUseCase implements OptionUseCaseInterface
 
         try {
             sendMessageWhatsapp($number, $messageId, ['Colaborador: ' . $user->getName()], 0);
-            // Enviar nome da empresa
-            //sendMessageWhatsapp($number, $messageId, ['Colaborador: ' . $user->getName()], 0);
+            sendMessageWhatsapp($number, $messageId, ['Empresa: ' . $user->getCompany()->getCorporateReason()], 0);
 
             $text = "";
             foreach ($points as $i => $point) {
@@ -68,6 +67,72 @@ class CheckThePointsHitTodayUseCase implements OptionUseCaseInterface
         } catch (Exception $e) {
             Log::info("Erro na receive da CheckThePointsHitTodayUseCase.", ['message' => $e->getMessage()]);
             sendMessageWhatsapp($number, $messageId, [EventsWahaEnum::SERVERERROR], 1);
+            return false;
+        }
+    }
+
+    public function confirmHitsToday(UserEntity $user, string $number, ?string $messageId = null, ?string $message = "")
+    {
+        try {
+            $points = $this->getHitsToDay($user);
+            if (empty($points)) {
+                sendMessageWhatsapp(
+                    $number,
+                    $messageId,
+                    [
+                        "❌ Não é possivel fazer essa ação, sem pontos marcados hoje."
+                    ],
+                    0
+                );
+                $this->returnToMenu($user, $number, $messageId);
+                return true;
+            }
+
+            $pointsEntities = [];
+            foreach ($points as $point) {
+                $pointEntity = $this->pointRepository->confirmHits($point['uuid']);
+                $pointsEntities[] = $pointEntity->presentation();
+            }
+
+            sendMessageWhatsapp(
+                $number,
+                $messageId,
+                [
+                    "✅ Pontos confirmado com sucesso."
+                ],
+                0
+            );
+
+            $text = "";
+            foreach ($pointsEntities as $i => $point) {
+                $index = array_key_exists($i, $this->indices) ? $this->indices[$i] : $this->indices[4];
+                $obs = empty($point['observation']) ? ' sem observação' : $point['observation'];
+                $confirmed = $point['checked'] == 'true' ? "✅" : "❌";
+                $text = $text . "📌 " . $index . " " . $point['date'] . PHP_EOL . "⤷ Obs: " . $obs . PHP_EOL . "⤷ Confirmado: " . $confirmed . PHP_EOL;
+            }
+
+            sendMessageWhatsapp($number, $messageId, [$text], 0);
+
+            Log::info('Pontos confirmado com sucesso', [
+                'uuid' => $user->getUuid(),
+                'email' => $user->getEmail(),
+                'number' => $number,
+                'messageId' => $messageId
+            ]);
+
+            $this->returnToMenu($user, $number, $messageId);
+            return true;
+        } catch (Exception $e) {
+            Log::info("Erro ao confirmar pontos batidos hoje.", [
+                'uuid' => $user->getUuid(),
+                'message' => $e->getMessage()
+            ]);
+            sendMessageWhatsapp(
+                $number,
+                $messageId,
+                [EventsWahaEnum::SERVERERROR],
+                1
+            );
             return false;
         }
     }

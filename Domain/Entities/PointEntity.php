@@ -103,6 +103,7 @@ class PointEntity
     public function presentation()
     {
         return [
+            'uuid' => $this->getUuid(),
             'name' => $this->user->getName(),
             'observation' => $this->getObservation(),
             'checked' => $this->getChecked(),

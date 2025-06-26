@@ -109,6 +109,28 @@ class PointsMysqlRepository implements PointRepositoryInterface
         }
     }
 
+    public function confirmHits(string $uuid)
+    {
+        try {
+            //dd($uuid);
+            $pointMysqlModel = $this->pointMysqlModel::where('uuid', '=', $uuid)->first();
+
+            if (is_null($pointMysqlModel)) {
+                throw new Exception("No points found for user", 400);
+            }
+
+            if ($pointMysqlModel->checked == 'false') {
+                $pointMysqlModel->checked = 'true';
+                $pointMysqlModel->save();
+            }
+
+            return $this->modelToEntity($pointMysqlModel);
+        } catch (Exception $e) {
+            Log::critical("Error in validate last point: ", ['message' => $e->getMessage()]);
+            throw new Exception("Error in validate last point: " . $e->getMessage(), 400);
+        }
+    }
+
     public function deleteLastPoint(UserEntity $user): PointEntity|true|Exception
     {
         try {

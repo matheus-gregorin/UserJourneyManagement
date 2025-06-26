@@ -24,8 +24,9 @@ class WebhookReceiveMessageWahaUseCase
 
     private array $options = [
         'checkThePointsHitToday' => [
-            "1" => 'sendEmailPdf',
-            "2" => 'returnToMenu'
+            "1" => 'confirmHitsToday',
+            "2" => 'sendEmailPdf',
+            "3" => 'returnToMenu'
         ],
         'hitPoint' => [
             "1" => 'addObservation',
