@@ -38,6 +38,20 @@ class checkThePointsOfTheMounthUseCase implements OptionUseCaseInterface
         try {
             $points = $this->getHitsToMounth($user);
             sendPdfHitsOfTheMounthEmail($user, $points, 0);
+
+            if (empty($points)) {
+                sendMessageWhatsapp(
+                    $number,
+                    $messageId,
+                    [
+                        "❌ Não é possivel fazer essa ação, sem pontos marcados neste mês."
+                    ],
+                    0
+                );
+                $this->returnToMenu($user, $number, $messageId);
+                return true;
+            }
+
             sendMessageWhatsapp(
                 $number,
                 $messageId,
@@ -72,7 +86,86 @@ class checkThePointsOfTheMounthUseCase implements OptionUseCaseInterface
         }
     }
 
-    public function returnToMenu(UserEntity $user, string $number, ?string $messageId = null, ?string $message = "") {}
+    public function confirmHitsOfTheMounth(UserEntity $user, string $number, ?string $messageId = null, ?string $message = "")
+    {
+        try {
+            $points = $this->getHitsToMounth($user);
+            if (empty($points)) {
+                sendMessageWhatsapp(
+                    $number,
+                    $messageId,
+                    [
+                        "❌ Não é possivel fazer essa ação, sem pontos marcados neste mês."
+                    ],
+                    0
+                );
+                $this->returnToMenu($user, $number, $messageId);
+                return true;
+            }
+
+            $pointsEntities = [];
+            foreach ($points as $point) {
+                $pointEntity = $this->pointRepository->confirmHits($point['uuid']);
+                $pointsEntities[] = $pointEntity->presentation();
+            }
+
+            sendMessageWhatsapp(
+                $number,
+                $messageId,
+                [
+                    "✅ Pontos confirmado com sucesso."
+                ],
+                0
+            );
+
+            sendMessageWhatsapp(
+                $number,
+                $messageId,
+                [
+                    "✉️ Enviamos o email com o pdf ao seu email: " . $user->getEmail()
+                ],
+                0
+            );
+
+            sendPdfHitsOfTheMounthEmail($user, $pointsEntities, 0);
+
+            Log::info('Pontos confirmado com sucesso', [
+                'uuid' => $user->getUuid(),
+                'email' => $user->getEmail(),
+                'number' => $number,
+                'messageId' => $messageId
+            ]);
+
+            $this->returnToMenu($user, $number, $messageId);
+            return true;
+        } catch (Exception $e) {
+            Log::info("Erro ao confirmar pontos batidos hoje.", [
+                'uuid' => $user->getUuid(),
+                'message' => $e->getMessage()
+            ]);
+            sendMessageWhatsapp(
+                $number,
+                $messageId,
+                [EventsWahaEnum::SERVERERROR],
+                1
+            );
+            return false;
+        }
+    }
+
+    public function returnToMenu(UserEntity $user, string $number, ?string $messageId = null, ?string $message = "")
+    {
+        Log::info('Returning to menu for user', [
+            'uuid' => $user->getUuid(),
+            'number' => $number,
+            'messageId' => $messageId
+        ]);
+        $this->userRepository->updateScopeOfTheUser($user, "");
+
+        sendMessageWhatsapp($number, $messageId, ["🔙 Retornando ao menu principal"], 1);
+        sendMessageWhatsapp($number, $messageId, [EventsWahaEnum::SCOPE], 3);
+        return true;
+    }
 
     public function getHitsToDay(UserEntity $user)
     {
