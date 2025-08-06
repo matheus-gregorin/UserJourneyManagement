@@ -13,7 +13,7 @@ services:
     networks:
       - mynetwork
     depends_on:
-      - bott_postgres
+      # - bott_postgres
       - bott_redis
 
   waha:
@@ -40,68 +40,68 @@ services:
     networks:
       - mynetwork
 
-  bott_postgres:
-    image: postgres:latest
-    container_name: bott_postgres
-    restart: always
-    ports:
-      - "5432:5432"
-    volumes:
-      - ./pg_data:/var/lib/postgresql/data/pgdata
-    networks:
-      - mynetwork
-    env_file:
-      - .env
+  # bott_postgres:
+  #   image: postgres:latest
+  #   container_name: bott_postgres
+  #   restart: always
+  #   ports:
+  #     - "5432:5432"
+  #   volumes:
+  #     - ./pg_data:/var/lib/postgresql/data/pgdata
+  #   networks:
+  #     - mynetwork
+  #   env_file:
+  #     - .env
 
-  n8n:
-    image: n8nio/n8n:latest
-    container_name: n8n
-    restart: always
-    ports:
-      - "${SERVER_EXTERNAL_PORT_N8N_APP}:${N8N_PORT}"
-    volumes:
-      - ./n8n_data:/home/node/.n8n
-    networks:
-      - mynetwork
-    env_file:
-      - .env
-    depends_on:
-      - bott_postgres
-      - bott_redis
+  # n8n:
+  #   image: n8nio/n8n:latest
+  #   container_name: n8n
+  #   restart: always
+  #   ports:
+  #     - "${SERVER_EXTERNAL_PORT_N8N_APP}:${N8N_PORT}"
+  #   volumes:
+  #     - ./n8n_data:/home/node/.n8n
+  #   networks:
+  #     - mynetwork
+  #   env_file:
+  #     - .env
+  #   depends_on:
+  #     - bott_postgres
+  #     - bott_redis
 
-  n8n_workers:
-    image: n8nio/n8n:latest
-    container_name: n8n_workers
-    restart: always
-    ports:
-      - "${SERVER_EXTERNAL_PORT_N8N_WORKERS}:${N8N_PORT}"
-    volumes:
-      - ./n8n_data:/home/node/.n8n
-    networks:
-      - mynetwork
-    env_file:
-      - .env
-    depends_on:
-      - bott_postgres
-      - bott_redis
-    command: worker
+  # n8n_workers:
+  #   image: n8nio/n8n:latest
+  #   container_name: n8n_workers
+  #   restart: always
+  #   ports:
+  #     - "${SERVER_EXTERNAL_PORT_N8N_WORKERS}:${N8N_PORT}"
+  #   volumes:
+  #     - ./n8n_data:/home/node/.n8n
+  #   networks:
+  #     - mynetwork
+  #   env_file:
+  #     - .env
+  #   depends_on:
+  #     - bott_postgres
+  #     - bott_redis
+  #   command: worker
 
-  n8n_webhooks:
-    image: n8nio/n8n:latest
-    container_name: n8n_webhooks
-    restart: always
-    ports:
-      - "${SERVER_EXTERNAL_PORT_N8N_WEBHOOKS}:${N8N_PORT}"
-    volumes:
-      - ./n8n_data:/home/node/.n8n
-    networks:
-      - mynetwork
-    env_file:
-      - .env
-    depends_on:
-      - bott_postgres
-      - bott_redis
-    command: webhook
+  # n8n_webhooks:
+  #   image: n8nio/n8n:latest
+  #   container_name: n8n_webhooks
+  #   restart: always
+  #   ports:
+  #     - "${SERVER_EXTERNAL_PORT_N8N_WEBHOOKS}:${N8N_PORT}"
+  #   volumes:
+  #     - ./n8n_data:/home/node/.n8n
+  #   networks:
+  #     - mynetwork
+  #   env_file:
+  #     - .env
+  #   depends_on:
+  #     - bott_postgres
+  #     - bott_redis
+  #   command: webhook
 
 volumes:
   app_data:
