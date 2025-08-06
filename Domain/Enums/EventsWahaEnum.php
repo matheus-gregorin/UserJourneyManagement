@@ -18,6 +18,8 @@ enum EventsWahaEnum
 
     public const HITPOINTMENU = "*O que deseja fazer:*\n_1 - Adicionar observação_\n_2 - Deletar ponto_\n_3 - Retornar ao MENU_\n\n\n_*Para adicionar uma observação*_ _Digite o numero da opção seguido da virgula e a descriação da observação, por exemplo: 1, Cheguei atrasado porque o trânsito estava ruim._";
 
+    public const HITSTOMOUNTHMENU = "*O que deseja fazer:*\n_1 - Confirmar pontos do mês_\n_2 - Retornar ao MENU_";
+
     public const THISUSERNAME = " - Nome do usuário: ";
 
     public const HI = "🙋🏻‍♂️ Olá, ";

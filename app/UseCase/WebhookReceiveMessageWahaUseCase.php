@@ -37,8 +37,7 @@ class WebhookReceiveMessageWahaUseCase
         ],
         'checkThePointsOfTheMounth' => [
             "1" => 'confirmHitsOfTheMounth',
-            "2" => 'sendEmailPdf',
-            "3" => 'returnToMenu'
+            "2" => 'returnToMenu'
         ],
         'support' => [
             "1" => 'CallSupport',
