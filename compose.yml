@@ -30,6 +30,9 @@ services:
       - mynetwork
     env_file:
       - .env
+    environment:
+      - WHATSAPP_SWAGGER_USERNAME=admin
+      - WHATSAPP_SWAGGER_PASSWORD=admin
 
   bott_redis:
     image: redis:latest
