@@ -86,7 +86,7 @@
 
 <body>
     <div class="container">
-        <h1>Resumo de Pontos</h1>
+        <h1>Resumo de Pontos deste mês</h1>
         <h2>Olá, {{ $username }}!</h2>
 
         @if (!empty($hits))
@@ -132,7 +132,7 @@
             </tbody>
         </table>
         @else
-        <p class="no-hits">Parece que você não registrou nenhum ponto hoje.</p>
+        <p class="no-hits">Parece que você não registrou nenhum ponto neste mês.</p>
         @endif
 
         <p class="footer">Este é um e-mail automático. Por favor, não responda.</p>
