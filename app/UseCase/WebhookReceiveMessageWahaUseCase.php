@@ -19,7 +19,9 @@ class WebhookReceiveMessageWahaUseCase
     private array $scopes = [
         "1" => 'checkThePointsHitToday',
         "2" => 'hitPoint',
-        //"3" => 'support'
+        "3" => 'checkThePointsOfTheMounth',
+        "4" => 'support',
+        "5" => 'finalize'
     ];
 
     private array $options = [
@@ -33,6 +35,16 @@ class WebhookReceiveMessageWahaUseCase
             "2" => 'deletePoint',
             "3" => 'returnToMenu'
         ],
+        'checkThePointsOfTheMounth' => [
+            "1" => 'confirmHitsOfTheMounth',
+            "2" => 'sendEmailPdf',
+            "3" => 'returnToMenu'
+        ],
+        'support' => [
+            "1" => 'CallSupport',
+            "2" => 'returnToMenu'
+        ],
+        'finalize' => []
     ];
 
     public function __construct(

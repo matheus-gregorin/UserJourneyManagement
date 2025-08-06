@@ -12,7 +12,7 @@ enum EventsWahaEnum
 
     public const AUTHSUCCESS = "✅ Certo! verificado.";
 
-    public const SCOPE = "*Digite o número opção desejada:*\n _1 - Verificar seus pontos batidos hoje_\n _2 - Bater ponto_\n _3 - Falar com suporte_";
+    public const SCOPE = "*Digite o número opção desejada:*\n _1 - Verificar seus pontos batidos hoje_\n _2 - Bater ponto_\n _3 - Verificar seus pontos batidos no mês atual_\n _4 - Falar com suporte_\n _5 - Finalizar_";
 
     public const HITSTODAYMENU = "*O que deseja fazer:*\n_1 - Confirmar pontos de hoje_\n_2 - Receber PDF no email_\n_3 - Retornar ao MENU_";
 
