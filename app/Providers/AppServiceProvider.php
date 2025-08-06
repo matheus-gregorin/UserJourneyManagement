@@ -13,8 +13,11 @@ use App\Repositories\UserMongoDbRepository;
 use App\Repositories\UsersMysqlRepository;
 use App\Services\UsersServices;
 use App\UseCase\ChangeRoleUserUseCase;
+use App\UseCase\CheckThePointsHitTodayUseCase;
+use App\UseCase\checkThePointsOfTheMounthUseCase;
 use App\UseCase\CreateUserUseCase;
 use App\UseCase\GetAllUsersUseCase;
+use App\UseCase\HitPointUseCase;
 use App\UseCase\LoginUseCase;
 use App\UseCase\WebhookReceiveMessageWahaUseCase;
 use Domain\Repositories\CompanyRepositoryInterface;
@@ -42,15 +45,18 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(CreateUserUseCase::class);
         $this->app->bind(GetAllUsersUseCase::class);
         $this->app->bind(ChangeRoleUserUseCase::class);
-        $this->app->bind(WebhookReceiveMessageWahaUseCase::class);
 
-        // Interfaces
+        $this->app->bind(WebhookReceiveMessageWahaUseCase::class);
+        $this->app->bind(CheckThePointsHitTodayUseCase::class);
+        $this->app->bind(checkThePointsOfTheMounthUseCase::class);
+        $this->app->bind(HitPointUseCase::class);
 
         // Http Client
         $this->app->bind(ClientHttpInterface::class, WahaHttpClient::class);
 
         // Repository Adapters
-        switch (Config::get('database.default')) {
+        $db = Config::get('database.default');
+        switch ($db) {
             case 'mysql':
                 $this->app->bind(UserRepositoryInterface::class, UsersMysqlRepository::class);
                 break;
