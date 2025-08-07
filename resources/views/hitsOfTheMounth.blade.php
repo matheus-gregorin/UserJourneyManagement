@@ -93,7 +93,7 @@
         <table>
             <thead>
                 <tr>
-                    <th>📌 Tipo</th>
+                    <!-- <th>📌 Tipo</th> -->
                     <th>🕓 Horário</th>
                     <th>📝 Observação</th>
                     <th>✔️ Verificado</th>
@@ -111,7 +111,7 @@
 
                 @foreach ($hits as $key => $hit)
                 <tr>
-                    <td>{{ $hitLabels[$key] ?? 'Outros' }}</td>
+                    <!-- /* <td>{{ $hitLabels[$key] ?? 'Outros' }}</td> -->
                     <td>{{ \Carbon\Carbon::parse($hit['date'])->format('d/m/Y H:i:s') }}</td>
                     <td>
                         @if (!empty($hit['observation']))

@@ -40,8 +40,7 @@ class WebhookReceiveMessageWahaUseCase
             "2" => 'returnToMenu'
         ],
         'support' => [
-            "1" => 'CallSupport',
-            "2" => 'returnToMenu'
+            "1" => 'returnToMenu'
         ],
         'finalize' => []
     ];

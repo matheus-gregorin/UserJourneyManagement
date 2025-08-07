@@ -14,7 +14,7 @@ use App\Repositories\UsersMysqlRepository;
 use App\Services\UsersServices;
 use App\UseCase\ChangeRoleUserUseCase;
 use App\UseCase\CheckThePointsHitTodayUseCase;
-use App\UseCase\checkThePointsOfTheMounthUseCase;
+use App\UseCase\CheckThePointsOfTheMounthUseCase;
 use App\UseCase\CreateUserUseCase;
 use App\UseCase\GetAllUsersUseCase;
 use App\UseCase\HitPointUseCase;
@@ -48,7 +48,7 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->bind(WebhookReceiveMessageWahaUseCase::class);
         $this->app->bind(CheckThePointsHitTodayUseCase::class);
-        $this->app->bind(checkThePointsOfTheMounthUseCase::class);
+        $this->app->bind(CheckThePointsOfTheMounthUseCase::class);
         $this->app->bind(HitPointUseCase::class);
 
         // Http Client

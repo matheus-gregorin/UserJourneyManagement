@@ -2,8 +2,9 @@
 
 namespace App\Factorys;
 
+use App\UseCase\CallSupportUseCase;
 use App\UseCase\CheckThePointsHitTodayUseCase;
-use App\UseCase\checkThePointsOfTheMounthUseCase;
+use App\UseCase\CheckThePointsOfTheMounthUseCase;
 use App\UseCase\HitPointUseCase;
 
 class OptionsFactory
@@ -20,12 +21,11 @@ class OptionsFactory
                 break;
 
             case 'checkThePointsOfTheMounth':
-                return app(checkThePointsOfTheMounthUseCase::class);
+                return app(CheckThePointsOfTheMounthUseCase::class);
                 break;
             
             case 'support':
-                // return app(SupportUseCase::class);
-                return null;
+                return app(CallSupportUseCase::class);
                 break;
 
             case 'finalize':

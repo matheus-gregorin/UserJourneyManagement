@@ -11,7 +11,7 @@ use Domain\UseCase\OptionUseCaseInterface;
 use Exception;
 use Illuminate\Support\Facades\Log;
 
-class checkThePointsOfTheMounthUseCase implements OptionUseCaseInterface
+class CheckThePointsOfTheMounthUseCase implements OptionUseCaseInterface
 {
 
     private UserRepositoryInterface $userRepository;
